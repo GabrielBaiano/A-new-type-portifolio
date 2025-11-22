@@ -443,12 +443,14 @@ body {
     gap: 16px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
     z-index: 1000;
+    transition: all 0.4s ease-in-out;
 }
 
 .nav-group {
     display: flex;
     align-items: center;
     gap: 8px;
+    transition: all 0.4s ease-in-out;
 }
 
 .nav-item {
