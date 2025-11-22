@@ -471,15 +471,20 @@ body {
 
 /* Esconder os spans por padrão */
 .nav-item span {
-    display: none;
+    display: inline;
     font-size: 0.9rem;
     font-weight: 600;
     white-space: nowrap;
+    opacity: 0;
+    max-width: 0;
+    overflow: hidden;
+    transition: opacity 0.4s ease-in-out, max-width 0.4s ease-in-out;
 }
 
 /* Mostrar o span quando o item estiver ativo */
 .nav-item.active span {
-    display: inline;
+    opacity: 1;
+    max-width: 100px;
 }
 
 .nav-item:hover {
