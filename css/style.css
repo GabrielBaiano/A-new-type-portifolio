@@ -8,6 +8,7 @@
     --border-color: #222222;
     --badge-bg: #111111;
     --accent-blue: #0070f3;
+    --radius: 0.5rem;
 }
 
 * {
@@ -46,7 +47,7 @@ body {
 .card {
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: 16px;
+    border-radius: 0.5rem;
     padding: 32px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     position: relative;
@@ -78,7 +79,6 @@ body {
     background-image: url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&q=80');
     background-size: cover;
     background-position: center;
-    border: 2px solid #333;
 }
 
 .user-details h1 {
@@ -124,8 +124,7 @@ body {
 }
 
 .social-btn {
-    background-color: #111;
-    border: 1px solid var(--border-color);
+    background-color: #1b1b1b;
     color: #e0e0e0;
     padding: 8px 16px;
     border-radius: 6px;
@@ -182,7 +181,7 @@ body {
 .company-logo {
     width: 48px;
     height: 48px;
-    border-radius: 8px;
+    border-radius: calc(var(--radius) - 4px);
     flex-shrink: 0;
 }
 
@@ -289,8 +288,8 @@ body {
     transform: translateX(-50%);
     background-color: #0f0f0f;
     border: 1px solid #222;
-    border-radius: 16px;
-    padding: 8px 12px;
+    border-radius: var(--radius);
+    padding: 6px 10px;
     display: flex;
     align-items: center;
     gap: 16px;
@@ -311,7 +310,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 10px;
+    padding: 8px;
     border-radius: 50%;
     transition: all 0.2s ease;
     border: none;
@@ -328,8 +327,8 @@ body {
 .nav-item.active {
     background-color: #222;
     color: #fff;
-    padding: 10px 20px;
-    border-radius: 100px;
+    padding: 8px 16px;
+    border-radius: var(--radius);
     font-weight: 600;
     font-size: 0.9rem;
 }
