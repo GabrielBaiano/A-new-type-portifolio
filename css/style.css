@@ -326,7 +326,7 @@ body {
     transform: translateX(-50%);
     background-color: #0f0f0f;
     border: 1px solid #222;
-    border-radius: var(--radius);
+    border-radius: 1rem;
     padding: 6px 10px;
     display: flex;
     align-items: center;
@@ -349,7 +349,7 @@ body {
     justify-content: center;
     gap: 8px;
     padding: 8px;
-    border-radius: 50%;
+    border-radius: 0.5rem;
     transition: all 0.2s ease;
     border: none;
     background: none;
