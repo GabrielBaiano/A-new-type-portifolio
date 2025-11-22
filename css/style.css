@@ -29,8 +29,8 @@ body {
     /* Adicionando um padrão de grade sutil no fundo para estilo */
     background-image: radial-gradient(#1a1a1a 1px, transparent 1px);
     background-size: 20px 20px;
-    padding: 40px 20px;
-    /* Aumentei o padding vertical */
+    padding: 40px 20px 120px 20px;
+    /* Aumentei o padding vertical e adicionei espaço inferior para a toolbar */
 }
 
 /* Container para agrupar os cards verticalmente */
