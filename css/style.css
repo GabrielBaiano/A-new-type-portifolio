@@ -232,6 +232,10 @@ body {
     background-color: #66bb00;
 }
 
+.bg-red {
+    background-color: #da2619;
+}
+
 .bg-orange {
     background-color: #ff5500;
 }
@@ -281,7 +285,7 @@ body {
     color: var(--text-muted);
     font-family: monospace;
     white-space: nowrap;
-    min-width: 100px;
+    min-width: auto;
     text-align: center;
 }
 
