@@ -126,16 +126,63 @@ body {
     background-color: var(--bg-color);
     color: var(--text-main);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* Centraliza verticalmente se houver espaço */
     min-height: 100vh;
     /* Adicionando um padrão de grade sutil no fundo para estilo */
     background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
     background-size: 20px 20px;
     padding: 40px 20px 120px 20px;
     /* Aumentei o padding vertical e adicionei espaço inferior para a toolbar */
+    position: relative;
+}
+
+/* SPA Page System */
+.page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px 120px 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+}
+
+.page.active {
+    opacity: 1;
+    visibility: visible;
+    position: relative;
+}
+
+/* Animação de fade */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+.page.active {
+    animation: fadeIn 0.5s ease-in-out;
 }
 
 /* Container para agrupar os cards verticalmente */
