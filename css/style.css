@@ -70,15 +70,42 @@ body {
 
 .avatar-container {
     position: relative;
-}
-
-.avatar {
     width: 64px;
     height: 64px;
+    perspective: 1000px;
+    cursor: pointer;
+}
+
+.avatar-flipper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+}
+
+.avatar-flipper.flip {
+    transform: rotateY(180deg);
+}
+
+.avatar-front,
+.avatar-back {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    backface-visibility: hidden;
     border-radius: 50%;
-    background-image: url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&q=80');
     background-size: cover;
     background-position: center;
+}
+
+.avatar-front {
+    background-image: url('../assets/images/me.png');
+}
+
+.avatar-back {
+    background-image: url('../assets/images/icon.jpg');
+    transform: rotateY(180deg);
 }
 
 .user-details h1 {
