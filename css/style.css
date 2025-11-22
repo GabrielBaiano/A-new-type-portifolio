@@ -9,7 +9,112 @@
     --badge-bg: #111111;
     --accent-blue: #0070f3;
     --radius: 0.5rem;
+    --grid-color: #1a1a1a;
 }
+
+/* Light Theme */
+[data-theme="light"] {
+    --bg-color: #f5f5f5;
+    --card-bg: #ffffff;
+    --text-main: #000000;
+    --text-muted: #555555;
+    --border-color: #e0e0e0;
+    --badge-bg: #e3f2fd;
+    --grid-color: #e8e8e8;
+    --accent-blue: #1976d2;
+}
+
+/* Light theme specific styles for buttons and dates */
+[data-theme="light"] .social-btn {
+    background-color: #1976d2;
+    color: #ffffff;
+    border-color: #1565c0;
+}
+
+[data-theme="light"] .social-btn:hover {
+    background-color: #1565c0;
+    border-color: #0d47a1;
+}
+
+[data-theme="light"] .job-date {
+    background-color: #e3f2fd;
+    border-color: #90caf9;
+    color: #1976d2;
+    font-weight: 600;
+}
+
+[data-theme="light"] .nav-item {
+    color: #555555;
+}
+
+[data-theme="light"] .nav-item:hover {
+    color: #1976d2;
+    background-color: #e3f2fd;
+}
+
+[data-theme="light"] .nav-item.active {
+    background-color: #1976d2;
+    color: #ffffff;
+}
+
+[data-theme="light"] .bottom-nav {
+    background-color: #ffffff;
+    border-color: #e0e0e0;
+}
+
+/* Force ALL text to be black in light theme */
+[data-theme="light"] .bio {
+    color: #000000;
+}
+
+[data-theme="light"] .bio p {
+    color: #000000;
+}
+
+[data-theme="light"] .bio i {
+    color: #000000;
+}
+
+[data-theme="light"] .bio strong {
+    color: #000000;
+}
+
+[data-theme="light"] .user-details h1 {
+    color: #000000;
+}
+
+[data-theme="light"] .user-details p {
+    color: #000000;
+}
+
+[data-theme="light"] .job-details h3 {
+    color: #000000;
+}
+
+[data-theme="light"] .job-details span {
+    color: #666666;
+}
+
+[data-theme="light"] .section-title {
+    color: #000000;
+}
+
+[data-theme="light"] .divider {
+    border-top-color: #d0d0d0;
+}
+
+
+
+/* Smooth transitions for theme changes */
+body,
+.card,
+.nav-item,
+.social-btn,
+.job-date,
+.bottom-nav {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
 
 * {
     box-sizing: border-box;
@@ -27,7 +132,7 @@ body {
     /* Centraliza verticalmente se houver espaço */
     min-height: 100vh;
     /* Adicionando um padrão de grade sutil no fundo para estilo */
-    background-image: radial-gradient(#1a1a1a 1px, transparent 1px);
+    background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
     background-size: 20px 20px;
     padding: 40px 20px 120px 20px;
     /* Aumentei o padding vertical e adicionei espaço inferior para a toolbar */
@@ -125,6 +230,11 @@ body {
     font-size: 1.8rem;
     color: white;
     opacity: 0.9;
+}
+
+[data-theme="light"] .brand-logo {
+    color: #000000;
+    opacity: 1;
 }
 
 /* Texto de Bio */
