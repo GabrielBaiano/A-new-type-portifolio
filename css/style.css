@@ -177,10 +177,17 @@ body {
     gap: 16px;
 }
 
+
+.job-details span {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
 /* Quadrados Coloridos (Logos) */
 .company-logo {
-    width: 48px;
-    height: 48px;
+    width: 2.5rem;
+    height: 2.5rem;
     border-radius: calc(var(--radius) - 4px);
     flex-shrink: 0;
 }
