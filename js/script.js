@@ -19,4 +19,21 @@ document.addEventListener('DOMContentLoaded', () => {
             avatarFlipper.classList.toggle('flip');
         });
     }
+
+    // Navegação da toolbar - controlar expansão dos itens
+    const navItems = document.querySelectorAll('.nav-item:not(.icon-only)');
+    
+    navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Remove a classe active de todos os itens
+            navItems.forEach(navItem => {
+                navItem.classList.remove('active');
+            });
+            
+            // Adiciona a classe active ao item clicado
+            item.classList.add('active');
+        });
+    });
 });
