@@ -1,62 +1,85 @@
-// Script.js
+// Script.js - Main application initialization
 document.addEventListener('DOMContentLoaded', () => {
-    const avatarContainer = document.querySelector('.avatar-container');
-    const avatarFlipper = document.querySelector('.avatar-flipper');
-
-    if (avatarContainer && avatarFlipper) {
-        // Animação automática ao carregar a página
-        setTimeout(() => {
-            avatarFlipper.classList.add('flip');
-            
-            // Volta depois de 2 segundos
-            setTimeout(() => {
-                avatarFlipper.classList.remove('flip');
-            }, 2000);
-        }, 1000);
-
-        // Click manual para flipar
-        avatarContainer.addEventListener('click', () => {
-            avatarFlipper.classList.toggle('flip');
-        });
-    }
-
-    // ===== SPA NAVIGATION =====
-    const navItems = document.querySelectorAll('.nav-item:not(.icon-only)');
-    const pages = document.querySelectorAll('.page');
+    // Initialize SPA System
+    initializeSPA();
     
-    // Função para navegar entre páginas
-    function navigateTo(pageId) {
-        // Remove active de todas as páginas
-        pages.forEach(page => {
-            page.classList.remove('active');
-        });
-        
-        // Adiciona active na página selecionada
-        const targetPage = document.getElementById(pageId);
-        if (targetPage) {
-            targetPage.classList.add('active');
-        }
-    }
+    // Initialize navigation
+    initializeNavigation();
+});
+
+/**
+ * Initialize the SPA routing system
+ */
+function initializeSPA() {
+    // Register all pages
+    pageManager.registerPage('home', HomePage);
+    pageManager.registerPage('projects', ProjectsPage);
+    pageManager.registerPage('tools', ToolsPage);
+    pageManager.registerPage('blog', BlogPage);
+    pageManager.registerPage('photos', PhotosPage);
+
+    // Register routes
+    router.register('home', (path) => {
+        pageManager.loadPage(path);
+        updateNavigation(path);
+    });
+    
+    router.register('projects', (path) => {
+        pageManager.loadPage(path);
+        updateNavigation(path);
+    });
+    
+    router.register('tools', (path) => {
+        pageManager.loadPage(path);
+        updateNavigation(path);
+    });
+    
+    router.register('blog', (path) => {
+        pageManager.loadPage(path);
+        updateNavigation(path);
+    });
+    
+    router.register('photos', (path) => {
+        pageManager.loadPage(path);
+        updateNavigation(path);
+    });
+
+    // Set default route
+    router.setDefaultRoute('home');
+}
+
+/**
+ * Initialize navigation bar interactions
+ */
+function initializeNavigation() {
+    const navItems = document.querySelectorAll('.nav-item:not(.icon-only)');
     
     // Event listeners para navegação
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
-            e.preventDefault();
-            
-            const pageId = item.getAttribute('data-page');
-            
-            // Remove a classe active de todos os itens
-            navItems.forEach(navItem => {
-                navItem.classList.remove('active');
-            });
-            
-            // Adiciona a classe active ao item clicado
-            item.classList.add('active');
-            
-            // Navega para a página
-            if (pageId) {
-                navigateTo(pageId);
+            // Let the router handle the navigation
+            // Just update the active state
+            const route = item.getAttribute('data-route');
+            if (route) {
+                updateNavigation(route);
             }
         });
     });
-});
+}
+
+/**
+ * Update navigation active state
+ * @param {string} activeRoute - The currently active route
+ */
+function updateNavigation(activeRoute) {
+    const navItems = document.querySelectorAll('.nav-item:not(.icon-only)');
+    
+    navItems.forEach(item => {
+        const route = item.getAttribute('data-route');
+        if (route === activeRoute) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+}
