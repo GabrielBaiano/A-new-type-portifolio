@@ -5,6 +5,7 @@ class PageManager {
         this.pages = {};
         this.currentPage = null;
         this.isTransitioning = false;
+        this.pendingPage = null;
         
         if (!this.container) {
             console.error(`Container with id "${containerId}" not found`);
@@ -25,7 +26,14 @@ class PageManager {
      * @param {string} pageName - Nome da página a ser carregada
      */
     async loadPage(pageName) {
+        // Se já estamos nessa página, não faz nada
+        if (this.currentPage === pageName && !this.isTransitioning) {
+            return;
+        }
+
+        // Se está em transição, guarda a página pendente
         if (this.isTransitioning) {
+            this.pendingPage = pageName;
             return;
         }
 
@@ -61,6 +69,15 @@ class PageManager {
 
         this.currentPage = pageName;
         this.isTransitioning = false;
+
+        // Se há uma página pendente, carrega ela
+        if (this.pendingPage && this.pendingPage !== pageName) {
+            const nextPage = this.pendingPage;
+            this.pendingPage = null;
+            this.loadPage(nextPage);
+        } else {
+            this.pendingPage = null;
+        }
     }
 
     /**
