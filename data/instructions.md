@@ -101,16 +101,17 @@ Controls the tools page content.
       "name": "Category Name",
       "tools": [
         {
-          "id": "tool-id",
-          "name": "Tool Name",
-          "icon": "fa-brands fa-react",
-          "color": "#61DAFB"
+          "title": "Tool Name",
+          "subtitle": "Description of what the tool does",
+          "link": "https://external-link.com"
         }
       ]
     }
   ]
 }
 ```
+
+**Tools**: User-created tools and utilities with external links, organized by categories (VS Code Extensions, Web Tools, Linux Apps, CLI Tools, Utilities, etc.)
 
 ---
 

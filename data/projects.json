@@ -4,8 +4,8 @@
       "id": "e-commerce-platform",
       "title": "E-Commerce Platform",
       "subtitle": "Full-stack online store with payment integration",
-      "image": "assets/images/projects/ecommerce.jpg",
-      "gradient": "",
+      "image": "",
+      "gradient": "bg-orange-gradient",
       "icon": "fa-solid fa-code",
       "contentFile": "data/content/projects/e-commerce-platform.md"
     },

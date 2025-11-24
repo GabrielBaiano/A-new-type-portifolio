@@ -1,12 +1,12 @@
-// Tools Page Component - Renders from JSON configuration
+// Tools Page Component - Renders user-created tools from JSON configuration
 const ToolsPage = {
     categories: [],
 
     render() {
         return `
             <div class="card tools-card">
-                <h2 class="section-title">Tools & Technologies</h2>
-                <p class="other-projects-description">Technologies and tools I use to build amazing things.</p>
+                <h2 class="section-title">Tools & Utilities</h2>
+                <p class="other-projects-description">Tools and utilities I've created to solve real-world problems.</p>
 
                 <div id="tools-container">
                     <!-- Loading state -->
@@ -33,14 +33,14 @@ const ToolsPage = {
         if (!container) return;
 
         container.innerHTML = this.categories.map(category => `
-            <div class="tools-section">
-                <h3 class="tools-category">${category.name}</h3>
-                <div class="tools-grid">
+            <div class="other-projects-category">
+                <h3 class="category-title">${category.name}</h3>
+                <div class="other-projects-list">
                     ${category.tools.map(tool => `
-                        <div class="tool-item" style="--tool-color: ${tool.color}">
-                            <i class="${tool.icon}" style="color: ${tool.color}"></i>
-                            <span class="tool-name">${tool.name}</span>
-                        </div>
+                        <a href="${tool.link}" target="_blank" rel="noopener noreferrer" class="other-project-item">
+                            <h4>${tool.title}</h4>
+                            <p>${tool.subtitle}</p>
+                        </a>
                     `).join('')}
                 </div>
             </div>
