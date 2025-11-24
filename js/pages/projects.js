@@ -1,47 +1,17 @@
-// Projects Page Component
+// Projects Page Component - Renders from JSON configuration
 const ProjectsPage = {
+    topProjects: [],
+    otherProjects: null,
+
     render() {
         return `
             <!-- Card 1: Top Projects -->
             <div class="card projects-card">
                 <h2 class="section-title">Top Projects</h2>
                 
-                <div class="projects-grid-cards">
-                    <div class="project-card" data-project-id="e-commerce-platform">
-                        <div class="project-image">
-                            <div class="project-image-placeholder">
-                                <i class="fa-solid fa-code"></i>
-                            </div>
-                        </div>
-                        <div class="project-info">
-                            <h3 class="project-title">E-Commerce Platform</h3>
-                            <p class="project-subtitle">Full-stack online store with payment integration</p>
-                        </div>
-                    </div>
-
-                    <div class="project-card" data-project-id="mobile-banking-app">
-                        <div class="project-image">
-                            <div class="project-image-placeholder bg-purple-gradient">
-                                <i class="fa-solid fa-mobile-screen"></i>
-                            </div>
-                        </div>
-                        <div class="project-info">
-                            <h3 class="project-title">Mobile Banking App</h3>
-                            <p class="project-subtitle">React Native app for financial management</p>
-                        </div>
-                    </div>
-
-                    <div class="project-card" data-project-id="analytics-dashboard">
-                        <div class="project-image">
-                            <div class="project-image-placeholder bg-green-gradient">
-                                <i class="fa-solid fa-chart-line"></i>
-                            </div>
-                        </div>
-                        <div class="project-info">
-                            <h3 class="project-title">Analytics Dashboard</h3>
-                            <p class="project-subtitle">Real-time data visualization platform</p>
-                        </div>
-                    </div>
+                <div id="top-projects-grid" class="projects-grid-cards">
+                    <!-- Loading state -->
+                    <div class="loading-placeholder">Loading projects...</div>
                 </div>
             </div>
 
@@ -50,82 +20,53 @@ const ProjectsPage = {
                 <h2 class="section-title">Other Projects</h2>
                 <p class="other-projects-description">I maintain many projects, including some very popular ones.</p>
 
-                <div class="other-projects-category">
-                    <h3 class="category-title">Web Tools</h3>
-                    <div class="other-projects-list">
-                        <div class="other-project-item">
-                            <h4>Quick Reference</h4>
-                            <p>开发人员分享快速参考备忘清单</p>
-                        </div>
-                        <div class="other-project-item">
-                            <h4>linux-command</h4>
-                            <p>Linux命令大全搜索工具，内容包含...</p>
-                        </div>
-                        <div class="other-project-item">
-                            <h4>Web Tool</h4>
-                            <p>Many many useful Web Online Too...</p>
-                        </div>
-                        <div class="other-project-item">
-                            <h4>WXMP</h4>
-                            <p>微信公众号文章 Markdown 编辑器</p>
-                        </div>
-                        <div class="other-project-item">
-                            <h4>SVG Badges</h4>
-                            <p>SVG badges to display</p>
-                        </div>
-                        <div class="other-project-item">
-                            <h4>npm-unpkg</h4>
-                            <p>A web application to npm...</p>
-                        </div>
-                        <div class="other-project-item">
-                            <h4>keycode-info</h4>
-                            <p>A simple web page that responds to...</p>
-                        </div>
-                        <div class="other-project-item">
-                            <h4>nginx-editor</h4>
-                            <p>Nginx language for Monaco Editor</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="other-projects-category">
-                    <h3 class="category-title">Development Tools</h3>
-                    <div class="other-projects-list">
-                        <div class="other-project-item">
-                            <h4>SVG Icon Search</h4>
-                            <p>Search SVG Icons. Easily include...</p>
-                        </div>
-                        <div class="other-project-item">
-                            <h4>CodeImage</h4>
-                            <p>Create beautiful images of your...</p>
-                        </div>
-                        <div class="other-project-item">
-                            <h4>json-viewer</h4>
-                            <p>Online JSON viewer, JSON Beautifi...</p>
-                        </div>
-                        <div class="other-project-item">
-                            <h4>run-web</h4>
-                            <p>Online Code Editor for Rapid Web...</p>
-                        </div>
-                        <div class="other-project-item">
-                            <h4>ui-color</h4>
-                            <p>Converting HEX & RGB colors to...</p>
-                        </div>
-                        <div class="other-project-item">
-                            <h4>github-rank</h4>
-                            <p>Github China/Global User Ranking...</p>
-                        </div>
-                    </div>
+                <div id="other-projects-container">
+                    <!-- Loading state -->
+                    <div class="loading-placeholder">Loading other projects...</div>
                 </div>
             </div>
         `;
     },
 
-    onMount() {
+    async onMount() {
         console.log('Projects page mounted');
         
-        // Add click handlers to all project cards
-        const projectCards = document.querySelectorAll('.project-card');
+        try {
+            // Load top projects
+            this.topProjects = await DataService.getTopProjects();
+            this.renderTopProjects();
+
+            // Load other projects
+            this.otherProjects = await DataService.getOtherProjects();
+            this.renderOtherProjects();
+        } catch (error) {
+            console.error('Error loading projects:', error);
+        }
+    },
+
+    renderTopProjects() {
+        const container = document.getElementById('top-projects-grid');
+        if (!container) return;
+
+        container.innerHTML = this.topProjects.map(project => `
+            <div class="project-card" data-project-id="${project.id}">
+                <div class="project-image">
+                    ${project.image ? 
+                        `<img src="${project.image}" alt="${project.title}" class="project-image-real">` :
+                        `<div class="project-image-placeholder ${project.gradient}">
+                            <i class="${project.icon}"></i>
+                        </div>`
+                    }
+                </div>
+                <div class="project-info">
+                    <h3 class="project-title">${project.title}</h3>
+                    <p class="project-subtitle">${project.subtitle}</p>
+                </div>
+            </div>
+        `).join('');
+
+        // Add click handlers
+        const projectCards = container.querySelectorAll('.project-card');
         projectCards.forEach(card => {
             card.style.cursor = 'pointer';
             card.addEventListener('click', (e) => {
@@ -135,17 +76,25 @@ const ProjectsPage = {
                 }
             });
         });
+    },
 
-        // Add click handlers to other project items
-        const otherProjectItems = document.querySelectorAll('.other-project-item');
-        otherProjectItems.forEach(item => {
-            item.addEventListener('click', (e) => {
-                const projectId = item.getAttribute('data-project-id');
-                if (projectId) {
-                    router.navigate(`detail/project/${projectId}`);
-                }
-            });
-        });
+    renderOtherProjects() {
+        const container = document.getElementById('other-projects-container');
+        if (!container || !this.otherProjects) return;
+
+        container.innerHTML = this.otherProjects.categories.map(category => `
+            <div class="other-projects-category">
+                <h3 class="category-title">${category.name}</h3>
+                <div class="other-projects-list">
+                    ${category.projects.map(project => `
+                        <a href="${project.link}" target="_blank" rel="noopener noreferrer" class="other-project-item">
+                            <h4>${project.title}</h4>
+                            <p>${project.subtitle}</p>
+                        </a>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
     },
 
     onUnmount() {

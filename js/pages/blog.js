@@ -1,54 +1,50 @@
-// Blog Page Component
+// Blog Page Component - Renders from JSON configuration
 const BlogPage = {
+    posts: [],
+
     render() {
         return `
             <div class="card blog-card">
                 <h2 class="section-title">Blog</h2>
                 
-                <div class="blog-list">
-                    <article class="blog-post" data-blog-id="spa-architecture">
-                        <div class="post-date">Nov 23, 2025</div>
-                        <h3 class="post-title">Getting Started with SPA Architecture</h3>
-                        <p class="post-excerpt">
-                            Learn how to build modern single-page applications with vanilla JavaScript.
-                            This post covers routing, state management, and best practices.
-                        </p>
-                        <a href="#" class="read-more">Read more →</a>
-                    </article>
-
-                    <article class="blog-post" data-blog-id="fullstack-journey">
-                        <div class="post-date">Nov 15, 2025</div>
-                        <h3 class="post-title">My Journey into Full Stack Development</h3>
-                        <p class="post-excerpt">
-                            A reflection on my path from beginner to professional developer.
-                            Lessons learned, challenges faced, and advice for newcomers.
-                        </p>
-                        <a href="#" class="read-more">Read more →</a>
-                    </article>
-
-                    <article class="blog-post" data-blog-id="scalable-apis">
-                        <div class="post-date">Nov 01, 2025</div>
-                        <h3 class="post-title">Building Scalable APIs with Node.js</h3>
-                        <p class="post-excerpt">
-                            Best practices for designing and implementing RESTful APIs that can handle
-                            high traffic and complex business logic.
-                        </p>
-                        <a href="#" class="read-more">Read more →</a>
-                    </article>
+                <div id="blog-list" class="blog-list">
+                    <!-- Loading state -->
+                    <div class="loading-placeholder">Loading blog posts...</div>
                 </div>
             </div>
         `;
     },
 
-    onMount() {
+    async onMount() {
         console.log('Blog page mounted');
         
-        // Add click handlers to all blog posts
-        const blogPosts = document.querySelectorAll('.blog-post');
+        try {
+            // Load blog posts from JSON
+            this.posts = await DataService.getAllBlogPosts();
+            this.renderPosts();
+        } catch (error) {
+            console.error('Error loading blog posts:', error);
+        }
+    },
+
+    renderPosts() {
+        const container = document.getElementById('blog-list');
+        if (!container) return;
+
+        container.innerHTML = this.posts.map(post => `
+            <article class="blog-post" data-blog-id="${post.id}">
+                <div class="post-date">${post.date}</div>
+                <h3 class="post-title">${post.title}</h3>
+                <p class="post-excerpt">${post.excerpt}</p>
+                <a href="#" class="read-more">Read more →</a>
+            </article>
+        `).join('');
+
+        // Add click handlers
+        const blogPosts = container.querySelectorAll('.blog-post');
         blogPosts.forEach(post => {
             post.style.cursor = 'pointer';
             post.addEventListener('click', (e) => {
-                // Prevent default link behavior
                 e.preventDefault();
                 const blogId = post.getAttribute('data-blog-id');
                 if (blogId) {

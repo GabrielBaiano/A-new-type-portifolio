@@ -1,0 +1,115 @@
+{
+  "topProjects": [
+    {
+      "id": "e-commerce-platform",
+      "title": "E-Commerce Platform",
+      "subtitle": "Full-stack online store with payment integration",
+      "image": "assets/images/projects/ecommerce.jpg",
+      "gradient": "",
+      "icon": "fa-solid fa-code",
+      "content": "# E-Commerce Platform\n\nA modern, full-stack e-commerce platform built with cutting-edge technologies.\n\n## Features\n\n- **User Authentication**: Secure login and registration system\n- **Product Catalog**: Browse and search through thousands of products\n- **Shopping Cart**: Add, remove, and manage items\n- **Payment Integration**: Secure checkout with Stripe\n- **Order Tracking**: Real-time order status updates\n- **Admin Dashboard**: Manage products, orders, and users\n\n## Tech Stack\n\n- **Frontend**: React, Redux, TailwindCSS\n- **Backend**: Node.js, Express\n- **Database**: PostgreSQL\n- **Payment**: Stripe API\n- **Deployment**: AWS (EC2, RDS, S3)\n\n## Key Achievements\n\n- Handled 10,000+ daily active users\n- 99.9% uptime\n- Sub-second page load times\n- PCI DSS compliant payment processing\n\n## Code Example\n\n```javascript\n// Payment processing with Stripe\nconst processPayment = async (paymentIntent) => {\n    const stripe = require('stripe')(process.env.STRIPE_SECRET);\n    \n    const payment = await stripe.paymentIntents.create({\n        amount: paymentIntent.amount,\n        currency: 'usd',\n        payment_method: paymentIntent.paymentMethod,\n        confirm: true,\n    });\n    \n    return payment;\n};\n```\n\n## Links\n\n- [Live Demo](https://example.com)\n- [GitHub Repository](https://github.com/example/ecommerce)"
+    },
+    {
+      "id": "mobile-banking-app",
+      "title": "Mobile Banking App",
+      "subtitle": "React Native app for financial management",
+      "image": "",
+      "gradient": "bg-purple-gradient",
+      "icon": "fa-solid fa-mobile-screen",
+      "content": "# Mobile Banking App\n\nA secure and intuitive mobile banking application for iOS and Android.\n\n## Overview\n\nThis cross-platform mobile app provides users with complete control over their finances, from checking balances to transferring money and paying bills.\n\n## Features\n\n- **Account Overview**: View all accounts at a glance\n- **Transfers**: Send money instantly to other users\n- **Bill Payments**: Schedule and automate bill payments\n- **Budgeting Tools**: Track spending and set financial goals\n- **Biometric Security**: Face ID and fingerprint authentication\n- **Push Notifications**: Real-time transaction alerts\n\n## Technology\n\n- React Native\n- Redux for state management\n- Firebase for authentication\n- Plaid API for bank connections\n- Chart.js for data visualization\n\n## Security\n\nAll data is encrypted end-to-end using AES-256 encryption. We follow industry best practices for secure mobile development."
+    },
+    {
+      "id": "analytics-dashboard",
+      "title": "Analytics Dashboard",
+      "subtitle": "Real-time data visualization platform",
+      "image": "",
+      "gradient": "bg-green-gradient",
+      "icon": "fa-solid fa-chart-line",
+      "content": "# Analytics Dashboard\n\nA powerful real-time analytics platform for business intelligence.\n\n## Description\n\nBuilt for enterprise clients to monitor KPIs, track metrics, and make data-driven decisions.\n\n## Features\n\n- Real-time data streaming\n- Customizable widgets\n- Multiple data source integrations\n- Export to PDF/Excel\n- Role-based access control\n\n## Tech Stack\n\n- Vue.js 3\n- D3.js for visualizations\n- WebSocket for real-time updates\n- Node.js backend\n- MongoDB for data storage"
+    }
+  ],
+  "otherProjects": {
+    "categories": [
+      {
+        "name": "Web Tools",
+        "projects": [
+          {
+            "title": "Quick Reference",
+            "subtitle": "开发人员分享快速参考备忘清单",
+            "link": "https://quickref.me"
+          },
+          {
+            "title": "linux-command",
+            "subtitle": "Linux命令大全搜索工具，内容包含...",
+            "link": "https://github.com/jaywcjlove/linux-command"
+          },
+          {
+            "title": "Web Tool",
+            "subtitle": "Many many useful Web Online Tools",
+            "link": "https://webtool.io"
+          },
+          {
+            "title": "WXMP",
+            "subtitle": "微信公众号文章 Markdown 编辑器",
+            "link": "https://wxmp.io"
+          },
+          {
+            "title": "SVG Badges",
+            "subtitle": "SVG badges to display",
+            "link": "https://shields.io"
+          },
+          {
+            "title": "npm-unpkg",
+            "subtitle": "A web application to npm packages",
+            "link": "https://unpkg.com"
+          },
+          {
+            "title": "keycode-info",
+            "subtitle": "A simple web page that responds to keyboard events",
+            "link": "https://keycode.info"
+          },
+          {
+            "title": "nginx-editor",
+            "subtitle": "Nginx language for Monaco Editor",
+            "link": "https://github.com/example/nginx-editor"
+          }
+        ]
+      },
+      {
+        "name": "Development Tools",
+        "projects": [
+          {
+            "title": "SVG Icon Search",
+            "subtitle": "Search SVG Icons. Easily include popular icons",
+            "link": "https://icones.js.org"
+          },
+          {
+            "title": "CodeImage",
+            "subtitle": "Create beautiful images of your code",
+            "link": "https://codeimage.dev"
+          },
+          {
+            "title": "json-viewer",
+            "subtitle": "Online JSON viewer, JSON Beautifier",
+            "link": "https://jsonviewer.stack.hu"
+          },
+          {
+            "title": "run-web",
+            "subtitle": "Online Code Editor for Rapid Web Development",
+            "link": "https://runweb.app"
+          },
+          {
+            "title": "ui-color",
+            "subtitle": "Converting HEX & RGB colors to UIColor",
+            "link": "https://uicolor.io"
+          },
+          {
+            "title": "github-rank",
+            "subtitle": "Github China/Global User Ranking",
+            "link": "https://github-rank.com"
+          }
+        ]
+      }
+    ]
+  }
+}

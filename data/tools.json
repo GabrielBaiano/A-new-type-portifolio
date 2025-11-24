@@ -1,0 +1,184 @@
+{
+  "categories": [
+    {
+      "name": "Design",
+      "tools": [
+        {
+          "id": "figma",
+          "name": "Figma",
+          "icon": "fa-brands fa-figma",
+          "color": "#F24E1E"
+        },
+        {
+          "id": "sketch",
+          "name": "Sketch",
+          "icon": "fa-solid fa-pen-nib",
+          "color": "#F7B500"
+        },
+        {
+          "id": "adobe-xd",
+          "name": "Adobe XD",
+          "icon": "fa-solid fa-palette",
+          "color": "#FF61F6"
+        },
+        {
+          "id": "photoshop",
+          "name": "Photoshop",
+          "icon": "fa-solid fa-image",
+          "color": "#31A8FF"
+        }
+      ]
+    },
+    {
+      "name": "Frontend",
+      "tools": [
+        {
+          "id": "react",
+          "name": "React",
+          "icon": "fa-brands fa-react",
+          "color": "#61DAFB"
+        },
+        {
+          "id": "vue",
+          "name": "Vue.js",
+          "icon": "fa-brands fa-vuejs",
+          "color": "#4FC08D"
+        },
+        {
+          "id": "angular",
+          "name": "Angular",
+          "icon": "fa-brands fa-angular",
+          "color": "#DD0031"
+        },
+        {
+          "id": "tailwind",
+          "name": "Tailwind CSS",
+          "icon": "fa-solid fa-wind",
+          "color": "#06B6D4"
+        },
+        {
+          "id": "sass",
+          "name": "Sass",
+          "icon": "fa-brands fa-sass",
+          "color": "#CC6699"
+        }
+      ]
+    },
+    {
+      "name": "Backend",
+      "tools": [
+        {
+          "id": "nodejs",
+          "name": "Node.js",
+          "icon": "fa-brands fa-node-js",
+          "color": "#339933"
+        },
+        {
+          "id": "python",
+          "name": "Python",
+          "icon": "fa-brands fa-python",
+          "color": "#3776AB"
+        },
+        {
+          "id": "java",
+          "name": "Java",
+          "icon": "fa-brands fa-java",
+          "color": "#007396"
+        },
+        {
+          "id": "golang",
+          "name": "Go",
+          "icon": "fa-solid fa-code",
+          "color": "#00ADD8"
+        }
+      ]
+    },
+    {
+      "name": "Database",
+      "tools": [
+        {
+          "id": "postgresql",
+          "name": "PostgreSQL",
+          "icon": "fa-solid fa-database",
+          "color": "#336791"
+        },
+        {
+          "id": "mongodb",
+          "name": "MongoDB",
+          "icon": "fa-solid fa-leaf",
+          "color": "#47A248"
+        },
+        {
+          "id": "redis",
+          "name": "Redis",
+          "icon": "fa-solid fa-server",
+          "color": "#DC382D"
+        },
+        {
+          "id": "mysql",
+          "name": "MySQL",
+          "icon": "fa-solid fa-database",
+          "color": "#4479A1"
+        }
+      ]
+    },
+    {
+      "name": "DevOps",
+      "tools": [
+        {
+          "id": "docker",
+          "name": "Docker",
+          "icon": "fa-brands fa-docker",
+          "color": "#2496ED"
+        },
+        {
+          "id": "kubernetes",
+          "name": "Kubernetes",
+          "icon": "fa-solid fa-dharmachakra",
+          "color": "#326CE5"
+        },
+        {
+          "id": "aws",
+          "name": "AWS",
+          "icon": "fa-brands fa-aws",
+          "color": "#FF9900"
+        },
+        {
+          "id": "github-actions",
+          "name": "GitHub Actions",
+          "icon": "fa-brands fa-github",
+          "color": "#2088FF"
+        }
+      ]
+    },
+    {
+      "name": "Tools",
+      "tools": [
+        {
+          "id": "vscode",
+          "name": "VS Code",
+          "icon": "fa-solid fa-code",
+          "color": "#007ACC"
+        },
+        {
+          "id": "git",
+          "name": "Git",
+          "icon": "fa-brands fa-git-alt",
+          "color": "#F05032"
+        },
+        {
+          "id": "postman",
+          "name": "Postman",
+          "icon": "fa-solid fa-paper-plane",
+          "color": "#FF6C37"
+        },
+        {
+          "id": "jira",
+          "name": "Jira",
+          "icon": "fa-brands fa-jira",
+          "color": "#0052CC"
+        }
+      ]
+    }
+  ]
+}
