@@ -2,6 +2,22 @@
 
 This directory contains JSON configuration files that control the content displayed on the portfolio website.
 
+## Structure
+
+```
+data/
+├── projects.json          # Projects configuration
+├── tools.json            # Tools configuration
+├── blog.json             # Blog configuration
+└── content/              # Markdown content files
+    ├── projects/         # Project markdown files
+    │   ├── project-1.md
+    │   └── project-2.md
+    └── blog/             # Blog post markdown files
+        ├── post-1.md
+        └── post-2.md
+```
+
 ## Files
 
 ### `projects.json`
@@ -13,13 +29,13 @@ Controls the projects page content.
 {
   "topProjects": [
     {
-      "id": "unique-project-id",           // Used in URL: /detail/project/{id}
+      "id": "unique-project-id",
       "title": "Project Title",
       "subtitle": "Short description",
-      "image": "assets/images/project.jpg", // Optional: path to image
-      "gradient": "bg-purple-gradient",    // Optional: CSS gradient class (if no image)
-      "icon": "fa-solid fa-code",          // Font Awesome icon (if no image)
-      "content": "# Markdown content..."   // Full markdown content for detail page
+      "image": "assets/images/project.jpg",
+      "gradient": "bg-purple-gradient",
+      "icon": "fa-solid fa-code",
+      "contentFile": "data/content/projects/project-id.md"
     }
   ],
   "otherProjects": {
@@ -30,7 +46,7 @@ Controls the projects page content.
           {
             "title": "Project Title",
             "subtitle": "Description",
-            "link": "https://external-link.com"  // External link (opens in new tab)
+            "link": "https://external-link.com"
           }
         ]
       }
@@ -39,8 +55,37 @@ Controls the projects page content.
 }
 ```
 
-**Top Projects**: Clickable cards that open detail pages with full markdown content
+**Top Projects**: 
+- Use `contentFile` to reference a markdown file
+- The markdown file contains the full project description
+- Much easier to edit than inline JSON!
+
 **Other Projects**: External links organized by categories
+
+---
+
+### `blog.json`
+Controls the blog page content.
+
+#### Structure:
+
+```json
+{
+  "posts": [
+    {
+      "id": "unique-post-id",
+      "title": "Post Title",
+      "date": "Nov 23, 2025",
+      "excerpt": "Short preview text...",
+      "contentFile": "data/content/blog/post-id.md"
+    }
+  ]
+}
+```
+
+**Blog Posts**: 
+- Use `contentFile` to reference a markdown file
+- Edit the `.md` file directly - no escaping needed!
 
 ---
 
@@ -58,8 +103,8 @@ Controls the tools page content.
         {
           "id": "tool-id",
           "name": "Tool Name",
-          "icon": "fa-brands fa-react",  // Font Awesome icon
-          "color": "#61DAFB"             // Hex color for the icon
+          "icon": "fa-brands fa-react",
+          "color": "#61DAFB"
         }
       ]
     }
@@ -67,38 +112,90 @@ Controls the tools page content.
 }
 ```
 
-**Tools**: Displayed as icon + name, organized by categories
-
----
-
-### `blog.json`
-Controls the blog page content.
-
-#### Structure:
-
-```json
-{
-  "posts": [
-    {
-      "id": "unique-post-id",              // Used in URL: /detail/blog/{id}
-      "title": "Post Title",
-      "date": "Nov 23, 2025",
-      "excerpt": "Short preview text...",
-      "content": "# Full markdown content..."  // Full markdown content for detail page
-    }
-  ]
-}
-```
-
-**Blog Posts**: Clickable posts that open detail pages with full markdown content
-
 ---
 
 ## How to Edit
 
-1. **Edit the JSON files** in this directory
-2. **Refresh the page** - changes will load automatically
-3. **No code changes needed** - all content is data-driven
+### Adding a New Project
+
+1. **Create markdown file**: `data/content/projects/my-project.md`
+   ```markdown
+   # My Project
+   
+   Description here...
+   
+   ## Features
+   - Feature 1
+   - Feature 2
+   ```
+
+2. **Update JSON**: Add to `data/projects.json`
+   ```json
+   {
+     "id": "my-project",
+     "title": "My Project",
+     "subtitle": "Cool project",
+     "gradient": "bg-purple-gradient",
+     "icon": "fa-solid fa-rocket",
+     "contentFile": "data/content/projects/my-project.md"
+   }
+   ```
+
+3. **Refresh** - Done!
+
+### Adding a Blog Post
+
+1. **Create markdown file**: `data/content/blog/my-post.md`
+   ```markdown
+   # My Blog Post
+   
+   Content here...
+   ```
+
+2. **Update JSON**: Add to `data/blog.json`
+   ```json
+   {
+     "id": "my-post",
+     "title": "My Post",
+     "date": "Nov 24, 2025",
+     "excerpt": "Preview...",
+     "contentFile": "data/content/blog/my-post.md"
+   }
+   ```
+
+### Benefits of Separate Files
+
+✅ **Easy to Edit**: Edit markdown in your favorite editor
+✅ **No Escaping**: No need for `\n` or escaping quotes
+✅ **Syntax Highlighting**: Your editor highlights markdown
+✅ **Version Control**: See changes clearly in Git
+✅ **Reusable**: Same file can be used elsewhere
+
+## Markdown Support
+
+All `.md` files support full markdown syntax:
+
+```markdown
+# Heading 1
+## Heading 2
+
+**Bold** and *italic*
+
+- Lists
+- Work great
+
+\`\`\`javascript
+// Code blocks
+const code = "awesome";
+\`\`\`
+
+[Links](https://example.com)
+
+> Blockquotes
+
+| Tables | Work | Too |
+|--------|------|-----|
+```
 
 ## Image Support
 
@@ -112,31 +209,6 @@ Available gradients:
 - `bg-orange-gradient`
 - `bg-red-gradient`
 - `bg-cyan-gradient`
-
-## Markdown Support
-
-The `content` field in projects and blog posts supports full markdown:
-- Headings (`# H1`, `## H2`, etc.)
-- Lists (ordered and unordered)
-- Code blocks with syntax highlighting
-- Links, images, tables
-- Blockquotes, bold, italic
-
-Example:
-```markdown
-# Project Title
-
-## Features
-
-- Feature 1
-- Feature 2
-
-## Code Example
-
-\`\`\`javascript
-const example = "Hello World";
-\`\`\`
-```
 
 ## Icons
 

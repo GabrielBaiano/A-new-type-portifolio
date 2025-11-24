@@ -5,21 +5,21 @@
       "title": "Getting Started with SPA Architecture",
       "date": "Nov 23, 2025",
       "excerpt": "Learn how to build modern single-page applications with vanilla JavaScript. This post covers routing, state management, and best practices.",
-      "content": "# Getting Started with SPA Architecture\n\nSingle Page Applications (SPAs) have revolutionized web development by providing a more fluid user experience.\n\n## What is a SPA?\n\nA SPA is a web application that loads a single HTML page and dynamically updates content as the user interacts with the app.\n\n## Benefits\n\n1. **Better UX**: No page reloads, instant navigation\n2. **Performance**: Less data transfer after initial load\n3. **Mobile-friendly**: Similar to native app experience\n\n## Implementation\n\nHere's how to build a simple router:\n\n```javascript\nclass Router {\n    constructor() {\n        this.routes = {};\n        window.addEventListener('hashchange', () => this.handleRoute());\n    }\n    \n    register(path, handler) {\n        this.routes[path] = handler;\n    }\n    \n    handleRoute() {\n        const path = window.location.hash.slice(1);\n        this.routes[path]?.();\n    }\n}\n```\n\n## Conclusion\n\nSPAs are powerful but require careful consideration of SEO and initial load time."
+      "contentFile": "data/content/blog/spa-architecture.md"
     },
     {
       "id": "fullstack-journey",
       "title": "My Journey into Full Stack Development",
       "date": "Nov 15, 2025",
       "excerpt": "A reflection on my path from beginner to professional developer. Lessons learned, challenges faced, and advice for newcomers.",
-      "content": "# My Journey into Full Stack Development\n\nA reflection on my path from beginner to professional developer.\n\n## The Beginning\n\nI started coding in 2018 with a simple HTML page. Little did I know where this journey would take me.\n\n## Key Milestones\n\n- **2018**: First HTML/CSS website\n- **2019**: Learned JavaScript and React\n- **2020**: Backend development with Node.js\n- **2021**: First full-stack project\n- **2022**: Professional developer role\n\n## Lessons Learned\n\n1. **Consistency is key**: Code every day, even if just for 30 minutes\n2. **Build projects**: Theory is important, but practice is essential\n3. **Join communities**: Learn from others and share your knowledge\n\n## Advice for Beginners\n\nDon't try to learn everything at once. Master the fundamentals first, then expand your knowledge gradually."
+      "contentFile": "data/content/blog/fullstack-journey.md"
     },
     {
       "id": "scalable-apis",
       "title": "Building Scalable APIs with Node.js",
       "date": "Nov 01, 2025",
       "excerpt": "Best practices for designing and implementing RESTful APIs that can handle high traffic and complex business logic.",
-      "content": "# Building Scalable APIs with Node.js\n\nBest practices for designing and implementing RESTful APIs that can handle high traffic.\n\n## Architecture Principles\n\n### 1. Separation of Concerns\n\nKeep your routes, controllers, and services separate:\n\n```javascript\n// routes/users.js\nrouter.get('/users/:id', userController.getUser);\n\n// controllers/userController.js\nexports.getUser = async (req, res) => {\n    const user = await userService.findById(req.params.id);\n    res.json(user);\n};\n\n// services/userService.js\nexports.findById = async (id) => {\n    return await User.findByPk(id);\n};\n```\n\n### 2. Error Handling\n\nImplement centralized error handling middleware.\n\n### 3. Caching\n\nUse Redis for frequently accessed data.\n\n### 4. Rate Limiting\n\nProtect your API from abuse with rate limiting.\n\n## Conclusion\n\nBuilding scalable APIs requires planning and following best practices from the start."
+      "contentFile": "data/content/blog/scalable-apis.md"
     }
   ]
 }

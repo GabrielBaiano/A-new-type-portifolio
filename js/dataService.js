@@ -68,6 +68,12 @@ const DataService = {
         const project = data.topProjects.find(p => p.id === id);
         
         if (project) {
+            // Load markdown content from file
+            if (project.contentFile) {
+                const response = await fetch(project.contentFile);
+                const content = await response.text();
+                return { ...project, content };
+            }
             return project;
         } else {
             throw new Error('Project not found');
@@ -135,6 +141,12 @@ const DataService = {
         const post = data.posts.find(p => p.id === id);
         
         if (post) {
+            // Load markdown content from file
+            if (post.contentFile) {
+                const response = await fetch(post.contentFile);
+                const content = await response.text();
+                return { ...post, content };
+            }
             return post;
         } else {
             throw new Error('Blog post not found');
