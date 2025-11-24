@@ -17,31 +17,38 @@ function initializeSPA() {
     pageManager.registerPage('tools', ToolsPage);
     pageManager.registerPage('blog', BlogPage);
     pageManager.registerPage('photos', PhotosPage);
+    pageManager.registerPage('detail', DetailPage);
 
     // Register routes
-    router.register('home', (path) => {
-        pageManager.loadPage(path);
-        updateNavigation(path);
+    router.register('home', () => {
+        pageManager.loadPage('home');
+        updateNavigation('home');
     });
     
-    router.register('projects', (path) => {
-        pageManager.loadPage(path);
-        updateNavigation(path);
+    router.register('projects', () => {
+        pageManager.loadPage('projects');
+        updateNavigation('projects');
     });
     
-    router.register('tools', (path) => {
-        pageManager.loadPage(path);
-        updateNavigation(path);
+    router.register('tools', () => {
+        pageManager.loadPage('tools');
+        updateNavigation('tools');
     });
     
-    router.register('blog', (path) => {
-        pageManager.loadPage(path);
-        updateNavigation(path);
+    router.register('blog', () => {
+        pageManager.loadPage('blog');
+        updateNavigation('blog');
     });
     
-    router.register('photos', (path) => {
-        pageManager.loadPage(path);
-        updateNavigation(path);
+    router.register('photos', () => {
+        pageManager.loadPage('photos');
+        updateNavigation('photos');
+    });
+
+    // Register detail route with parameters
+    router.register('detail/:type/:id', (params) => {
+        pageManager.loadPage('detail', params);
+        // Don't update navigation for detail pages
     });
 
     // Set default route

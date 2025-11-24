@@ -24,8 +24,9 @@ class PageManager {
     /**
      * Carrega e exibe uma página
      * @param {string} pageName - Nome da página a ser carregada
+     * @param {Object} params - Parâmetros da rota (opcional)
      */
-    async loadPage(pageName) {
+    async loadPage(pageName, params = {}) {
         // Se já estamos nessa página, não faz nada
         if (this.currentPage === pageName && !this.isTransitioning) {
             return;
@@ -33,7 +34,7 @@ class PageManager {
 
         // Se está em transição, guarda a página pendente
         if (this.isTransitioning) {
-            this.pendingPage = pageName;
+            this.pendingPage = { name: pageName, params };
             return;
         }
 
@@ -55,26 +56,26 @@ class PageManager {
         // Transição de saída
         await this.fadeOut();
 
-        // Renderiza nova página
-        const content = page.render();
+        // Renderiza nova página (passa parâmetros)
+        const content = page.render(params);
         this.container.innerHTML = content;
 
         // Transição de entrada
         await this.fadeIn();
 
-        // Chama onMount da nova página
+        // Chama onMount da nova página (passa parâmetros)
         if (page.onMount) {
-            page.onMount();
+            page.onMount(params);
         }
 
         this.currentPage = pageName;
         this.isTransitioning = false;
 
         // Se há uma página pendente, carrega ela
-        if (this.pendingPage && this.pendingPage !== pageName) {
+        if (this.pendingPage && this.pendingPage.name !== pageName) {
             const nextPage = this.pendingPage;
             this.pendingPage = null;
-            this.loadPage(nextPage);
+            this.loadPage(nextPage.name, nextPage.params);
         } else {
             this.pendingPage = null;
         }

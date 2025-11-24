@@ -7,7 +7,7 @@ const ProjectsPage = {
                 <h2 class="section-title">Top Projects</h2>
                 
                 <div class="projects-grid-cards">
-                    <div class="project-card">
+                    <div class="project-card" data-project-id="e-commerce-platform">
                         <div class="project-image">
                             <div class="project-image-placeholder">
                                 <i class="fa-solid fa-code"></i>
@@ -19,7 +19,7 @@ const ProjectsPage = {
                         </div>
                     </div>
 
-                    <div class="project-card">
+                    <div class="project-card" data-project-id="mobile-banking-app">
                         <div class="project-image">
                             <div class="project-image-placeholder bg-purple-gradient">
                                 <i class="fa-solid fa-mobile-screen"></i>
@@ -31,7 +31,7 @@ const ProjectsPage = {
                         </div>
                     </div>
 
-                    <div class="project-card">
+                    <div class="project-card" data-project-id="analytics-dashboard">
                         <div class="project-image">
                             <div class="project-image-placeholder bg-green-gradient">
                                 <i class="fa-solid fa-chart-line"></i>
@@ -123,6 +123,29 @@ const ProjectsPage = {
 
     onMount() {
         console.log('Projects page mounted');
+        
+        // Add click handlers to all project cards
+        const projectCards = document.querySelectorAll('.project-card');
+        projectCards.forEach(card => {
+            card.style.cursor = 'pointer';
+            card.addEventListener('click', (e) => {
+                const projectId = card.getAttribute('data-project-id');
+                if (projectId) {
+                    router.navigate(`detail/project/${projectId}`);
+                }
+            });
+        });
+
+        // Add click handlers to other project items
+        const otherProjectItems = document.querySelectorAll('.other-project-item');
+        otherProjectItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                const projectId = item.getAttribute('data-project-id');
+                if (projectId) {
+                    router.navigate(`detail/project/${projectId}`);
+                }
+            });
+        });
     },
 
     onUnmount() {
