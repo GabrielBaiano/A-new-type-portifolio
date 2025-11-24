@@ -1,5 +1,8 @@
 // Script.js - Main application initialization
 document.addEventListener('DOMContentLoaded', () => {
+    // Preload all data first for instant navigation
+    DataService.preloadAllData();
+    
     // Initialize SPA System
     initializeSPA();
     

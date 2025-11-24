@@ -41,6 +41,23 @@ const DataService = {
     },
 
     /**
+     * Preload all data at once to avoid loading states when navigating
+     * Call this on page load
+     */
+    async preloadAllData() {
+        try {
+            await Promise.all([
+                this.loadProjectsData(),
+                this.loadToolsData(),
+                this.loadBlogData()
+            ]);
+            console.log('✅ All data preloaded successfully');
+        } catch (error) {
+            console.error('Error preloading data:', error);
+        }
+    },
+
+    /**
      * Get all top projects
      * @returns {Promise<Array>} Array of top projects
      */

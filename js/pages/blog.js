@@ -8,8 +8,6 @@ const BlogPage = {
                 <h2 class="section-title">Blog</h2>
                 
                 <div id="blog-list" class="blog-list">
-                    <!-- Loading state -->
-                    <div class="loading-placeholder">Loading blog posts...</div>
                 </div>
             </div>
         `;
@@ -19,7 +17,7 @@ const BlogPage = {
         console.log('Blog page mounted');
         
         try {
-            // Load blog posts from JSON
+            // Load blog posts from JSON (already preloaded)
             this.posts = await DataService.getAllBlogPosts();
             this.renderPosts();
         } catch (error) {

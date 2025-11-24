@@ -10,8 +10,6 @@ const ProjectsPage = {
                 <h2 class="section-title">Top Projects</h2>
                 
                 <div id="top-projects-grid" class="projects-grid-cards">
-                    <!-- Loading state -->
-                    <div class="loading-placeholder">Loading projects...</div>
                 </div>
             </div>
 
@@ -21,8 +19,6 @@ const ProjectsPage = {
                 <p class="other-projects-description">I maintain many projects, including some very popular ones.</p>
 
                 <div id="other-projects-container">
-                    <!-- Loading state -->
-                    <div class="loading-placeholder">Loading other projects...</div>
                 </div>
             </div>
         `;
@@ -32,11 +28,11 @@ const ProjectsPage = {
         console.log('Projects page mounted');
         
         try {
-            // Load top projects
+            // Load top projects (already preloaded)
             this.topProjects = await DataService.getTopProjects();
             this.renderTopProjects();
 
-            // Load other projects
+            // Load other projects (already preloaded)
             this.otherProjects = await DataService.getOtherProjects();
             this.renderOtherProjects();
         } catch (error) {

@@ -9,8 +9,6 @@ const ToolsPage = {
                 <p class="other-projects-description">Tools and utilities I've created to solve real-world problems.</p>
 
                 <div id="tools-container">
-                    <!-- Loading state -->
-                    <div class="loading-placeholder">Loading tools...</div>
                 </div>
             </div>
         `;
@@ -20,7 +18,7 @@ const ToolsPage = {
         console.log('Tools page mounted');
         
         try {
-            // Load tools from JSON
+            // Load tools from JSON (already preloaded)
             this.categories = await DataService.getAllTools();
             this.renderTools();
         } catch (error) {
