@@ -1322,6 +1322,231 @@ body {
     color: #333333;
 }
 
+/* ===== Balloon System Styles ===== */
+.floating-balloon {
+    pointer-events: auto;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    width: 320px;
+}
+
+.floating-balloon:hover {
+    transform: translateY(-4px) !important;
+}
+
+.balloon-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.floating-balloon:hover .balloon-card {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    border-color: var(--accent-blue);
+}
+
+.balloon-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 2px solid var(--border-color);
+    background-color: var(--badge-bg);
+}
+
+.balloon-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.balloon-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.balloon-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.balloon-badge {
+    font-size: 1rem;
+}
+
+.balloon-message {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: var(--text-muted);
+}
+
+/* Balloon size variations */
+.balloon-card.balloon-small {
+    padding: 12px;
+}
+
+.balloon-card.balloon-small .balloon-avatar {
+    width: 36px;
+    height: 36px;
+}
+
+.balloon-card.balloon-small .balloon-name {
+    font-size: 0.85rem;
+}
+
+.balloon-card.balloon-small .balloon-message {
+    font-size: 0.75rem;
+}
+
+.balloon-card.balloon-large {
+    padding: 20px;
+}
+
+.balloon-card.balloon-large .balloon-avatar {
+    width: 56px;
+    height: 56px;
+}
+
+.balloon-card.balloon-large .balloon-name {
+    font-size: 1.05rem;
+}
+
+.balloon-card.balloon-large .balloon-message {
+    font-size: 0.95rem;
+}
+
+/* Ad balloon styles - image inside card */
+.balloon-card.balloon-ad {
+    padding: 0;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.balloon-card.balloon-ad .ad-link {
+    text-decoration: none;
+    display: block;
+}
+
+.balloon-card.balloon-ad:hover {
+    transform: translateY(-6px);
+    border-color: var(--accent-blue);
+}
+
+.ad-title {
+    padding: 16px 16px 12px 16px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-main);
+    background: var(--card-bg);
+    text-align: center;
+    order: -1; /* Ensure title appears first */
+}
+
+.ad-image {
+    width: auto;
+    max-width: 90%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+    max-height: 140px;
+    border-radius: 16px;
+    margin: 0 auto 16px auto;
+}
+
+/* Floating animations */
+@keyframes float-up-left {
+    0% {
+        left: -350px;
+        opacity: 0;
+        transform: translateY(0);
+    }
+    3% {
+        left: var(--horizontal-offset);
+        opacity: 1;
+    }
+    97% {
+        opacity: 1;
+    }
+    100% {
+        left: var(--horizontal-offset);
+        opacity: 0;
+        transform: translateY(-120vh);
+    }
+}
+
+@keyframes float-up-right {
+    0% {
+        right: -350px;
+        opacity: 0;
+        transform: translateY(0);
+    }
+    3% {
+        right: var(--horizontal-offset);
+        opacity: 1;
+    }
+    97% {
+        opacity: 1;
+    }
+    100% {
+        right: var(--horizontal-offset);
+        opacity: 0;
+        transform: translateY(-120vh);
+    }
+}
+
+/* Light theme adjustments for balloons */
+[data-theme="light"] .balloon-card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .floating-balloon:hover .balloon-card {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    /* Hide balloons completely on mobile */
+    #balloon-container {
+        display: none !important;
+    }
+    
+    .floating-balloon {
+        display: none !important;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .floating-balloon {
+        width: 280px;
+    }
+    
+    .balloon-card {
+        padding: 12px;
+    }
+    
+    .balloon-avatar {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .balloon-name {
+        font-size: 0.85rem;
+    }
+    
+    .balloon-message {
+        font-size: 0.8rem;
+    }
+}
+
+
 /* Responsive adjustments for detail page */
 @media (max-width: 500px) {
     .detail-title {
