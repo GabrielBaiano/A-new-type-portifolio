@@ -103,6 +103,36 @@
     border-top-color: #d0d0d0;
 }
 
+/* Light theme styles for project and tool items */
+[data-theme="light"] .other-project-item {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .other-project-item:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .tool-item {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .tool-item:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .projects-divider {
+    border-top-color: #d0d0d0;
+}
+
+[data-theme="light"] .project-image {
+    border: 1px solid #d0d0d0;
+}
+
+[data-theme="light"] .project-image-placeholder,
+[data-theme="light"] .project-image-real {
+    border: 1px solid #d0d0d0;
+}
+
 
 
 /* Smooth transitions for theme changes */

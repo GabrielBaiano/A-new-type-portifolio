@@ -4,14 +4,9 @@
       "name": "VS Code Extensions",
       "tools": [
         {
-          "title": "Theme Studio",
-          "subtitle": "Create beautiful VS Code themes with live preview",
-          "link": "https://marketplace.visualstudio.com/items?itemName=example.theme-studio"
-        },
-        {
-          "title": "Code Snippets Manager",
-          "subtitle": "Organize and share your code snippets efficiently",
-          "link": "https://marketplace.visualstudio.com/items?itemName=example.snippets"
+          "title": "Auto Commiter",
+          "subtitle": "VSCode extension that analyzes your git diff --staged and uses generative AI",
+          "link": "https://marketplace.visualstudio.com/items?itemName=gabrielbaiano.auto-commiter"
         }
       ]
     },
@@ -19,19 +14,9 @@
       "name": "Web Tools",
       "tools": [
         {
-          "title": "Image Converter",
-          "subtitle": "Convert images between formats (PNG, JPG, WebP, AVIF)",
-          "link": "https://example.com/image-converter"
-        },
-        {
-          "title": "JSON Formatter",
-          "subtitle": "Format and validate JSON with syntax highlighting",
-          "link": "https://example.com/json-formatter"
-        },
-        {
-          "title": "Color Picker Pro",
-          "subtitle": "Advanced color picker with palette generator",
-          "link": "https://example.com/color-picker"
+          "title": "Banered",
+          "subtitle": "Interactive HTML banner editor that allows you to create and customize banners and images",
+          "link": "https://banered.vercel.app/"
         }
       ]
     },
@@ -39,29 +24,9 @@
       "name": "Linux Apps",
       "tools": [
         {
-          "title": "System Monitor",
-          "subtitle": "Beautiful system monitoring tool for Linux",
-          "link": "https://github.com/example/system-monitor"
-        },
-        {
           "title": "File Organizer",
           "subtitle": "Automatically organize files by type and date",
-          "link": "https://github.com/example/file-organizer"
-        }
-      ]
-    },
-    {
-      "name": "CLI Tools",
-      "tools": [
-        {
-          "title": "DevSetup",
-          "subtitle": "Automated development environment setup script",
-          "link": "https://github.com/example/devsetup"
-        },
-        {
-          "title": "Git Helper",
-          "subtitle": "Simplify common git workflows with shortcuts",
-          "link": "https://github.com/example/git-helper"
+          "link": "https://github.com/GabrielBaiano/file_organizer"
         }
       ]
     },
@@ -69,14 +34,9 @@
       "name": "Utilities",
       "tools": [
         {
-          "title": "Markdown Preview",
-          "subtitle": "Live markdown preview with GitHub styling",
-          "link": "https://example.com/markdown-preview"
-        },
-        {
-          "title": "QR Code Generator",
-          "subtitle": "Generate QR codes with custom colors and logos",
-          "link": "https://example.com/qr-generator"
+          "title": "Awesome README",
+          "subtitle": "Collection of professional, ready-to-use README templates",
+          "link": "https://github.com/GabrielBaiano/awesome-readme"
         }
       ]
     }

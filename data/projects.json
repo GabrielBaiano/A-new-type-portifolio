@@ -1,31 +1,13 @@
 {
   "topProjects": [
     {
-      "id": "e-commerce-platform",
-      "title": "E-Commerce Platform",
-      "subtitle": "Full-stack online store with payment integration",
-      "image": "",
+      "id": "shii-app",
+      "title": "Shii! app",
+      "subtitle": "A desktop application to manage widgets",
+      "image": "assets/images/Shii.logo.app.png",
       "gradient": "bg-orange-gradient",
       "icon": "fa-solid fa-code",
-      "contentFile": "data/content/projects/e-commerce-platform.md"
-    },
-    {
-      "id": "mobile-banking-app",
-      "title": "Mobile Banking App",
-      "subtitle": "React Native app for financial management",
-      "image": "",
-      "gradient": "bg-purple-gradient",
-      "icon": "fa-solid fa-mobile-screen",
-      "contentFile": "data/content/projects/mobile-banking-app.md"
-    },
-    {
-      "id": "analytics-dashboard",
-      "title": "Analytics Dashboard",
-      "subtitle": "Real-time data visualization platform",
-      "image": "",
-      "gradient": "bg-green-gradient",
-      "icon": "fa-solid fa-chart-line",
-      "contentFile": "data/content/projects/analytics-dashboard.md"
+      "contentFile": "data/content/projects/shii-app.md"
     }
   ],
   "otherProjects": {
