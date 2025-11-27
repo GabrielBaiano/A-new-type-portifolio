@@ -1,0 +1,17 @@
+{
+  "name": "portfolio-gabrielbaiano",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Portfolio website with GitHub integration",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Static site - no build needed'",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "devDependencies": {
+    "vercel": "^33.0.0"
+  }
+}
