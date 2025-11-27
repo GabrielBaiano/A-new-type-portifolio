@@ -1428,6 +1428,7 @@ body {
     padding: 0;
     overflow: hidden;
     cursor: pointer;
+    width: 380px; /* Increased from default 320px */
 }
 
 .balloon-card.balloon-ad .ad-link {
@@ -1442,7 +1443,7 @@ body {
 
 .ad-title {
     padding: 16px 16px 12px 16px;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 600;
     color: var(--text-main);
     background: var(--card-bg);
@@ -1451,54 +1452,28 @@ body {
 }
 
 .ad-image {
-    width: auto;
-    max-width: 90%;
+    width: 95%;
+    max-width: 95%;
     height: auto;
     display: block;
     object-fit: contain;
-    max-height: 140px;
+    max-height: 220px; /* Increased from 140px */
     border-radius: 16px;
     margin: 0 auto 16px auto;
 }
 
-/* Floating animations */
-@keyframes float-up-left {
+/* Floating animation - simple upward movement */
+@keyframes balloon-move-up {
     0% {
-        left: -350px;
-        opacity: 0;
         transform: translateY(0);
-    }
-    3% {
-        left: var(--horizontal-offset);
         opacity: 1;
     }
-    97% {
+    90% {
         opacity: 1;
     }
     100% {
-        left: var(--horizontal-offset);
+        transform: translateY(-200vh);
         opacity: 0;
-        transform: translateY(-120vh);
-    }
-}
-
-@keyframes float-up-right {
-    0% {
-        right: -350px;
-        opacity: 0;
-        transform: translateY(0);
-    }
-    3% {
-        right: var(--horizontal-offset);
-        opacity: 1;
-    }
-    97% {
-        opacity: 1;
-    }
-    100% {
-        right: var(--horizontal-offset);
-        opacity: 0;
-        transform: translateY(-120vh);
     }
 }
 
