@@ -110,7 +110,7 @@ const DataService = {
         } else {
             throw new Error('Project not found');
         }
-    }
+    },
 
     /**
      * Get all tools organized by categories
