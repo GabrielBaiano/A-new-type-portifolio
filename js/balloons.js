@@ -149,14 +149,14 @@ class BalloonSystem {
         `;
     }
 
-    start() {
+    async start() {
         if (this.isRunning || window.innerWidth <= 768) return;
         this.isRunning = true;
 
-        const spawn = () => {
+        const spawn = async () => {
             if (!this.isRunning) return;
 
-            const data = this.getBalloonData();
+            const data = await this.getBalloonData();
             this.createBalloon(data);
 
             // Increased interval: 1.5-3.5 seconds (slower spawn rate)
@@ -171,8 +171,8 @@ class BalloonSystem {
         this.isRunning = false;
     }
 
-    getBalloonData() {
-        let list = this.getAllData();
+    async getBalloonData() {
+        let list = await this.getAllData();
         
         // Filter by context
         list = list.filter(item => {
@@ -185,7 +185,7 @@ class BalloonSystem {
 
         if (list.length === 0) {
             this.recent = [];
-            list = this.getAllData().filter(item => {
+            list = (await this.getAllData()).filter(item => {
                 if (!item.contexts) return true;
                 return item.contexts.includes(this.currentContext);
             });
@@ -200,7 +200,30 @@ class BalloonSystem {
         return item;
     }
 
-    getAllData() {
+    async getAllData() {
+        // Try to fetch from API first
+        try {
+            const context = this.currentContext;
+            const url = context === 'home' 
+                ? '/api/get-balloon-data?context=home'
+                : `/api/get-balloon-data?project=${context}`;
+            
+            const response = await fetch(url);
+            const result = await response.json();
+            
+            if (result.success && result.data && result.data.length > 0) {
+                console.log(`Loaded ${result.data.length} balloons from API`);
+                return result.data;
+            }
+        } catch (error) {
+            console.error('Error fetching from API, using fallback:', error);
+        }
+
+        // Fallback to static data if API fails
+        return this.getFallbackData();
+    }
+
+    getFallbackData() {
         return [
             // Notifications only
             {
