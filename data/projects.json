@@ -14,82 +14,47 @@
   "otherProjects": {
     "categories": [
       {
-        "name": "Web Tools",
+        "name": "VS Code Extensions",
         "projects": [
           {
-            "title": "Quick Reference",
-            "subtitle": "开发人员分享快速参考备忘清单",
-            "link": "https://quickref.me"
-          },
-          {
-            "title": "linux-command",
-            "subtitle": "Linux命令大全搜索工具，内容包含...",
-            "link": "https://github.com/jaywcjlove/linux-command"
-          },
-          {
-            "title": "Web Tool",
-            "subtitle": "Many many useful Web Online Tools",
-            "link": "https://webtool.io"
-          },
-          {
-            "title": "WXMP",
-            "subtitle": "微信公众号文章 Markdown 编辑器",
-            "link": "https://wxmp.io"
-          },
-          {
-            "title": "SVG Badges",
-            "subtitle": "SVG badges to display",
-            "link": "https://shields.io"
-          },
-          {
-            "title": "npm-unpkg",
-            "subtitle": "A web application to npm packages",
-            "link": "https://unpkg.com"
-          },
-          {
-            "title": "keycode-info",
-            "subtitle": "A simple web page that responds to keyboard events",
-            "link": "https://keycode.info"
-          },
-          {
-            "title": "nginx-editor",
-            "subtitle": "Nginx language for Monaco Editor",
-            "link": "https://github.com/example/nginx-editor"
+            "title": "Auto Commiter",
+            "subtitle": "VSCode extension that analyzes your git diff --staged and uses generative AI",
+            "link": "https://marketplace.visualstudio.com/items?itemName=gabrielbaiano.auto-commiter"
           }
         ]
       },
       {
-        "name": "Development Tools",
+        "name": "Web Tools",
         "projects": [
           {
-            "title": "SVG Icon Search",
-            "subtitle": "Search SVG Icons. Easily include popular icons",
-            "link": "https://icones.js.org"
+            "title": "Banered",
+            "subtitle": "Interactive HTML banner editor that allows you to create and customize banners and images",
+            "link": "https://banered.vercel.app/"
           },
           {
-            "title": "CodeImage",
-            "subtitle": "Create beautiful images of your code",
-            "link": "https://codeimage.dev"
-          },
+            "title": "VOSTOK OS Terminal",
+            "subtitle": "A terminal emulator inspired by retro Soviet aesthetics",
+            "link": "https://github.com/GabrielBaiano/VOSTOK_OS_TERMINAL"
+          }
+        ]
+      },
+      {
+        "name": "Linux Apps",
+        "projects": [
           {
-            "title": "json-viewer",
-            "subtitle": "Online JSON viewer, JSON Beautifier",
-            "link": "https://jsonviewer.stack.hu"
-          },
+            "title": "File Organizer",
+            "subtitle": "Automatically organize files by type and date",
+            "link": "https://github.com/GabrielBaiano/file_organizer"
+          }
+        ]
+      },
+      {
+        "name": "Utilities",
+        "projects": [
           {
-            "title": "run-web",
-            "subtitle": "Online Code Editor for Rapid Web Development",
-            "link": "https://runweb.app"
-          },
-          {
-            "title": "ui-color",
-            "subtitle": "Converting HEX & RGB colors to UIColor",
-            "link": "https://uicolor.io"
-          },
-          {
-            "title": "github-rank",
-            "subtitle": "Github China/Global User Ranking",
-            "link": "https://github-rank.com"
+            "title": "Awesome README",
+            "subtitle": "Collection of professional, ready-to-use README templates",
+            "link": "https://github.com/GabrielBaiano/awesome-readme"
           }
         ]
       }
