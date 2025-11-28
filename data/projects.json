@@ -7,7 +7,8 @@
       "image": "assets/images/Shii.logo.app.png",
       "gradient": "bg-orange-gradient",
       "icon": "fa-solid fa-code",
-      "contentFile": "data/content/projects/shii-app.md"
+      "contentFile": "data/content/projects/shii-app.md",
+      "github_repo": "GabrielBaiano/Shii.logo.app"
     }
   ],
   "otherProjects": {
