@@ -75,34 +75,42 @@ const DataService = {
         return data.otherProjects;
     },
 
-    /**
-     * Get project by ID
-     * @param {string} id - Project identifier
-     * @returns {Promise<Object>} Project data
-     */
     async getProjectById(id) {
         const data = await this.loadProjectsData();
         const project = data.topProjects.find(p => p.id === id);
         
         if (project) {
-            // Load markdown content from file
+            // If project has github_repo, fetch README from API
+            if (project.github_repo) {
+                try {
+                    const response = await fetch(`/api/get-project-readme?repo=${project.github_repo}`);
+                    const result = await response.json();
+                    
+                    if (result.success && result.readme) {
+                        return { 
+                            ...project, 
+                            content: result.readme,
+                            source: 'github'
+                        };
+                    }
+                } catch (error) {
+                    console.error('Error fetching README from API:', error);
+                    // Fall through to use contentFile as fallback
+                }
+            }
+            
+            // Fallback: Load markdown content from static file
             if (project.contentFile) {
                 const response = await fetch(project.contentFile);
                 const content = await response.text();
-                return { ...project, content };
+                return { ...project, content, source: 'file' };
             }
+            
             return project;
         } else {
             throw new Error('Project not found');
         }
-
-        // Future backend integration:
-        // return fetch(`/api/projects/${id}`).then(res => res.json());
-        // Or fetch README from GitHub:
-        // return fetch(`https://raw.githubusercontent.com/user/repo/main/README.md`)
-        //     .then(res => res.text())
-        //     .then(content => ({ id, content }));
-    },
+    }
 
     /**
      * Get all tools organized by categories
