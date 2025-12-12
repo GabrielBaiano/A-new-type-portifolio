@@ -27,8 +27,7 @@ const HomePage = {
                 <!-- Bio -->
                 <div class="bio">
                     <p>
-                        Welcome to <i>my space on the internet</i>. I'm a FullStack Developer with over 3 years of
-                        experience, focused on crafting robust and scalable applications.
+Welcome to <i>my space on the internet</i>. I'm a Full-Stack Developer with over 3 years of experience, and I'm also part of the <strong>YellowHood agency</strong>.
                     </p>
                     <br>
                     <p>

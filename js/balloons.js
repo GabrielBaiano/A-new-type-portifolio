@@ -172,6 +172,17 @@ class BalloonSystem {
     }
 
     async getBalloonData() {
+        // 7% chance to show YellowHood ad (de vez em nunca)
+        if (Math.random() < 0.07) {
+            return {
+                id: "ad-yellowhood-" + Date.now(),
+                type: "ad",
+                title: "YellowHood Studio",
+                adImage: "assets/images/banner.png",
+                link: "https://www.yellowhood.com.br/"
+            };
+        }
+
         let list = await this.getAllData();
         
         // Filter by context
