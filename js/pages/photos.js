@@ -86,7 +86,7 @@ const PhotosPage = {
             const photoEl = document.createElement('div');
             photoEl.className = 'photo-item fade-in';
             
-            // Layout: Image only, no link, real height
+            // Layout: Image only, pure waterfall
             photoEl.innerHTML = `
                 <img src="${item.image}" alt="${item.title}" loading="lazy">
             `;
