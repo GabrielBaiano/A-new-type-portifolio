@@ -68,7 +68,7 @@ Welcome to <i>my space on the internet</i>. I'm a Full-Stack Developer with over
                             <div class="company-logo bg-darkblue"></div>
                             <div class="job-details">
                                 <h3>Compass UOL</h3>
-                                <span>Mobile Developer / Junior</span>
+                                <span>Mobile Developer</span>
                             </div>
                         </div>
                         <div class="job-date">2024 – 2025</div>
@@ -80,7 +80,7 @@ Welcome to <i>my space on the internet</i>. I'm a Full-Stack Developer with over
                             <div class="company-logo bg-lime"></div>
                             <div class="job-details">
                                 <h3>Techsolutions</h3>
-                                <span>Full Stack / Junior</span>
+                                <span>Full Stack</span>
                             </div>
                         </div>
                         <div class="job-date">2023 – 2024</div>
@@ -92,7 +92,7 @@ Welcome to <i>my space on the internet</i>. I'm a Full-Stack Developer with over
                             <div class="company-logo bg-orange"></div>
                             <div class="job-details">
                                 <h3>Emporio 24h</h3>
-                                <span>Web Developer / Freelance</span>
+                                <span>Web Developer</span>
                             </div>
                         </div>
                         <div class="job-date">2022 – 2023</div>
@@ -104,7 +104,7 @@ Welcome to <i>my space on the internet</i>. I'm a Full-Stack Developer with over
                             <div class="company-logo bg-green"></div>
                             <div class="job-details">
                                 <h3>Shultz</h3>
-                                <span>Full Stack Developer / Junior</span>
+                                <span>Full Stack Developer</span>
                             </div>
                         </div>
                         <div class="job-date">2022</div>
