@@ -1,6 +1,16 @@
 {
   "topProjects": [
     {
+      "id": "agencia-yellow-hood",
+      "title": "Agência Yellow Hood",
+      "subtitle": "A creative digital agency",
+      "image": "assets/images/banner.png",
+      "gradient": "bg-orange-gradient",
+      "icon": "fa-solid fa-layer-group",
+      "contentFile": "data/content/projects/agencia-yellow-hood.md",
+      "github_repo": "Agencia-YellowHood/General-Template"
+    },
+    {
       "id": "shii-app",
       "title": "Shii! app",
       "subtitle": "A desktop application to manage widgets",

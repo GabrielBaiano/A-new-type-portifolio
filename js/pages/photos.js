@@ -5,7 +5,7 @@ const PhotosPage = {
             <div class="card photos-card">
                 <h2 class="section-title">Photos</h2>
                 
-                <div id="photos-container" class="photos-grid">
+                <div id="photos-container" class="photos-masonry">
                     <!-- Loading State -->
                     <div class="loading-state">
                         <i class="fa-solid fa-spinner fa-spin"></i>
@@ -49,7 +49,14 @@ const PhotosPage = {
                     
                     // Try to get higher quality image
                     if (imageUrl) {
-                        imageUrl = imageUrl.replace('/236x/', '/736x/');
+                        // Pinterest image URLs often follow a pattern like:
+                        // https://i.pinimg.com/236x/path/to/image.jpg
+                        // We want to replace '236x' with 'originals' or '736x'
+                        
+                        // First try to replace the size segment with 'originals' (highest quality)
+                        // Note: Sometiomes 'originals' might be a different file type, so '736x' is safer for general use 
+                        // matching the feed's original file type.
+                        imageUrl = imageUrl.replace(/\/236x\//, '/736x/');
                     }
 
                     return { title, image: imageUrl, link };

@@ -48,7 +48,7 @@ Welcome to <i>my space on the internet</i>. I'm a Full-Stack Developer with over
 
                 <!-- Links Sociais -->
                 <div class="social-links">
-                    <a href="https://x.com/uMagicalJake" class="social-btn"><i class="fa-brands fa-twitter"></i> Twitter</a>
+                    <!-- <a href="https://x.com/uMagicalJake" class="social-btn"><i class="fa-brands fa-twitter"></i> Twitter</a> -->
                     <a href="https://www.linkedin.com/in/gabriel-nascimento-gama-5b0b30185/" class="social-btn"><i
                             class="fa-brands fa-linkedin"></i> Linkedin</a>
                     <a href="https://github.com/GabrielBaiano" class="social-btn"><i class="fa-brands fa-github"></i>
@@ -68,7 +68,7 @@ Welcome to <i>my space on the internet</i>. I'm a Full-Stack Developer with over
                             <div class="company-logo bg-darkblue"></div>
                             <div class="job-details">
                                 <h3>Compass UOL</h3>
-                                <span>Mobile Developer</span>
+                                <span>Mobile Developer / Junior</span>
                             </div>
                         </div>
                         <div class="job-date">2024 – 2025</div>
@@ -80,7 +80,7 @@ Welcome to <i>my space on the internet</i>. I'm a Full-Stack Developer with over
                             <div class="company-logo bg-lime"></div>
                             <div class="job-details">
                                 <h3>Techsolutions</h3>
-                                <span>Full Stack Assistant</span>
+                                <span>Full Stack / Junior</span>
                             </div>
                         </div>
                         <div class="job-date">2023 – 2024</div>
@@ -92,7 +92,7 @@ Welcome to <i>my space on the internet</i>. I'm a Full-Stack Developer with over
                             <div class="company-logo bg-orange"></div>
                             <div class="job-details">
                                 <h3>Emporio 24h</h3>
-                                <span>Web Developer</span>
+                                <span>Web Developer / Freelance</span>
                             </div>
                         </div>
                         <div class="job-date">2022 – 2023</div>
@@ -104,7 +104,7 @@ Welcome to <i>my space on the internet</i>. I'm a Full-Stack Developer with over
                             <div class="company-logo bg-green"></div>
                             <div class="job-details">
                                 <h3>Shultz</h3>
-                                <span>Full Stack Developer</span>
+                                <span>Full Stack Developer / Junior</span>
                             </div>
                         </div>
                         <div class="job-date">2022</div>

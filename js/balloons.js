@@ -177,7 +177,7 @@ class BalloonSystem {
             return {
                 id: "ad-yellowhood-" + Date.now(),
                 type: "ad",
-                title: "YellowHood Studio",
+                title: "Agência Yellow Hood",
                 adImage: "assets/images/banner.png",
                 link: "https://www.yellowhood.com.br/"
             };
