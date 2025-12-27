@@ -328,7 +328,26 @@ class BalloonSystem {
     }
 
     getFallbackData() {
-        const baseData = [];
+        const baseData = [
+            {
+                id: "notif-5",
+                type: "notification",
+                name: "New Follower",
+                message: "Started following you on GitHub",
+                badge: "👥",
+                image: "https://api.dicebear.com/7.x/avataaars/svg?seed=user5",
+                contexts: ['home', 'projects']
+            },
+            {
+                id: "notif-8",
+                type: "notification",
+                name: "New Follower",
+                message: "Started following you on GitHub",
+                badge: "👥",
+                image: "https://api.dicebear.com/7.x/avataaars/svg?seed=user8",
+                contexts: ['home', 'projects']
+            }
+        ];
         return baseData;
     }
 
