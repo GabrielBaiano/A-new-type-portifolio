@@ -231,7 +231,7 @@ class BalloonSystem {
 
             // Increased interval: 1.5-3.5 seconds (slower spawn rate)
             const next = 1500 + Math.random() * 2000;
-            setTimeout(spawn, next);
+            this.spawnTimeout = setTimeout(spawn, next);
         };
 
         spawn();
@@ -239,6 +239,10 @@ class BalloonSystem {
 
     stop() {
         this.isRunning = false;
+        if (this.spawnTimeout) {
+            clearTimeout(this.spawnTimeout);
+            this.spawnTimeout = null;
+        }
     }
 
     async getBalloonData() {
