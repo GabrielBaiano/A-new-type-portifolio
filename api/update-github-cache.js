@@ -74,8 +74,8 @@ export default async function handler(req, res) {
 
     const allProjectData = [];
 
-    // Processar top 10 repos
-    for (const repo of repos.slice(0, 10)) {
+    // Processar top 30 repos
+    for (const repo of repos.slice(0, 30)) {
       const repoFullName = repo.full_name;
       const projectContext = repo.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
       
@@ -257,20 +257,35 @@ export default async function handler(req, res) {
     // 3. SALVAR NO SUPABASE
     // ========================================
 
-    // Limpar dados antigos
-    await supabaseRequest('github_followers?id=neq.dummy', 'DELETE');
-    await supabaseRequest('github_project_data?id=neq.dummy', 'DELETE');
+    // ========================================
+    // 3. SALVAR NO SUPABASE
+    // ========================================
 
-    // Inserir followers
-    if (followersData.length > 0) {
-      await supabaseRequest('github_followers', 'POST', followersData);
-    }
+    const debugInfo = {
+      reposFound: repos ? repos.length : 0,
+      followersFound: followersData.length,
+      projectDataCount: allProjectData.length,
+      sampleProjectData: allProjectData.length > 0 ? allProjectData[0] : null,
+      errors: []
+    };
 
-    // Inserir project data
+    // Only update if we actually found data (Safety Check)
     if (allProjectData.length > 0) {
-      await supabaseRequest('github_project_data', 'POST', allProjectData);
+      // Limpar dados antigos
+      await supabaseRequest('github_project_data?id=neq.dummy', 'DELETE');
+      
+      // Inserir project data
+      const insertRes = await supabaseRequest('github_project_data', 'POST', allProjectData);
+      if (!insertRes.ok) debugInfo.errors.push(`Insert Project Data Failed: ${insertRes.statusText}`);
+    } else {
+      debugInfo.errors.push("No project data found to insert. Skipping DB wipe to preserve cache.");
     }
 
+    if (followersData.length > 0) {
+        await supabaseRequest('github_followers?id=neq.dummy', 'DELETE');
+        await supabaseRequest('github_followers', 'POST', followersData);
+    }
+    
     // Atualizar metadata
     await supabaseRequest('github_cache_metadata', 'POST', {
       username: username,
@@ -282,10 +297,11 @@ export default async function handler(req, res) {
     return res.status(200).json({
       success: true,
       updated_at: new Date().toISOString(),
+      debug: debugInfo,
       data: {
         followers: followersData.length,
         project_data: allProjectData.length,
-        repos_processed: Math.min(repos.length, 10)
+        repos_processed: Math.min(repos.length, 30)
       }
     });
 

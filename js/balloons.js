@@ -394,39 +394,7 @@ class BalloonSystem {
                 contexts: ['shii-app', 'projects']
             }
         ];
-
-        // Combine with realistic mock data for immediate feedback
-        const mockData = [
-            {
-                id: "notif-real-1",
-                type: "notification",
-                name: "uMagicalJake",
-                message: "Starred Agência Yellow Hood",
-                badge: "⭐",
-                image: "assets/images/icon.jpg",
-                contexts: ['projects']
-            },
-            {
-                id: "notif-real-2",
-                type: "notification",
-                name: "Contributor",
-                message: "Opened issue: 'Fix responsive layout' in Shii! app",
-                badge: "🐛",
-                image: "https://api.dicebear.com/7.x/avataaars/svg?seed=dev1",
-                contexts: ['projects', 'shii-app']
-            },
-            {
-                id: "notif-real-3",
-                type: "notification",
-                name: "Dependabot",
-                message: "Opened PR: 'Bump version' in Auto Commiter",
-                badge: "📝",
-                image: "https://avatars.githubusercontent.com/in/29110?s=64&v=4",
-                contexts: ['projects']
-            }
-        ];
-        
-        return [...baseData, ...mockData];
+        return baseData;
     }
 
     // Method to change context
