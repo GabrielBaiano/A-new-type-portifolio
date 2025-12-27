@@ -278,12 +278,23 @@ class BalloonSystem {
         }
 
         // All notifications now (no ads)
-        const item = list[Math.floor(Math.random() * list.length)];
+        if (list.length > 0) {
+            const item = list[Math.floor(Math.random() * list.length)];
+            this.recent.push(item.id);
+            if (this.recent.length > this.maxRecent) this.recent.shift();
+            return item;
+        }
 
-        this.recent.push(item.id);
-        if (this.recent.length > this.maxRecent) this.recent.shift();
-
-        return item;
+        // Return a safe default if absolutely nothing matches (prevents crash)
+        return {
+            id: "fallback-" + Date.now(),
+            type: "notification",
+            name: "Portfolio",
+            message: "Welcome to my portfolio!",
+            badge: "👋",
+            image: "assets/images/icon.jpg",
+            contexts: ['home', 'projects', 'shii-app']
+        };
     }
 
     async getAllData() {
@@ -317,7 +328,7 @@ class BalloonSystem {
     }
 
     getFallbackData() {
-        return [
+        const baseData = [
             // Notifications only
             {
                 id: "notif-1",
@@ -344,7 +355,7 @@ class BalloonSystem {
                 message: "Thanks for contributing to the project! 🎉",
                 badge: "💻",
                 image: "https://api.dicebear.com/7.x/avataaars/svg?seed=user3",
-                contexts: ['home', 'shii-app']
+                contexts: ['home', 'shii-app', 'projects']
             },
             {
                 id: "notif-4",
@@ -353,7 +364,7 @@ class BalloonSystem {
                 message: "Someone starred your repository!",
                 badge: "⭐",
                 image: "https://api.dicebear.com/7.x/avataaars/svg?seed=user4",
-                contexts: ['home', 'shii-app']
+                contexts: ['home', 'shii-app', 'projects']
             },
             {
                 id: "notif-5",
@@ -362,7 +373,7 @@ class BalloonSystem {
                 message: "Started following you on GitHub",
                 badge: "👥",
                 image: "https://api.dicebear.com/7.x/avataaars/svg?seed=user5",
-                contexts: ['home']
+                contexts: ['home', 'projects']
             },
             {
                 id: "notif-6",
@@ -371,7 +382,7 @@ class BalloonSystem {
                 message: "Bug fix merged successfully",
                 badge: "🔧",
                 image: "https://api.dicebear.com/7.x/avataaars/svg?seed=user6",
-                contexts: ['shii-app']
+                contexts: ['shii-app', 'projects']
             },
             {
                 id: "notif-7",
@@ -380,9 +391,42 @@ class BalloonSystem {
                 message: "New PR submitted for review",
                 badge: "📝",
                 image: "https://api.dicebear.com/7.x/avataaars/svg?seed=user7",
-                contexts: ['shii-app']
+                contexts: ['shii-app', 'projects']
             }
         ];
+
+        // Combine with realistic mock data for immediate feedback
+        const mockData = [
+            {
+                id: "notif-real-1",
+                type: "notification",
+                name: "uMagicalJake",
+                message: "Starred Agência Yellow Hood",
+                badge: "⭐",
+                image: "assets/images/icon.jpg",
+                contexts: ['projects']
+            },
+            {
+                id: "notif-real-2",
+                type: "notification",
+                name: "Contributor",
+                message: "Opened issue: 'Fix responsive layout' in Shii! app",
+                badge: "🐛",
+                image: "https://api.dicebear.com/7.x/avataaars/svg?seed=dev1",
+                contexts: ['projects', 'shii-app']
+            },
+            {
+                id: "notif-real-3",
+                type: "notification",
+                name: "Dependabot",
+                message: "Opened PR: 'Bump version' in Auto Commiter",
+                badge: "📝",
+                image: "https://avatars.githubusercontent.com/in/29110?s=64&v=4",
+                contexts: ['projects']
+            }
+        ];
+        
+        return [...baseData, ...mockData];
     }
 
     // Method to change context
