@@ -104,12 +104,18 @@ export default async function handler(req, res) {
       try {
         const starsRes = await fetch(
           `https://api.github.com/repos/${repoFullName}/stargazers?per_page=100`,
-          { headers: githubHeaders }
+          { 
+            headers: {
+              ...githubHeaders,
+              'Accept': 'application/vnd.github.v3.star+json'
+            }
+          }
         );
         const stars = await starsRes.json();
         
         if (Array.isArray(stars)) {
-          stars.forEach(user => {
+          stars.forEach(starItem => {
+            const user = starItem.user;
             allProjectData.push({
               id: `star-${repo.id}-${user.id}`,
               type: 'star',
@@ -120,7 +126,7 @@ export default async function handler(req, res) {
               repo_full_name: repoFullName,
               context: 'projects',
               project_context: projectContext,
-              created_at: new Date().toISOString()
+              created_at: starItem.starred_at // Real timestamp
             });
           });
         }

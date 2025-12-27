@@ -44,25 +44,41 @@ class BalloonSystem {
         `;
         document.body.appendChild(this.container);
 
-        // Handle window resize
+        // Handle window resize with Debounce (prevents duplication)
+        let resizeTimer;
         window.addEventListener('resize', () => {
-             // Check if we have enough space for balloons
-            const safe = this.hasEnoughSpace();
-            
-            if (!safe && this.container) {
-                this.stop();
-                this.container.style.display = 'none';
-            } else if (safe && this.container) {
-                this.container.style.display = 'block';
-                if (!this.isRunning) {
-                    this.start();
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                // Check if we have enough space for balloons
+                const safe = this.hasEnoughSpace();
+                
+                if (safe) {
+                    if (this.container) this.container.style.display = 'block';
+                    
+                    if (!this.isRunning) {
+                        this.start();
+                    } else {
+                        this.repositionBalloons();
+                    }
+                } else {
+                    if (this.container) this.container.style.display = 'none';
+                    this.stop();
                 }
-            }
+            }, 200); // Wait 200ms after resize stops
         });
 
         // Handle URL changes to update context
         window.addEventListener('hashchange', () => this.updateContext());
         window.addEventListener('load', () => this.updateContext());
+
+        // New: Watch for main container size changes (e.g. entering Photos page)
+        const mainContainer = document.querySelector('.main-container');
+        if (mainContainer) {
+            const resizeObserver = new ResizeObserver(() => {
+                this.repositionBalloons();
+            });
+            resizeObserver.observe(mainContainer);
+        }
     }
 
     hasEnoughSpace() {
@@ -77,6 +93,45 @@ class BalloonSystem {
         // Balloon width (320px default, 380px ads) + minimal padding (20px)
         // Relaxed constraint to allow balloons on 720px detail pages (laptop screens)
         return margin > 280;
+    }
+
+    // New: Reposition active balloons when layout changes
+    repositionBalloons() {
+        const mainContainer = document.querySelector('.main-container');
+        if (!mainContainer) return;
+
+        // Recalculate safe margins
+        const margin = (window.innerWidth - mainContainer.offsetWidth) / 2;
+        const balloons = document.querySelectorAll('.floating-balloon');
+
+        balloons.forEach(balloon => {
+            const isAd = balloon.classList.contains('twitter-balloon');
+            const width = isAd ? 380 : 320;
+            const minOffset = 40;
+            
+            // If space is too tight, push them off-screen or fade out
+            if (margin <= width + 20) {
+                balloon.style.opacity = '0.2'; // Fade out if no space
+                return;
+            } else {
+                balloon.style.opacity = '1';
+            }
+
+            // Calculate safe boundaries
+            const maxOffset = Math.max(minOffset, margin - width - 20);
+
+            // Determine side based on current style (left/right)
+            const isLeft = balloon.style.left && balloon.style.left !== 'auto';
+            
+            // Generate new safe random offset
+            const newOffset = minOffset + Math.random() * (maxOffset - minOffset);
+            
+            if (isLeft) {
+                balloon.style.left = `${newOffset}px`;
+            } else {
+                balloon.style.right = `${newOffset}px`;
+            }
+        });
     }
 
     chooseSide() {
@@ -213,6 +268,7 @@ class BalloonSystem {
                         <span class="balloon-name">${data.name}</span>
                         ${data.badge ? `<span class="balloon-badge">${data.badge}</span>` : ""}
                     </div>
+                    ${data.date ? `<div class="balloon-date">${new Date(data.date).toLocaleDateString()}</div>` : ''}
                     <div class="balloon-message">${data.message}</div>
                 </div>
             </div>
@@ -222,23 +278,37 @@ class BalloonSystem {
     async start() {
         if (this.isRunning || !this.hasEnoughSpace()) return;
         this.isRunning = true;
+        
+        // Generate a unique ID for this run session
+        this.runId = (this.runId || 0) + 1;
+        const currentRunId = this.runId;
 
         const spawn = async () => {
-            if (!this.isRunning) return;
+            // Strict check: if runId changed, this loop is dead
+            if (!this.isRunning || this.runId !== currentRunId) return;
 
             const data = await this.getBalloonData();
+            
+            // Check again after async wait (crucial!)
+            if (!this.isRunning || this.runId !== currentRunId) return;
+            
             this.createBalloon(data);
 
-            // Increased interval: 1.5-3.5 seconds (slower spawn rate)
-            const next = 1500 + Math.random() * 2000;
+            // Much slower interval: 4-10 seconds
+            const next = 4000 + Math.random() * 6000;
             this.spawnTimeout = setTimeout(spawn, next);
         };
 
-        spawn();
+        // Initial delay to prevent burst on rapid restarts (0.5s - 1.5s)
+        const initialDelay = 500 + Math.random() * 1000;
+        this.spawnTimeout = setTimeout(spawn, initialDelay);
     }
 
     stop() {
         this.isRunning = false;
+        // Increment runId to invalidate any pending async spawns immediately
+        this.runId = (this.runId || 0) + 1;
+        
         if (this.spawnTimeout) {
             clearTimeout(this.spawnTimeout);
             this.spawnTimeout = null;
@@ -390,6 +460,9 @@ class BalloonSystem {
         
         // Reset recent list to ensure new context data is shown immediately
         this.recent = [];
+        
+        // Force reposition check on new context
+        setTimeout(() => this.repositionBalloons(), 100);
     }
 }
 

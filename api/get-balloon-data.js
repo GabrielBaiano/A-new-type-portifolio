@@ -20,12 +20,16 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Supabase not configured' });
     }
 
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const dateFilter = `&created_at=gte.${sevenDaysAgo.toISOString()}`;
+
     let data = [];
 
     if (context === 'home') {
-      // Buscar followers para Home
+      // Buscar followers para Home (Last 7 days)
       const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/github_followers?select=*&order=created_at.desc&limit=50`,
+        `${SUPABASE_URL}/rest/v1/github_followers?select=*&order=created_at.desc&limit=50${dateFilter}`,
         { headers: supabaseHeaders }
       );
       const followers = await response.json();
@@ -37,13 +41,14 @@ export default async function handler(req, res) {
         message: 'Started following you on GitHub',
         badge: '👥',
         image: f.avatar_url,
+        date: f.created_at,
         contexts: ['home']
       }));
       
     } else if (project) {
-      // Buscar dados de projeto específico
+      // Buscar dados de projeto específico (Last 7 days)
       const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/github_project_data?project_context=eq.${project}&select=*&order=created_at.desc&limit=100`,
+        `${SUPABASE_URL}/rest/v1/github_project_data?project_context=eq.${project}&select=*&order=created_at.desc&limit=100${dateFilter}`,
         { headers: supabaseHeaders }
       );
       const projectData = await response.json();
@@ -55,13 +60,14 @@ export default async function handler(req, res) {
         message: getMessageForType(item.type, item),
         badge: getBadgeForType(item.type),
         image: item.avatar_url,
+        date: item.created_at,
         contexts: [project]
       }));
       
     } else {
-      // Buscar todos os projetos
+      // Buscar todos os projetos (Last 7 days)
       const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/github_project_data?context=eq.projects&select=*&order=created_at.desc&limit=100`,
+        `${SUPABASE_URL}/rest/v1/github_project_data?context=eq.projects&select=*&order=created_at.desc&limit=100${dateFilter}`,
         { headers: supabaseHeaders }
       );
       const projectData = await response.json();
@@ -73,6 +79,7 @@ export default async function handler(req, res) {
         message: getMessageForType(item.type, item),
         badge: getBadgeForType(item.type),
         image: item.avatar_url,
+        date: item.created_at,
         contexts: ['projects']
       }));
     }
