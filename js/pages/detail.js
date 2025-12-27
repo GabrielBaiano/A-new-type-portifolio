@@ -25,6 +25,7 @@ const DetailPage = {
                     <div class="loading-state">
                         <i class="fa-solid fa-spinner fa-spin"></i>
                         <p>Loading...</p>
+                        <p id="loading-status" style="font-size: 0.8rem; color: #888; margin-top: 8px;"></p>
                     </div>
                 </div>
             </div>
@@ -35,11 +36,23 @@ const DetailPage = {
      * Called after the page is mounted to the DOM
      */
     async onMount() {
-        console.log(`Detail page mounted: ${this.currentType}/${this.currentId}`);
+        console.log(`[Detail] Mounted: ${this.currentType}/${this.currentId}`);
+        document.body.classList.add('detail-mode');
         
+        const statusEl = document.getElementById('loading-status');
+        const updateStatus = (msg) => { if (statusEl) statusEl.textContent = msg; };
+
+        // Safety timeout
+        const timeout = setTimeout(() => {
+            this.renderError("Request timed out. Please check your connection or try again.");
+        }, 8000);
+
         try {
-            // Fetch data based on type
             let data;
+            updateStatus("Fetching data...");
+            
+            // Artificial delay check? No.
+            
             switch (this.currentType) {
                 case 'project':
                     data = await DataService.getProjectById(this.currentId);
@@ -54,10 +67,15 @@ const DetailPage = {
                     throw new Error(`Unknown content type: ${this.currentType}`);
             }
 
+            clearTimeout(timeout);
+            updateStatus("Rendering content...");
+            
             this.currentData = data;
             this.renderContent(data);
+            
         } catch (error) {
-            console.error('Error loading detail:', error);
+            clearTimeout(timeout);
+            console.error('[Detail] Error:', error);
             this.renderError(error.message);
         }
     },
@@ -70,23 +88,33 @@ const DetailPage = {
         const contentDiv = document.getElementById('detail-content');
         if (!contentDiv) return;
 
-        // Convert markdown to HTML using marked.js
-        const htmlContent = marked.parse(data.content);
+        try {
+            // Check if marked is available
+            if (typeof marked === 'undefined') {
+                throw new Error("Markdown parser (marked) not loaded");
+            }
 
-        contentDiv.innerHTML = `
-            <div class="detail-header">
-                <h1 class="detail-title">${data.title}</h1>
-                ${data.subtitle ? `<p class="detail-subtitle">${data.subtitle}</p>` : ''}
-                ${data.date ? `<div class="detail-date">${data.date}</div>` : ''}
-            </div>
-            
-            <div class="markdown-content">
-                ${htmlContent}
-            </div>
-        `;
+            // Convert markdown to HTML using marked.js
+            const htmlContent = marked.parse(data.content || '');
 
-        // Add syntax highlighting to code blocks if needed
-        this.enhanceCodeBlocks();
+            contentDiv.innerHTML = `
+                <div class="detail-header">
+                    <h1 class="detail-title">${data.title}</h1>
+                    ${data.subtitle ? `<p class="detail-subtitle">${data.subtitle}</p>` : ''}
+                    ${data.date ? `<div class="detail-date">${data.date}</div>` : ''}
+                </div>
+                
+                <div class="markdown-content">
+                    ${htmlContent}
+                </div>
+            `;
+
+            // Add syntax highlighting to code blocks if needed
+            this.enhanceCodeBlocks();
+        } catch (e) {
+            console.error('[Detail] Render Error:', e);
+            this.renderError("Failed to render content: " + e.message);
+        }
     },
 
     /**
@@ -153,6 +181,7 @@ const DetailPage = {
      * Called when navigating away from the page
      */
     onUnmount() {
+        document.body.classList.remove('detail-mode');
         this.currentType = null;
         this.currentId = null;
         this.currentData = null;

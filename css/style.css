@@ -14,14 +14,22 @@
 
 /* Light Theme */
 [data-theme="light"] {
-    --bg-color: #f5f5f5;
+    --bg-color: #2b5c96; /* Blueprint Blue Background */
     --card-bg: #ffffff;
     --text-main: #000000;
     --text-muted: #555555;
-    --border-color: #e0e0e0;
-    --badge-bg: #e3f2fd;
-    --grid-color: #e8e8e8;
+    --border-color: #bbdefb; /* Blue-ish border */
+    --badge-bg: #bbdefb; /* Slightly darker blue for badges */
+    --grid-color: #bbdefb;
     --accent-blue: #1976d2;
+}
+
+/* ... (lines 27-1727 skipped) ... */
+
+/* ===== Wide Layout System ===== */
+body.wide-layout .main-container {
+    max-width: 1000px; /* Reduced to ensure space for 380px wide ads */
+    transition: max-width 0.5s ease-in-out;
 }
 
 /* Light theme specific styles for buttons and dates */
@@ -169,9 +177,10 @@ body {
 .main-container {
     max-width: 600px;
     margin: 0 auto;
+    width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 24px;
 }
 
 /* SPA Page System */
@@ -225,14 +234,9 @@ body {
 }
 
 /* Container para agrupar os cards verticalmente */
-.main-container {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    /* Espaço entre os quadros */
-    width: 100%;
-    max-width: 600px;
-}
+/* Container para agrupar os cards verticalmente */
+/* Removed duplicate .main-container rule to avoid conflicts. 
+   Styles are already defined at line 177 with proper centering. */
 
 /* Estilo Genérico do Card */
 .card {
@@ -1357,7 +1361,9 @@ body {
 }
 
 .floating-balloon:hover {
-    transform: translateY(-4px) !important;
+    /* transform: translateY(-4px) !important; <--- CAUSES FLICKER, REMOVED */
+    animation-play-state: paused; /* Stop movement when hovering */
+    z-index: 1000; /* Ensure it stays on top */
 }
 
 .balloon-card {
@@ -1449,44 +1455,233 @@ body {
     font-size: 0.95rem;
 }
 
-/* Ad balloon styles - image inside card */
-.balloon-card.balloon-ad {
-    padding: 0;
+/* Twitter Balloon Styles */
+.balloon-card.balloon-twitter {
+    padding: 12px 16px;
     overflow: hidden;
-    cursor: pointer;
-    width: 380px; /* Increased from default 320px */
-}
-
-.balloon-card.balloon-ad .ad-link {
-    text-decoration: none;
+    cursor: default;
+    width: 380px;
+    background: #000000;
+    border: 1px solid #333;
     display: block;
 }
 
-.balloon-card.balloon-ad:hover {
-    transform: translateY(-6px);
+.twitter-link-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    cursor: pointer;
+}
+
+.twitter-body {
+    display: flex;
+    gap: 12px;
+}
+
+.twitter-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.twitter-right-col {
+    flex: 1;
+    min-width: 0;
+}
+
+.twitter-header-row {
+    display: flex;
+    align-items: center;
+    gap: 4px; /* Space between name, badge, handle */
+    font-size: 0.95rem;
+    line-height: 1.2;
+    margin-bottom: 4px;
+    flex-wrap: wrap; /* Handle long names gracefully */
+}
+
+.twitter-name {
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+}
+
+.twitter-verified-badge {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1d9bf0;
+    font-size: 0.95rem;
+    margin-left: 0px; /* Adjust spacing */
+}
+
+.twitter-verified-badge .fa-check {
+    position: absolute;
+    color: white;
+    font-size: 0.5rem;
+    z-index: 2;
+}
+   
+.twitter-handle {
+    color: #71767b;
+    font-size: 0.95rem;
+    margin-left: 0; /* Tight spacing as per screenshot */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.twitter-content {
+    color: #e7e9ea;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 20; /* Keep text interactions above overlay */
+    pointer-events: none; /* Let clicks pass through text to overlay... */
+}
+
+/* ...but allow clicks on links inside text */
+.twitter-content a {
+    pointer-events: auto;
+    position: relative;
+    z-index: 30;
+}
+
+.twitter-image-container {
+    margin-top: 8px;
+}
+
+.twitter-post-image {
+    width: 100%;
+    border-radius: 6px; /* Reduced from 12px to prevent clipping */
+    border: 1px solid #333;
+    object-fit: cover;
+}
+
+.twitter-footer {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 12px;
+    max-width: 90%;
+    position: relative;
+    z-index: 20; /* Keep actions above overlay */
+}
+
+.tweet-action {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #71767b;
+    font-size: 0.8rem;
+    transition: color 0.2s;
+    cursor: pointer;
+}
+
+.tweet-action:hover {
+    color: #1d9bf0; /* Default Blue (Reply/View) */
+}
+
+.tweet-action.action-retweet:hover {
+    color: #00ba7c; /* Twitter Green */
+}
+
+.tweet-action.action-like:hover {
+    color: #f91880; /* Twitter Red */
+}
+
+.tweet-action i {
+    font-size: 1rem;
+}
+
+.balloon-card.balloon-twitter:hover {
+    box-shadow: 0 0 15px rgba(29, 155, 240, 0.1);
+    border-color: #333;
+    background-color: #050505;
+}
+
+/* ===== Detail Page Styles ===== */
+.detail-card {
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    /* Ensure content doesn't break layout */
+    max-width: 100%; 
+    width: 100%; /* Force full width within container */
+    overflow: hidden; 
+}
+
+.detail-header {
+    text-align: left; /* Reverted to left alignment */
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.detail-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    line-height: 1.2;
+}
+
+.detail-subtitle {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+}
+
+.detail-date {
+    display: inline-block;
+    padding: 4px 12px;
+    background-color: var(--badge-bg);
+    color: var(--accent-blue);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.back-button {
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-bottom: 24px;
+    transition: all 0.2s;
+}
+
+.back-button:hover {
+    background-color: var(--badge-bg);
+    color: var(--accent-blue);
     border-color: var(--accent-blue);
 }
 
-.ad-title {
-    padding: 16px 16px 12px 16px;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-main);
-    background: var(--card-bg);
-    text-align: center;
-    order: -1; /* Ensure title appears first */
+/* Fix Markdown Overflow */
+.markdown-content {
+    width: 100%;
+    overflow-wrap: break-word;
 }
 
-.ad-image {
-    width: 95%;
-    max-width: 95%;
-    height: auto;
-    display: block;
-    object-fit: contain;
-    max-height: 220px; /* Increased from 140px */
-    border-radius: 16px;
-    margin: 0 auto 16px auto;
+.markdown-content pre {
+    overflow-x: auto; /* Allow code blocks to scroll horizontally instead of widening page */
+    max-width: 100%;
 }
+
+.markdown-content img {
+    max-width: 100%;
+    height: auto;
+}
+
 
 /* Floating animation - simple upward movement */
 @keyframes balloon-move-up {
@@ -1613,5 +1808,45 @@ body {
 
 /* Photos Page Masonry Layout */
 /* Styles moved to main section above */
+
+/* ===== Wide Layout System ===== */
+body.wide-layout .main-container {
+    max-width: 1000px; /* Reduced to ensure space for 380px wide ads */
+    transition: max-width 0.5s ease-in-out;
+}
+
+/* Adjust grid/masonry for wide layout */
+body.wide-layout .photos-masonry {
+    column-count: 4; /* More columns on wide screens */
+}
+
+/* Responsive adjustments for wide layout */
+@media (max-width: 1600px) {
+    body.wide-layout .main-container {
+        max-width: 1200px;
+    }
+    body.wide-layout .photos-masonry {
+        column-count: 3;
+    }
+}
+
+@media (max-width: 1200px) {
+    body.wide-layout .main-container {
+        max-width: 900px;
+    }
+}
+
+@media (max-width: 900px) {
+    body.wide-layout .photos-masonry {
+        column-count: 2;
+    }
+}
+
+@media (max-width: 500px) {
+    body.wide-layout .photos-masonry {
+        column-count: 1;
+    }
+}
+
 
 

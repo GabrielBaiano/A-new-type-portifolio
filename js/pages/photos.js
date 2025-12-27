@@ -18,6 +18,10 @@ const PhotosPage = {
 
     async onMount() {
         console.log('Photos page mounted');
+        
+        // Enable wide layout for photos page
+        document.body.classList.add('wide-layout');
+        
         const container = document.getElementById('photos-container');
         if (!container) return;
 
@@ -103,6 +107,7 @@ const PhotosPage = {
     },
 
     onUnmount() {
-        // Cleanup if necessary
+        // Remove wide layout when leaving photos page
+        document.body.classList.remove('wide-layout');
     }
 };

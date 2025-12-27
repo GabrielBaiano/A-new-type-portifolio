@@ -21,12 +21,15 @@ class BalloonSystem {
         // Page context for filtering (future use)
         this.currentContext = 'home';
 
+        // Flag to ensure ad is shown first
+        this.hasShownInitialAd = false;
+
         this.init();
     }
 
     init() {
-        // Don't initialize on mobile
-        if (window.innerWidth <= 768) {
+        // Don't initialize on mobile or if space is too tight
+        if (!this.hasEnoughSpace()) {
             return;
         }
 
@@ -43,16 +46,33 @@ class BalloonSystem {
 
         // Handle window resize
         window.addEventListener('resize', () => {
-            if (window.innerWidth <= 768 && this.container) {
+             // Check if we have enough space for balloons
+            const safe = this.hasEnoughSpace();
+            
+            if (!safe && this.container) {
                 this.stop();
                 this.container.style.display = 'none';
-            } else if (window.innerWidth > 768 && this.container) {
+            } else if (safe && this.container) {
                 this.container.style.display = 'block';
                 if (!this.isRunning) {
                     this.start();
                 }
             }
         });
+    }
+
+    hasEnoughSpace() {
+        if (window.innerWidth <= 1000) return false; // Hard limit for mobile/tablet
+
+        const mainContainer = document.querySelector('.main-container');
+        if (!mainContainer) return true; // Default to safe if no container logic found
+        
+        // Calculate margin on ONE side
+        const margin = (window.innerWidth - mainContainer.offsetWidth) / 2;
+        
+        // Balloon width (320px default, 380px ads) + minimal padding (20px)
+        // Relaxed constraint to allow balloons on 720px detail pages (laptop screens)
+        return margin > 280;
     }
 
     chooseSide() {
@@ -67,6 +87,7 @@ class BalloonSystem {
             position: absolute;
             opacity: 0;
             pointer-events: none;
+            width: ${data.type === 'ad' ? '380px' : '320px'}; /* Fix width for measurement */
         `;
         temp.innerHTML = this.buildBalloonHTML(data);
 
@@ -77,8 +98,8 @@ class BalloonSystem {
         const side = this.chooseSide();
         const track = this.tracks[side];
 
-        // Spacing between balloons (increased to prevent overlap)
-        const spacing = data.type === "ad" ? 200 : 120;
+        // Spacing between balloons
+        const spacing = data.type === "ad" ? 220 : 120;
 
         // Calculate Y position based on track's last balloon
         const startY = track.lastY;
@@ -86,15 +107,30 @@ class BalloonSystem {
         // Update track for next balloon
         track.lastY = startY + height + spacing;
 
-        // Random horizontal position (20px to 150px from edge)
-        const horizontalOffset = 20 + Math.random() * 130;
+        // Random horizontal position within the available margin (safer logic)
+        // We want them centered in the margin space if possible
+        const mainContainer = document.querySelector('.main-container');
+        const margin = mainContainer ? (window.innerWidth - mainContainer.offsetWidth) / 2 : 200;
+        
+        // Limit max offset to ensure it doesn't overlap content
+        const balloonWidth = data.type === 'ad' ? 380 : 320;
+        
+        // Safer margin: Minimum 40px from edge
+        // Max offset: Margin - balloonWidth - 20px safety buffer
+        const minOffset = 40;
+        const maxOffset = Math.max(minOffset, margin - balloonWidth - 20);
+        
+        // Random between min and max
+        const horizontalOffset = minOffset + Math.random() * (maxOffset - minOffset);
 
         // Create actual balloon
         const balloon = document.createElement("div");
         balloon.className = "floating-balloon";
+        if (data.type === 'ad') balloon.classList.add('twitter-balloon');
+        
         balloon.innerHTML = this.buildBalloonHTML(data);
 
-        const speed = 60; // pixels per second (slower for better visibility)
+        const speed = 60; // pixels per second
         const travel = startY + height + 300;
         const duration = travel / speed;
 
@@ -103,6 +139,7 @@ class BalloonSystem {
             ${side}: ${horizontalOffset}px;
             top: ${startY}px;
             animation: balloon-move-up ${duration}s linear forwards;
+            z-index: ${data.type === 'ad' ? 100 : 90};
         `;
 
         this.container.appendChild(balloon);
@@ -113,7 +150,6 @@ class BalloonSystem {
         }, duration * 1000);
 
         // Reset track after balloon has moved up enough
-        // Wait until balloon has moved 500px up (more clearance)
         const resetTime = (500 / speed) * 1000;
         setTimeout(() => {
             track.lastY = window.innerHeight + 100;
@@ -122,15 +158,45 @@ class BalloonSystem {
 
     buildBalloonHTML(data) {
         if (data.type === "ad") {
-            const linkStart = data.link ? `<a href="${data.link}" target="_blank" rel="noopener noreferrer" class="ad-link">` : '';
-            const linkEnd = data.link ? `</a>` : '';
+            const linkStart = data.link ? `<a href="${data.link}" target="_blank" rel="noopener noreferrer" class="twitter-link-overlay"></a>` : '';
             
+            // Interaction links (using Web Intents for realism, or just the tweet link)
+            // For now, let's point everything to the tweet as requested
+            const actionLink = (type) => data.link ? `onclick="window.open('${data.link}', '_blank')"` : '';
+
             return `
-                <div class="balloon-card balloon-ad">
+                <div class="balloon-card balloon-twitter">
                     ${linkStart}
-                        <div class="ad-title">${data.title}</div>
-                        <img src="${data.adImage}" alt="${data.title}" class="ad-image">
-                    ${linkEnd}
+                    <div class="twitter-body">
+                        <img src="${data.userImage}" alt="${data.user}" class="twitter-avatar">
+                        <div class="twitter-right-col">
+                            <div class="twitter-header-row">
+                                <span class="twitter-name">${data.user}</span>
+                                <div class="twitter-verified-badge">
+                                    <i class="fa-solid fa-certificate"></i>
+                                    <i class="fa-solid fa-check"></i>
+                                </div>
+                                <span class="twitter-handle">${data.handle} &middot; ${data.time}</span>
+                            </div>
+                            
+                            <div class="twitter-content">
+                                ${data.content}
+                            </div>
+
+                            ${data.adImage ? `
+                            <div class="twitter-image-container">
+                                <img src="${data.adImage}" alt="Post Image" class="twitter-post-image">
+                            </div>
+                            ` : ''}
+
+                            <div class="twitter-footer">
+                                <div class="tweet-action action-reply" ${actionLink('reply')} title="Reply"><i class="fa-regular fa-comment"></i> <span>2</span></div>
+                                <div class="tweet-action action-retweet" ${actionLink('retweet')} title="Retweet"><i class="fa-solid fa-retweet"></i> <span>5</span></div>
+                                <div class="tweet-action action-like" ${actionLink('like')} title="Like"><i class="fa-regular fa-heart"></i> <span>18</span></div>
+                                <div class="tweet-action action-view" ${actionLink('view')} title="Views"><i class="fa-solid fa-chart-simple"></i> <span>1.2k</span></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `;
         }
@@ -150,7 +216,7 @@ class BalloonSystem {
     }
 
     async start() {
-        if (this.isRunning || window.innerWidth <= 768) return;
+        if (this.isRunning || !this.hasEnoughSpace()) return;
         this.isRunning = true;
 
         const spawn = async () => {
@@ -172,14 +238,19 @@ class BalloonSystem {
     }
 
     async getBalloonData() {
-        // 7% chance to show YellowHood ad (de vez em nunca)
-        if (Math.random() < 0.07) {
+        // Always show YellowHood ad first, then 7% chance for subsequent ads
+        if (!this.hasShownInitialAd || Math.random() < 0.07) {
+            this.hasShownInitialAd = true;
             return {
                 id: "ad-yellowhood-" + Date.now(),
                 type: "ad",
-                title: "Agência Yellow Hood",
+                user: "Gabriel Baiano",
+                handle: "@uMagicalJake",
+                userImage: "assets/images/icon.jpg",
+                time: "2h",
+                content: "Discovering how to create unique digital experiences at <span style='color: #1d9bf0'>#AgenciaYellowHood</span>. Transform your online presence with strategy, design, and technology. <a href='https://yellowhood.com.br' style='color: #1d9bf0; text-decoration: none;'>https://yellowhood.com.br</a>",
                 adImage: "assets/images/banner.png",
-                link: "https://www.yellowhood.com.br/"
+                link: "https://x.com/uMagicalJake/status/2004784426199466295"
             };
         }
 
@@ -314,7 +385,7 @@ const balloonSystem = new BalloonSystem();
 
 // Auto-start after page load
 window.addEventListener("load", () => {
-    if (window.innerWidth > 768) {
+    if (balloonSystem.hasEnoughSpace()) {
         setTimeout(() => {
             balloonSystem.start();
         }, 3000);
