@@ -269,7 +269,7 @@ class BalloonSystem {
                         ${data.badge ? `<span class="balloon-badge">${data.badge}</span>` : ""}
                     </div>
                     <div class="balloon-message">
-                        ${data.message}${data.date ? ` <span style="opacity: 0.6; font-size: 0.85em;">on ${new Date(data.date).toLocaleDateString()}</span>` : ''}
+                        ${data.message}${data.date ? ` <span>on ${new Date(data.date).toLocaleDateString()}</span>` : ''}
                     </div>
                 </div>
             </div>
