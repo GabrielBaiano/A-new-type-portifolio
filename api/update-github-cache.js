@@ -293,8 +293,21 @@ export default async function handler(req, res) {
       // Limpar dados antigos
       await supabaseRequest('github_project_data?id=neq.dummy', 'DELETE');
       
+      // Normalize data to ensure all keys exist (Supabase requirement for bulk insert)
+      const normalizedData = allProjectData.map(item => ({
+        contributions: null,
+        fork_url: null,
+        issue_title: null,
+        issue_url: null,
+        issue_number: null,
+        pr_title: null,
+        pr_url: null,
+        pr_number: null,
+        ...item
+      }));
+
       // Inserir project data
-      const insertRes = await supabaseRequest('github_project_data', 'POST', allProjectData);
+      const insertRes = await supabaseRequest('github_project_data', 'POST', normalizedData);
       if (!insertRes.ok) {
         const errorText = await insertRes.text();
         debugInfo.errors.push(`Insert Project Data Failed: ${insertRes.statusText} - ${errorText}`);
