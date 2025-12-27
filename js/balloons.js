@@ -328,36 +328,7 @@ class BalloonSystem {
     }
 
     getFallbackData() {
-        const baseData = [
-            // Notifications only
-            {
-                id: "notif-1",
-                type: "notification",
-                name: "typelnvictvs",
-                message: "I joined on Oct 3, 2025 and i received 1 star this week!",
-                badge: "⭐",
-                image: "https://api.dicebear.com/7.x/avataaars/svg?seed=user1",
-                contexts: ['home']
-            },
-            {
-                id: "notif-2",
-                type: "notification",
-                name: "Pedro Menghini",
-                message: "Eu entrei aqui 14/10/2025",
-                badge: "",
-                image: "https://api.dicebear.com/7.x/avataaars/svg?seed=user2",
-                contexts: ['home']
-            },
-            {
-                id: "notif-5",
-                type: "notification",
-                name: "New Follower",
-                message: "Started following you on GitHub",
-                badge: "👥",
-                image: "https://api.dicebear.com/7.x/avataaars/svg?seed=user5",
-                contexts: ['home', 'projects']
-            }
-        ];
+        const baseData = [];
         return baseData;
     }
 
