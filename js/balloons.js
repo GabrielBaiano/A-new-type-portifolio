@@ -242,8 +242,8 @@ class BalloonSystem {
     }
 
     async getBalloonData() {
-        // Always show YellowHood ad first, then 7% chance for subsequent ads
-        if (!this.hasShownInitialAd || Math.random() < 0.07) {
+        // Always show YellowHood ad first, then 4% chance for subsequent ads
+        if (!this.hasShownInitialAd || Math.random() < 0.04) {
             this.hasShownInitialAd = true;
             return {
                 id: "ad-yellowhood-" + Date.now(),
