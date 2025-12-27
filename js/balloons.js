@@ -268,9 +268,7 @@ class BalloonSystem {
                         <span class="balloon-name">${data.name}</span>
                         ${data.badge ? `<span class="balloon-badge">${data.badge}</span>` : ""}
                     </div>
-                    <div class="balloon-message">
-                        ${data.message}${data.date ? ` <span>on ${new Date(data.date).toLocaleDateString()}</span>` : ''}
-                    </div>
+                    <div class="balloon-message">${data.message}</div>
                 </div>
             </div>
         `;
