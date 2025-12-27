@@ -347,25 +347,6 @@ class BalloonSystem {
                 badge: "",
                 image: "https://api.dicebear.com/7.x/avataaars/svg?seed=user2",
                 contexts: ['home']
-            },
-            {
-                id: "notif-3",
-                type: "notification",
-                name: "New Contributor",
-                message: "Thanks for contributing to the project! 🎉",
-                badge: "💻",
-                image: "https://api.dicebear.com/7.x/avataaars/svg?seed=user3",
-                contexts: ['home', 'shii-app', 'projects']
-            },
-            {
-                id: "notif-4",
-                type: "notification",
-                name: "GitHub Star",
-                message: "Someone starred your repository!",
-                badge: "⭐",
-                image: "https://api.dicebear.com/7.x/avataaars/svg?seed=user4",
-                contexts: ['home', 'shii-app', 'projects']
-            },
             {
                 id: "notif-5",
                 type: "notification",
@@ -374,24 +355,6 @@ class BalloonSystem {
                 badge: "👥",
                 image: "https://api.dicebear.com/7.x/avataaars/svg?seed=user5",
                 contexts: ['home', 'projects']
-            },
-            {
-                id: "notif-6",
-                type: "notification",
-                name: "Issue Resolved",
-                message: "Bug fix merged successfully",
-                badge: "🔧",
-                image: "https://api.dicebear.com/7.x/avataaars/svg?seed=user6",
-                contexts: ['shii-app', 'projects']
-            },
-            {
-                id: "notif-7",
-                type: "notification",
-                name: "Pull Request",
-                message: "New PR submitted for review",
-                badge: "📝",
-                image: "https://api.dicebear.com/7.x/avataaars/svg?seed=user7",
-                contexts: ['shii-app', 'projects']
             }
         ];
         return baseData;
