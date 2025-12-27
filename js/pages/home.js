@@ -27,11 +27,7 @@ const HomePage = {
                 <!-- Bio -->
                 <div class="bio">
                     <p>
-Welcome to <i>my space on the internet</i>. I'm a Full-Stack Developer with over 3 years of experience, and I'm also part of the <strong>YellowHood agency</strong>.
-                    </p>
-                    <br>
-                    <p>
-                        Growing up with video games shaped my expectations for great technology. Today, I bring that mindset into my code.
+Welcome, i'm a Brazilian Full-Stack Developer with over 3 years of experience, and I'm also part of the <strong>YellowHood agency</strong>.
                     </p>
                     <br>
                     <p>
@@ -41,7 +37,7 @@ Welcome to <i>my space on the internet</i>. I'm a Full-Stack Developer with over
                     <br>
                     <p>
                         In my personal projects, I love exploring low-level concepts and
-                        automation using <strong>Python</strong> and <strong>C++</strong>. Have fun exploring my portfolio!
+                        automation using <strong>Python</strong> and <strong>C++</strong>.
                     </p>
                 </div>
 
