@@ -59,6 +59,10 @@ class BalloonSystem {
                 }
             }
         });
+
+        // Handle URL changes to update context
+        window.addEventListener('hashchange', () => this.updateContext());
+        window.addEventListener('load', () => this.updateContext());
     }
 
     hasEnoughSpace() {
@@ -286,9 +290,16 @@ class BalloonSystem {
         // Try to fetch from API first
         try {
             const context = this.currentContext;
-            const url = context === 'home' 
-                ? '/api/get-balloon-data?context=home'
-                : `/api/get-balloon-data?project=${context}`;
+            let url;
+
+            if (context === 'home') {
+                url = '/api/get-balloon-data?context=home';
+            } else if (context === 'projects') {
+                url = '/api/get-balloon-data?context=projects';
+            } else {
+                // Specific project context
+                url = `/api/get-balloon-data?project=${context}`;
+            }
             
             const response = await fetch(url);
             const result = await response.json();
@@ -374,9 +385,41 @@ class BalloonSystem {
         ];
     }
 
-    // Method to change context (for future use)
-    setContext(context) {
-        this.currentContext = context;
+    // Method to change context
+    async updateContext() {
+        const hash = window.location.hash;
+        
+        // Context: Projects Page (all projects)
+        if (hash === '#/projects') {
+            this.currentContext = 'projects';
+            console.log('🎈 Balloon Context: Projects (Aggregated)');
+        }
+        // Context: Specific Project Detail
+        else if (hash.startsWith('#/detail/projects/')) {
+            const projectId = hash.split('/').pop();
+            try {
+                // Get repo slug from project ID (e.g., 'shii-app' -> 'shii-study-assistant')
+                const repoSlug = await DataService.getProjectRepoSlug(projectId);
+                
+                if (repoSlug) {
+                    this.currentContext = repoSlug;
+                    console.log(`🎈 Balloon Context: Project (${repoSlug})`);
+                } else {
+                    this.currentContext = 'home';
+                }
+            } catch (e) {
+                console.error('Error setting balloon context:', e);
+                this.currentContext = 'home';
+            }
+        }
+        // Default: Home
+        else {
+            this.currentContext = 'home';
+            console.log('🎈 Balloon Context: Home');
+        }
+        
+        // Reset recent list to ensure new context data is shown immediately
+        this.recent = [];
     }
 }
 

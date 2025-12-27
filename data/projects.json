@@ -19,6 +19,16 @@
       "icon": "fa-solid fa-code",
       "contentFile": "data/content/projects/shii-app.md",
       "github_repo": "GabrielBaiano/shii-study-assistant"
+    },
+    {
+      "id": "awesome-readme",
+      "title": "Awesome README",
+      "subtitle": "Collection of professional, ready-to-use README templates",
+      "image": "assets/images/awesome-readme.png",
+      "gradient": "bg-blue-gradient",
+      "icon": "fa-solid fa-file-code",
+      "contentFile": "data/content/projects/awesome-readme.md",
+      "github_repo": "GabrielBaiano/awesome-readme"
     }
   ],
   "otherProjects": {
@@ -55,16 +65,6 @@
             "title": "File Organizer",
             "subtitle": "Automatically organize files by type and date",
             "link": "https://github.com/GabrielBaiano/file_organizer"
-          }
-        ]
-      },
-      {
-        "name": "Utilities",
-        "projects": [
-          {
-            "title": "Awesome README",
-            "subtitle": "Collection of professional, ready-to-use README templates",
-            "link": "https://github.com/GabrielBaiano/awesome-readme"
           }
         ]
       }

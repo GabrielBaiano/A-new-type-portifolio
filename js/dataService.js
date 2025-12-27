@@ -113,6 +113,22 @@ const DataService = {
     },
 
     /**
+     * Helper to get GitHub repo slug from project ID
+     * @param {string} id - Project ID
+     * @returns {Promise<string|null>} Repo slug (e.g. 'shii-study-assistant') or null
+     */
+    async getProjectRepoSlug(id) {
+        const data = await this.loadProjectsData();
+        const project = data.topProjects.find(p => p.id === id);
+        
+        if (project && project.github_repo) {
+            // Extract slug from "User/Repo" format
+            return project.github_repo.split('/').pop();
+        }
+        return null;
+    },
+
+    /**
      * Get all tools organized by categories
      * @returns {Promise<Object>} Tools data with categories
      */
