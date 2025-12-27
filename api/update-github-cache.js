@@ -74,8 +74,27 @@ export default async function handler(req, res) {
 
     const allProjectData = [];
 
-    // Processar top 30 repos
-    for (const repo of repos.slice(0, 30)) {
+    // Priority projects that MUST be processed
+    const priorityReposNames = ['shii-study-assistant', 'awesome-readme', 'A-new-type-portifolio'];
+    
+    // Filter priority repos from the list
+    const priorityRepos = repos.filter(r => priorityReposNames.includes(r.name));
+    
+    // Get other repos (excluding priority ones) up to a safe limit
+    // Total limit of 6 ensures execution time stays safely within Vercel's 10s limit for Hobby plan
+    // (6 repos * ~6 requests each = ~36 requests)
+    const MAX_REPOS = 6;
+    const remainingSlots = Math.max(0, MAX_REPOS - priorityRepos.length);
+    const otherRepos = repos
+      .filter(r => !priorityReposNames.includes(r.name))
+      .slice(0, remainingSlots);
+
+    const reposToProcess = [...priorityRepos, ...otherRepos];
+
+    console.log(`Selected ${reposToProcess.length} repos for processing: ${reposToProcess.map(r => r.name).join(', ')}`);
+
+    // Process selected repos
+    for (const repo of reposToProcess) {
       const repoFullName = repo.full_name;
       const projectContext = repo.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
       
@@ -301,7 +320,7 @@ export default async function handler(req, res) {
       data: {
         followers: followersData.length,
         project_data: allProjectData.length,
-        repos_processed: Math.min(repos.length, 30)
+        repos_processed: reposToProcess.length
       }
     });
 
