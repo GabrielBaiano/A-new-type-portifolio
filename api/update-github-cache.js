@@ -295,7 +295,11 @@ export default async function handler(req, res) {
       
       // Inserir project data
       const insertRes = await supabaseRequest('github_project_data', 'POST', allProjectData);
-      if (!insertRes.ok) debugInfo.errors.push(`Insert Project Data Failed: ${insertRes.statusText}`);
+      if (!insertRes.ok) {
+        const errorText = await insertRes.text();
+        debugInfo.errors.push(`Insert Project Data Failed: ${insertRes.statusText} - ${errorText}`);
+        console.error('Supabase Insert Error:', errorText);
+      }
     } else {
       debugInfo.errors.push("No project data found to insert. Skipping DB wipe to preserve cache.");
     }
