@@ -31,8 +31,7 @@ Welcome to <i>my space on the internet</i>. I'm a Full-Stack Developer with over
                     </p>
                     <br>
                     <p>
-                        Growing up, I spent hours immersed in video games, and between levels, I developed high expectations
-                        for how technology should feel. Today, I bring that precision to my code.
+                        Growing up with video games shaped my expectations for great technology. Today, I bring that mindset into my code.
                     </p>
                     <br>
                     <p>
