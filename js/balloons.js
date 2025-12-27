@@ -347,6 +347,7 @@ class BalloonSystem {
                 badge: "",
                 image: "https://api.dicebear.com/7.x/avataaars/svg?seed=user2",
                 contexts: ['home']
+            },
             {
                 id: "notif-5",
                 type: "notification",
