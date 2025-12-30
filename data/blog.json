@@ -1,25 +1,28 @@
 {
   "posts": [
     {
-      "id": "spa-architecture",
-      "title": "Getting Started with SPA Architecture",
-      "date": "Nov 23, 2025",
-      "excerpt": "Learn how to build modern single-page applications with vanilla JavaScript. This post covers routing, state management, and best practices.",
-      "contentFile": "data/content/blog/spa-architecture.md"
+      "id": "research-llm-agents",
+      "title": "Exploring Autonomy in LLM Agents",
+      "date": "Dec 2024",
+      "type": "Research",
+      "excerpt": "A study on the capabilities and limitations of agentic systems in complex coding environments.",
+      "contentFile": "data/content/academic/research-llm-agents.md"
     },
     {
-      "id": "fullstack-journey",
-      "title": "My Journey into Full Stack Development",
-      "date": "Nov 15, 2025",
-      "excerpt": "A reflection on my path from beginner to professional developer. Lessons learned, challenges faced, and advice for newcomers.",
-      "contentFile": "data/content/blog/fullstack-journey.md"
+      "id": "workshop-ai-design",
+      "title": "Workshop: Generative AI in Interface Design",
+      "date": "Nov 2024",
+      "type": "Workshop",
+      "excerpt": "Facilitating discussions on the future of AI-assisted design tools.",
+      "contentFile": "data/content/academic/workshop-ai-design.md"
     },
     {
-      "id": "scalable-apis",
-      "title": "Building Scalable APIs with Node.js",
-      "date": "Nov 01, 2025",
-      "excerpt": "Best practices for designing and implementing RESTful APIs that can handle high traffic and complex business logic.",
-      "contentFile": "data/content/blog/scalable-apis.md"
+      "id": "publication-modern-frameworks",
+      "title": "Paper: Modern Frameworks & Web Performance",
+      "date": "Oct 2024",
+      "type": "Publication",
+      "excerpt": "A comparative analysis between SPA frameworks and server-side rendering approaches.",
+      "contentFile": "data/content/academic/publication-modern-frameworks.md"
     }
   ]
 }

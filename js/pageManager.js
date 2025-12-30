@@ -48,25 +48,27 @@ class PageManager {
         // Previne múltiplas transições simultâneas
         this.isTransitioning = true;
 
-        // Chama onUnmount da página anterior
+        // Transição de saída
+        await this.fadeOut();
+
+        // Chama onUnmount da página anterior APÓS o fadeOut para evitar
+        // que elementos sumam ou mudem de tamanho enquanto ainda estão visíveis
         if (this.currentPage && this.pages[this.currentPage]?.onUnmount) {
             this.pages[this.currentPage].onUnmount();
         }
-
-        // Transição de saída
-        await this.fadeOut();
 
         // Renderiza nova página (passa parâmetros)
         const content = page.render(params);
         this.container.innerHTML = content;
 
-        // Transição de entrada
-        await this.fadeIn();
-
-        // Chama onMount da nova página (passa parâmetros)
+        // Chama onMount da nova página ANTES do fadeIn para evitar pulos de layout
+        // (ex: adicionar classes no body que mudam o tamanho do container)
         if (page.onMount) {
             page.onMount(params);
         }
+
+        // Transição de entrada
+        await this.fadeIn();
 
         this.currentPage = pageName;
         this.isTransitioning = false;

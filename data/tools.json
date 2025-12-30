@@ -1,4 +1,61 @@
 {
+  "articleTypes": [
+    {
+      "id": "articles",
+      "title": "Articles",
+      "subtitle": "Deep dives into design and tech",
+      "icon": "fa-solid fa-newspaper",
+      "gradient": "bg-purple-gradient"
+    },
+    {
+      "id": "tutorials",
+      "title": "Tutorials",
+      "subtitle": "Step-by-step guides for creators",
+      "icon": "fa-solid fa-chalkboard-user",
+      "gradient": "bg-green-gradient"
+    },
+    {
+      "id": "tips",
+      "title": "Quick Tips",
+      "subtitle": "Hacks and tricks for your workflow",
+      "icon": "fa-solid fa-lightbulb",
+      "gradient": "bg-orange-gradient"
+    },
+    {
+      "id": "resources",
+      "title": "Resources",
+      "subtitle": "Assets and tools for download",
+      "icon": "fa-solid fa-box-archive",
+      "gradient": "bg-cyan-gradient"
+    }
+  ],
+  "feed": [
+    {
+      "type": "update",
+      "date": "Dec 30, 2024",
+      "tag": "Project",
+      "title": "Auto Commiter v2 Release",
+      "description": "Significant improvements in diff analysis and integration with Claude 3.5 Sonnet.",
+      "image": "assets/images/banner.png",
+      "link": "https://marketplace.visualstudio.com/items?itemName=gabrielbaiano.auto-commiter"
+    },
+    {
+      "type": "site",
+      "date": "Dec 28, 2024",
+      "tag": "Site",
+      "title": "New Banered Layout",
+      "description": "Dark mode implementation and new templates for GitHub banners.",
+      "link": "https://banered.vercel.app/"
+    },
+    {
+      "type": "update",
+      "date": "Dec 25, 2024",
+      "tag": "Project",
+      "title": "VOSTOK OS Terminal Beta",
+      "description": "First functional version of the retro Soviet terminal emulator.",
+      "link": "https://github.com/GabrielBaiano/VOSTOK_OS_TERMINAL"
+    }
+  ],
   "categories": [
     {
       "name": "VS Code Extensions",
@@ -19,26 +76,20 @@
           "link": "https://banered.vercel.app/"
         }
       ]
-    },
-    {
-      "name": "Linux Apps",
-      "tools": [
-        {
-          "title": "File Organizer",
-          "subtitle": "Automatically organize files by type and date",
-          "link": "https://github.com/GabrielBaiano/file_organizer"
-        }
-      ]
-    },
-    {
-      "name": "Utilities",
-      "tools": [
-        {
-          "title": "Awesome README",
-          "subtitle": "Collection of professional, ready-to-use README templates",
-          "link": "https://github.com/GabrielBaiano/awesome-readme"
-        }
-      ]
     }
-  ]
+  ],
+  "sidebar": {
+    "categories": [
+      "CSS", "React", "Animation", "Career", "JavaScript", "SVG", "Next.js", "General"
+    ],
+    "popularContent": [
+      { "title": "An Interactive Guide to Flexbox", "link": "#" },
+      { "title": "A Modern CSS Reset", "link": "#" },
+      { "title": "An Interactive Guide to CSS Transitions", "link": "#" },
+      { "title": "How To Center a Div", "link": "#" },
+      { "title": "The End of Front-End Development", "link": "#" },
+      { "title": "An Interactive Guide to CSS Grid", "link": "#" },
+      { "title": "Designing Beautiful Shadows in CSS", "link": "#" }
+    ]
+  }
 }

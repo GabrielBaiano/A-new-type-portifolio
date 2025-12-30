@@ -10,8 +10,8 @@ class BalloonSystem {
 
         // Independent tracks for left and right sides
         this.tracks = {
-            left: { lastY: window.innerHeight + 100 },
-            right: { lastY: window.innerHeight + 100 }
+            left: { lastY: window.innerHeight + 100, lastTick: Date.now() },
+            right: { lastY: window.innerHeight + 100, lastTick: Date.now() }
         };
 
         // Anti-repetition system
@@ -41,6 +41,8 @@ class BalloonSystem {
             pointer-events: none;
             z-index: 999;
             overflow: hidden;
+            transition: opacity 1s ease;
+            opacity: 1;
         `;
         document.body.appendChild(this.container);
 
@@ -53,7 +55,7 @@ class BalloonSystem {
                 const safe = this.hasEnoughSpace();
                 
                 if (safe) {
-                    if (this.container) this.container.style.display = 'block';
+                    if (this.container) this.container.style.opacity = '1';
                     
                     if (!this.isRunning) {
                         this.start();
@@ -61,8 +63,9 @@ class BalloonSystem {
                         this.repositionBalloons();
                     }
                 } else {
-                    if (this.container) this.container.style.display = 'none';
-                    this.stop();
+                    if (this.container) this.container.style.opacity = '0';
+                    // We don't stop entirely, just hide. They'll stop spawning 
+                    // if it stays tight in the loop check.
                 }
             }, 200); // Wait 200ms after resize stops
         });
@@ -82,17 +85,15 @@ class BalloonSystem {
     }
 
     hasEnoughSpace() {
-        if (window.innerWidth <= 1000) return false; // Hard limit for mobile/tablet
+        if (window.innerWidth <= 1000) return false;
 
         const mainContainer = document.querySelector('.main-container');
-        if (!mainContainer) return true; // Default to safe if no container logic found
+        if (!mainContainer) return true;
         
-        // Calculate margin on ONE side
         const margin = (window.innerWidth - mainContainer.offsetWidth) / 2;
         
-        // Balloon width (320px default, 380px ads) + minimal padding (20px)
-        // Relaxed constraint to allow balloons on 720px detail pages (laptop screens)
-        return margin > 280;
+        // Lowered threshold to 240px to be more permissive on small laptops
+        return margin > 240;
     }
 
     // New: Reposition active balloons when layout changes
@@ -109,10 +110,9 @@ class BalloonSystem {
             const width = isAd ? 380 : 320;
             const minOffset = 40;
             
-            // If space is too tight, push them off-screen or fade out
-            if (margin <= width + 20) {
-                balloon.style.opacity = '0.2'; // Fade out if no space
-                return;
+            // If space is too tight, fade them out but keep them moving
+            if (margin <= width + 10) {
+                balloon.style.opacity = '0.1';
             } else {
                 balloon.style.opacity = '1';
             }
@@ -120,12 +120,22 @@ class BalloonSystem {
             // Calculate safe boundaries
             const maxOffset = Math.max(minOffset, margin - width - 20);
 
-            // Determine side based on current style (left/right)
+            // Determine side and current offset
             const isLeft = balloon.style.left && balloon.style.left !== 'auto';
+            const currentOffset = parseFloat(isLeft ? balloon.style.left : balloon.style.right) || minOffset;
             
-            // Generate new safe random offset
-            const newOffset = minOffset + Math.random() * (maxOffset - minOffset);
+            // If the balloon is now outside the safe zone (too far into the center),
+            // OR if it's too close to the edge, clamp it smoothly.
+            // We use a small buffer to avoid jitter.
+            let newOffset = currentOffset;
             
+            if (currentOffset > maxOffset) {
+                newOffset = maxOffset; 
+            } else if (currentOffset < minOffset) {
+                newOffset = minOffset;
+            }
+            
+            // Apply new offset
             if (isLeft) {
                 balloon.style.left = `${newOffset}px`;
             } else {
@@ -160,10 +170,21 @@ class BalloonSystem {
         // Spacing between balloons
         const spacing = data.type === "ad" ? 220 : 120;
 
-        // Calculate Y position based on track's last balloon
+        // Update track's lastY based on elapsed time since last check
+        const now = Date.now();
+        const delta = (now - track.lastTick) / 1000;
+        track.lastTick = now;
+        
+        // Speed of movement
+        const speed = 60; // pixels per second
+        
+        // Move the virtual "last balloon bottom" up based on elapsed time
+        track.lastY = Math.max(window.innerHeight + 100, track.lastY - (delta * speed));
+
+        // Use the current lastY as start position
         const startY = track.lastY;
         
-        // Update track for next balloon
+        // Update track for next balloon: push the next spawn point further down
         track.lastY = startY + height + spacing;
 
         // Random horizontal position within the available margin (safer logic)
@@ -188,8 +209,7 @@ class BalloonSystem {
         if (data.type === 'ad') balloon.classList.add('twitter-balloon');
         
         balloon.innerHTML = this.buildBalloonHTML(data);
-
-        const speed = 60; // pixels per second
+        
         const travel = startY + height + 300;
         const duration = travel / speed;
 
@@ -208,11 +228,7 @@ class BalloonSystem {
             balloon.remove();
         }, duration * 1000);
 
-        // Reset track after balloon has moved up enough
-        const resetTime = (500 / speed) * 1000;
-        setTimeout(() => {
-            track.lastY = window.innerHeight + 100;
-        }, resetTime);
+        // Removed redundant track reset setTimeout
     }
 
     buildBalloonHTML(data) {
