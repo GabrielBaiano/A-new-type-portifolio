@@ -14,7 +14,7 @@ const HomePage = {
                             </div>
                         </div>
                         <div class="user-details">
-                            <h1>Gabriel Gama</h1>
+                            <h1>Gabriel Nascimento Gama</h1>
                             <p>Full Stack Dev</p>
                         </div>
                     </div>
@@ -43,11 +43,11 @@ Welcome, i'm a Brazilian Full-Stack Developer with over 3 years of experience, a
 
                 <!-- Links Sociais -->
                 <div class="social-links">
-                    <!-- <a href="https://x.com/uMagicalJake" class="social-btn"><i class="fa-brands fa-twitter"></i> Twitter</a> -->
                     <a href="https://www.linkedin.com/in/gabriel-nascimento-gama-5b0b30185/" class="social-btn"><i
                             class="fa-brands fa-linkedin"></i> Linkedin</a>
                     <a href="https://github.com/GabrielBaiano" class="social-btn"><i class="fa-brands fa-github"></i>
                         GitHub</a>
+                    <a href="http://lattes.cnpq.br/1588167693631178" target="_blank" class="social-btn"><i class="fa-solid fa-graduation-cap"></i> Lattes CV</a>
                     <a href="mailto:gabrielngama@gmail.com" class="social-btn"><i class="fa-solid fa-envelope"></i> Mail</a>
                 </div>
 

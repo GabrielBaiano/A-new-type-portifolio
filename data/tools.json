@@ -83,16 +83,8 @@
   ],
   "sidebar": {
     "categories": [
-      "CSS", "React", "Animation", "Career", "JavaScript", "SVG", "Next.js", "General"
+      "Project", "Site", "AI", "VS Code", "Web Tools"
     ],
-    "popularContent": [
-      { "title": "An Interactive Guide to Flexbox", "link": "#" },
-      { "title": "A Modern CSS Reset", "link": "#" },
-      { "title": "An Interactive Guide to CSS Transitions", "link": "#" },
-      { "title": "How To Center a Div", "link": "#" },
-      { "title": "The End of Front-End Development", "link": "#" },
-      { "title": "An Interactive Guide to CSS Grid", "link": "#" },
-      { "title": "Designing Beautiful Shadows in CSS", "link": "#" }
-    ]
+    "popularContent": []
   }
 }

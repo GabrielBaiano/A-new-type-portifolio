@@ -30,11 +30,11 @@ const DataService = {
     },
 
     /**
-     * Load blog data from JSON
+     * Load academic (cv) data from JSON
      */
     async loadBlogData() {
         if (!this.blogData) {
-            const response = await fetch('data/blog.json');
+            const response = await fetch('data/academic.json');
             this.blogData = await response.json();
         }
         return this.blogData;
@@ -179,7 +179,7 @@ const DataService = {
      */
     async getBlogPostById(id) {
         const data = await this.loadBlogData();
-        const post = data.posts.find(p => p.id === id);
+        const post = data.publications.find(p => p.id === id);
         
         if (post) {
             // Load markdown content from file
@@ -190,7 +190,7 @@ const DataService = {
             }
             return post;
         } else {
-            throw new Error('Blog post not found');
+            throw new Error('Publication not found');
         }
 
         // Future backend integration:
@@ -214,5 +214,31 @@ const DataService = {
         }
         
         throw new Error('Feed item not found');
+    },
+
+    /**
+     * Get publications for a specific category
+     * @param {string} typeId - Category identifier (articles, tutorials, etc.)
+     */
+    async getPublicationsByCategory(typeId) {
+        const blogData = await this.loadBlogData();
+        const toolsData = await this.loadToolsData();
+        const type = toolsData.articleTypes.find(t => t.id === typeId);
+        
+        // Filter academic publications
+        let items = [];
+        if (typeId === 'articles') {
+            items = blogData.publications.filter(p => p.category === 'Articles');
+        } else {
+            // For now, other categories filter from the same pool or as placeholders
+            items = blogData.publications.filter(p => p.category.toLowerCase() === typeId);
+        }
+
+        return {
+            title: type ? type.title : 'Publications',
+            subtitle: type ? type.subtitle : '',
+            items: items,
+            count: items.length
+        };
     }
 };

@@ -66,6 +66,9 @@ const DetailPage = {
                 case 'feed':
                     data = await DataService.getFeedItemById(this.currentId);
                     break;
+                case 'category':
+                    data = await DataService.getPublicationsByCategory(this.currentId);
+                    break;
                 default:
                     throw new Error(`Unknown content type: ${this.currentType}`);
             }
@@ -105,10 +108,21 @@ const DetailPage = {
                     <h1 class="detail-title">${data.title}</h1>
                     ${data.subtitle ? `<p class="detail-subtitle">${data.subtitle}</p>` : ''}
                     ${data.date ? `<div class="detail-date">${data.date}</div>` : ''}
+                    ${data.count !== undefined ? `<div class="detail-date">${data.count} Articles</div>` : ''}
                 </div>
                 
                 <div class="markdown-content">
-                    ${htmlContent}
+                    ${data.items ? `
+                        <div class="pub-grid">
+                            ${data.items.map(pub => `
+                                <div class="pub-card" onclick="location.hash='#/detail/academic/${pub.id}'">
+                                    <h3>${pub.title}</h3>
+                                    <p>${pub.excerpt || 'Explore the full content of this publication.'}</p>
+                                    <span class="read-more-btn">Read more</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : htmlContent}
                 </div>
             `;
 
