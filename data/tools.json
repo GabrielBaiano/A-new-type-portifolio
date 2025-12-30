@@ -31,6 +31,7 @@
   ],
   "feed": [
     {
+      "id": "auto-commiter-v2",
       "type": "update",
       "date": "Dec 30, 2024",
       "tag": "Project",
@@ -40,6 +41,7 @@
       "link": "https://marketplace.visualstudio.com/items?itemName=gabrielbaiano.auto-commiter"
     },
     {
+      "id": "banered-layout-update",
       "type": "site",
       "date": "Dec 28, 2024",
       "tag": "Site",
@@ -48,6 +50,7 @@
       "link": "https://banered.vercel.app/"
     },
     {
+      "id": "vostok-os-beta",
       "type": "update",
       "date": "Dec 25, 2024",
       "tag": "Project",

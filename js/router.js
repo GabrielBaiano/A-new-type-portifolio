@@ -3,7 +3,7 @@ class Router {
     constructor() {
         this.routes = {};
         this.currentRoute = null;
-        this.defaultRoute = 'home';
+        this.defaultRoute = 'tools';
         
         // Listen para mudanças de hash
         window.addEventListener('hashchange', () => this.handleRouteChange());

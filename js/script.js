@@ -55,7 +55,7 @@ function initializeSPA() {
     });
 
     // Set default route
-    router.setDefaultRoute('home');
+    router.setDefaultRoute('tools');
 }
 
 /**

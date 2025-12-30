@@ -195,5 +195,24 @@ const DataService = {
 
         // Future backend integration:
         // return fetch(`/api/blog/${id}`).then(res => res.json());
+    },
+
+    /**
+     * Get feed item by ID
+     * @param {string} id - Feed item identifier
+     * @returns {Promise<Object>} Feed item data
+     */
+    async getFeedItemById(id) {
+        const data = await this.loadToolsData();
+        const item = data.feed.find(f => f.id === id);
+        
+        if (item) {
+            return {
+                ...item,
+                content: `# ${item.title}\n\n${item.description}\n\nPublished on ${item.date}.\n\n[Check it out here](${item.link})`
+            };
+        }
+        
+        throw new Error('Feed item not found');
     }
 };

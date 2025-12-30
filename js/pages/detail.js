@@ -63,6 +63,9 @@ const DetailPage = {
                 case 'tool':
                     data = await DataService.getToolById(this.currentId);
                     break;
+                case 'feed':
+                    data = await DataService.getFeedItemById(this.currentId);
+                    break;
                 default:
                     throw new Error(`Unknown content type: ${this.currentType}`);
             }

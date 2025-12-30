@@ -2124,6 +2124,11 @@ body.wide-layout .photos-masonry {
     align-self: start;
 }
 
+/* Detail Page Width Adjustment */
+body.detail-mode .main-container {
+    max-width: 800px;
+}
+
 .sidebar-card {
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);

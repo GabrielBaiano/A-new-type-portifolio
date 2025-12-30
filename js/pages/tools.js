@@ -66,7 +66,7 @@ const ToolsPage = {
 
                         <div id="feed-container" class="feed-list">
                             ${feed.map(item => `
-                                <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="feed-item">
+                                <div class="feed-item feed-item-btn" data-id="${item.id}">
                                     <div class="feed-item-header">
                                         <span class="feed-date">${item.date}</span>
                                         <span class="feed-tag">${item.tag}</span>
@@ -82,7 +82,7 @@ const ToolsPage = {
                                         <h4 class="feed-title">${item.title}</h4>
                                         <p class="feed-description">${item.description}</p>
                                     </div>
-                                </a>
+                                </div>
                             `).join('')}
                         </div>
                     </div>
@@ -109,6 +109,18 @@ const ToolsPage = {
                 const section = toggle.closest('.collapsible-section');
                 if (section) {
                     section.classList.toggle('expanded');
+                }
+            });
+        });
+
+        // Initialize feed item clicks
+        const feedItems = document.querySelectorAll('.feed-item-btn');
+        feedItems.forEach(item => {
+            item.style.cursor = 'pointer';
+            item.addEventListener('click', () => {
+                const id = item.getAttribute('data-id');
+                if (id) {
+                    router.navigate(`detail/feed/${id}`);
                 }
             });
         });
