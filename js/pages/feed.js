@@ -62,9 +62,9 @@ const FeedPage = {
         return `
             <div class="page-layout-grid">
                 <div class="main-content-area">
-                    <!-- Card 1: Resources & Publications -->
-                    <div class="card projects-card">
-                        <h2 class="section-title">Resources & Publications</h2>
+                    <!-- Card 1: Content Channels -->
+                    <div class="card projects-card channel-card">
+                        <h2 class="section-title">Content Channels</h2>
                         
                         <div id="article-types-grid" class="projects-grid-cards article-types-grid">
                             ${articleTypes.map(type => `

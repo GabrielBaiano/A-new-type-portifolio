@@ -220,6 +220,10 @@ const DataService = {
      * Get publications for a specific category
      * @param {string} typeId - Category identifier (articles, tutorials, etc.)
      */
+    /**
+     * Get publications for a specific category
+     * @param {string} typeId - Category identifier (articles, tutorials, etc.)
+     */
     async getPublicationsByCategory(typeId) {
         const academicData = await this.loadAcademicData();
         const toolsData = await this.loadToolsData();
@@ -240,5 +244,47 @@ const DataService = {
             items: items,
             count: items.length
         };
+    },
+
+    /**
+     * Fetch and parse dynamic reading list from personal-library README
+     */
+    async getGitHubReadingList() {
+        const username = 'GabrielBaiano';
+        const repo = 'personal-library';
+        const rawUrl = `https://raw.githubusercontent.com/${username}/${repo}/main/README.md`;
+
+        try {
+            const response = await fetch(rawUrl);
+            if (!response.ok) throw new Error('Failed to fetch reading list');
+            const markdown = await response.text();
+
+            // Simple parser for the "Reading" section
+            // Looks for patterns in the Markdown/HTML seen in the user's screenshot
+            const books = [];
+            
+            // This is a placeholder for a more robust parser matching the user's README structure
+            // We'll try to extract items from the <table> or <div> structures likely used
+            const itemRegex = /<td[^>]*>[\s\S]*?<img src="([^"]+)"[\s\S]*?<span[^>]*>([^<]+)<\/span>[\s\S]*?<a[^>]*>([^<]+)<\/a>[\s\S]*?Status: <strong>([^<]+)<\/strong>[\s\S]*?<\/td>/g;
+            
+            let match;
+            while ((match = itemRegex.exec(markdown)) !== null) {
+                books.push({
+                    image: match[1],
+                    tag: match[2],
+                    title: match[3],
+                    status: match[4],
+                    link: `https://github.com/${username}/${repo}`,
+                    icon: match[4].toLowerCase().includes('reading') ? 'fa-solid fa-book-open' : 'fa-solid fa-check-double',
+                    isBR: match[3].includes('BR') // Simple check
+                });
+            }
+
+            console.log('Dynamic books found:', books.length);
+            return books.length > 0 ? books : null;
+        } catch (error) {
+            console.error('Error syncing reading list:', error);
+            return null;
+        }
     }
 };

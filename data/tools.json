@@ -1,38 +1,38 @@
 {
   "articleTypes": [
     {
-      "id": "articles",
-      "title": "Articles",
-      "subtitle": "Deep dives into design and tech",
-      "icon": "fa-solid fa-newspaper",
+      "id": "deep-tutorials",
+      "title": "Mastery & Guides",
+      "subtitle": "Deep technical tutorials & documentation",
+      "icon": "fa-solid fa-chalkboard-user",
       "gradient": "bg-purple-gradient"
     },
     {
-      "id": "tutorials",
-      "title": "Tutorials",
-      "subtitle": "Step-by-step guides for creators",
-      "icon": "fa-solid fa-chalkboard-user",
+      "id": "full-projects",
+      "title": "Full Reviews",
+      "subtitle": "Deep dives into architecture & books",
+      "icon": "fa-solid fa-flask-vial",
       "gradient": "bg-green-gradient"
     },
     {
-      "id": "tips",
-      "title": "Quick Tips",
-      "subtitle": "Hacks and tricks for your workflow",
-      "icon": "fa-solid fa-lightbulb",
+      "id": "courses-certs",
+      "title": "Certs & Courses",
+      "subtitle": "Learning paths and certifications",
+      "icon": "fa-solid fa-graduation-cap",
       "gradient": "bg-orange-gradient"
     },
     {
-      "id": "resources",
-      "title": "Resources",
-      "subtitle": "Assets and tools for download",
-      "icon": "fa-solid fa-box-archive",
+      "id": "study-notes",
+      "title": "Study Notes",
+      "subtitle": "Technical research & book annotations",
+      "icon": "fa-solid fa-brain",
       "gradient": "bg-cyan-gradient"
     }
   ],
   "feed": [
     {
       "id": "auto-commiter-v2",
-      "type": "update",
+      "type": "projects-labs",
       "date": "Dec 30, 2024",
       "tag": "Project",
       "title": "Auto Commiter v2 Release",
@@ -41,8 +41,17 @@
       "link": "https://marketplace.visualstudio.com/items?itemName=gabrielbaiano.auto-commiter"
     },
     {
+      "id": "personal-library-update",
+      "type": "nerdy-hobbies",
+      "date": "Dec 29, 2024",
+      "tag": "Review",
+      "title": "Reading: Clean Code",
+      "description": "Updating my personal library with thoughts on Robert C. Martin's classic. Essential for any dev.",
+      "link": "https://github.com/GabrielBaiano/personal-library"
+    },
+    {
       "id": "banered-layout-update",
-      "type": "site",
+      "type": "projects-labs",
       "date": "Dec 28, 2024",
       "tag": "Site",
       "title": "New Banered Layout",
@@ -50,8 +59,17 @@
       "link": "https://banered.vercel.app/"
     },
     {
+      "id": "retro-gaming-find",
+      "type": "nerdy-hobbies",
+      "date": "Dec 27, 2024",
+      "tag": "Retro",
+      "title": "New Gem: GameBoy Color Atomic Purple",
+      "description": "Finally added this classic to my collection. A masterpiece of industrial design.",
+      "link": "#"
+    },
+    {
       "id": "vostok-os-beta",
-      "type": "update",
+      "type": "projects-labs",
       "date": "Dec 25, 2024",
       "tag": "Project",
       "title": "VOSTOK OS Terminal Beta",
@@ -83,7 +101,7 @@
   ],
   "sidebar": {
     "categories": [
-      "Project", "Site", "AI", "VS Code", "Web Tools"
+      "Daily Update", "Retro Gaming", "Sci-Fi", "Career", "Nerdy Find", "Quick Review"
     ],
     "popularContent": []
   }

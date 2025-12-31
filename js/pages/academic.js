@@ -114,6 +114,33 @@ const AcademicPage = {
                         </section>
                     </div>
 
+                    <!-- Visual Reading List Section -->
+                    <div class="card reading-section-card">
+                        <section class="cv-section" style="margin-bottom: 0;">
+                            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px;">
+                                <h2 class="cv-section-title" style="margin-bottom: 0;">Current Reading</h2>
+                                <a href="https://github.com/GabrielBaiano/personal-library" target="_blank" class="academic-link" style="font-size: 0.85rem;">View Full Library →</a>
+                            </div>
+                            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6;">A list of books I'm currently reading and have read recently. Click to explore reviews and notes.</p>
+                            
+                            <div class="reading-grid">
+                                ${data.readingList.map(book => `
+                                    <a href="${book.link}" target="_blank" class="book-card" style="text-decoration: none;">
+                                        <img src="${book.image}" alt="${book.title}" class="book-cover">
+                                        <div class="book-info">
+                                            <span class="book-tag">${book.tag}</span>
+                                            <h4 class="book-title">${book.title}${book.isBR ? '<sup style="font-size: 0.6em; margin-left: 2px; opacity: 0.6;">BR</sup>' : ''}</h4>
+                                            <div class="book-status-row">
+                                                <i class="${book.icon}"></i>
+                                                <span>Status: <strong>${book.status}</strong></span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                `).join('')}
+                            </div>
+                        </section>
+                    </div>
+
                     <!-- Mobile Sidebar Content -->
                     <div class="mobile-only">
                         ${this.renderSidebar(data.readingList, data, true)}
@@ -133,6 +160,9 @@ const AcademicPage = {
         
         // Enable wide layout for academic page
         document.body.classList.add('wide-layout');
+
+        // Dynamic Sync: Try to get latest books from GitHub
+        this.syncGitHubBooks();
 
         // Initialize sidebar toggle (only for collapsible sections)
         const toggles = document.querySelectorAll('.sidebar-toggle-btn');
@@ -157,6 +187,36 @@ const AcademicPage = {
                 }
             });
         });
+    },
+
+    /**
+     * Sync books dynamically from personal-library README
+     */
+    async syncGitHubBooks() {
+        const grid = document.querySelector('.reading-grid');
+        if (!grid) return;
+
+        try {
+            const githubBooks = await DataService.getGitHubReadingList();
+            if (githubBooks && githubBooks.length > 0) {
+                grid.innerHTML = githubBooks.map(book => `
+                    <a href="${book.link}" target="_blank" class="book-card" style="text-decoration: none;">
+                        <img src="${book.image}" alt="${book.title}" class="book-cover">
+                        <div class="book-info">
+                            <span class="book-tag">${book.tag}</span>
+                            <h4 class="book-title">${book.title}${book.isBR ? '<sup style="font-size: 0.6em; margin-left: 2px; opacity: 0.6;">BR</sup>' : ''}</h4>
+                            <div class="book-status-row">
+                                <i class="${book.icon}"></i>
+                                <span>Status: <strong>${book.status}</strong></span>
+                            </div>
+                        </div>
+                    </a>
+                `).join('');
+                console.log('📚 Reading list synced with GitHub');
+            }
+        } catch (err) {
+            console.warn('Sync failed, using fallback data:', err);
+        }
     },
 
     onUnmount() {
