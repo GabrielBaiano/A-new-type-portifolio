@@ -5,7 +5,7 @@
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const API_SECRET = process.env.GITHUB_TOKEN; // Using existing token as a simple secret for now
+const API_SECRET = process.env.LEETCODE_ADMIN_KEY;
 
 const supabaseHeaders = {
   'apikey': SUPABASE_KEY,
