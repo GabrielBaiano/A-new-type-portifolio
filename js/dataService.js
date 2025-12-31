@@ -259,29 +259,41 @@ const DataService = {
             if (!response.ok) throw new Error('Failed to fetch reading list');
             const markdown = await response.text();
 
-            // Simple parser for the "Reading" section
-            // Looks for patterns in the Markdown/HTML seen in the user's screenshot
-            const books = [];
-            
-            // This is a placeholder for a more robust parser matching the user's README structure
-            // We'll try to extract items from the <table> or <div> structures likely used
-            const itemRegex = /<td[^>]*>[\s\S]*?<img src="([^"]+)"[\s\S]*?<span[^>]*>([^<]+)<\/span>[\s\S]*?<a[^>]*>([^<]+)<\/a>[\s\S]*?Status: <strong>([^<]+)<\/strong>[\s\S]*?<\/td>/g;
-            
-            let match;
-            while ((match = itemRegex.exec(markdown)) !== null) {
-                books.push({
-                    image: match[1],
-                    tag: match[2],
-                    title: match[3],
-                    status: match[4],
-                    link: `https://github.com/${username}/${repo}`,
-                    icon: match[4].toLowerCase().includes('reading') ? 'fa-solid fa-book-open' : 'fa-solid fa-check-double',
-                    isBR: match[3].includes('BR') // Simple check
-                });
-            }
+            // Split by headers (e.g., # Reading, ## 2024, ## 2023)
+            const sections = markdown.split(/(?=^#{1,3} )/m);
+            const groupedBooks = {};
 
-            console.log('Dynamic books found:', books.length);
-            return books.length > 0 ? books : null;
+            const itemRegex = /<td[^>]*>[\s\S]*?<img src="([^"]+)"[\s\S]*?<span[^>]*>([^<]+)<\/span>[\s\S]*?<a[^>]*>([^<]+)<\/a>[\s\S]*?Status: <strong>([^<]+)<\/strong>[\s\S]*?<\/td>/g;
+
+            sections.forEach(section => {
+                const headerMatch = section.match(/^#{1,3}\s+(.+)$/m);
+                if (!headerMatch) return;
+
+                const sectionTitle = headerMatch[1].trim();
+                // Filter titles to only those that likely contain books (Reading or Years)
+                if (!/Reading|\d{4}/i.test(sectionTitle)) return;
+
+                const booksInTitle = [];
+                let match;
+                while ((match = itemRegex.exec(section)) !== null) {
+                    booksInTitle.push({
+                        image: match[1],
+                        tag: match[2],
+                        title: match[3],
+                        status: match[4],
+                        link: `https://github.com/${username}/${repo}`,
+                        icon: match[4].toLowerCase().includes('reading') ? 'fa-solid fa-book-open' : 'fa-solid fa-check-double',
+                        isBR: match[3].includes('BR')
+                    });
+                }
+
+                if (booksInTitle.length > 0) {
+                    groupedBooks[sectionTitle] = booksInTitle;
+                }
+            });
+
+            console.log('Grouped books found:', Object.keys(groupedBooks));
+            return Object.keys(groupedBooks).length > 0 ? groupedBooks : null;
         } catch (error) {
             console.error('Error syncing reading list:', error);
             return null;

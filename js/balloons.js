@@ -1,12 +1,13 @@
 /**
  * Balloon System - Floating notification cards with track-based positioning
- * Features: Independent tracks, dynamic height calculation, anti-repetition
+ * Features: Independent tracks, dynamic height calculation, anti-repetition, and active-on-screen tracking
  */
 
 class BalloonSystem {
     constructor() {
         this.container = null;
         this.isRunning = false;
+        this.lastZIndex = 100;
 
         // Independent tracks for left and right sides
         this.tracks = {
@@ -18,7 +19,10 @@ class BalloonSystem {
         this.recent = [];
         this.maxRecent = 5;
 
-        // Page context for filtering (future use)
+        // Tracks balloons currently on screen to avoid duplicates
+        this.activeBalloons = new Set();
+
+        // Page context for filtering
         this.currentContext = 'home';
 
         // Flag to ensure ad is shown first
@@ -46,17 +50,14 @@ class BalloonSystem {
         `;
         document.body.appendChild(this.container);
 
-        // Handle window resize with Debounce (prevents duplication)
+        // Handle window resize with Debounce
         let resizeTimer;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
-                // Check if we have enough space for balloons
                 const safe = this.hasEnoughSpace();
-                
                 if (safe) {
                     if (this.container) this.container.style.opacity = '1';
-                    
                     if (!this.isRunning) {
                         this.start();
                     } else {
@@ -64,17 +65,15 @@ class BalloonSystem {
                     }
                 } else {
                     if (this.container) this.container.style.opacity = '0';
-                    // We don't stop entirely, just hide. They'll stop spawning 
-                    // if it stays tight in the loop check.
                 }
-            }, 200); // Wait 200ms after resize stops
+            }, 200);
         });
 
         // Handle URL changes to update context
         window.addEventListener('hashchange', () => this.updateContext());
         window.addEventListener('load', () => this.updateContext());
 
-        // New: Watch for main container size changes (e.g. entering Photos page)
+        // Watch for main container size changes
         const mainContainer = document.querySelector('.main-container');
         if (mainContainer) {
             const resizeObserver = new ResizeObserver(() => {
@@ -82,64 +81,59 @@ class BalloonSystem {
             });
             resizeObserver.observe(mainContainer);
         }
+
+        // Tab Visibility: Reset tracks when user returns to tab to avoid "sprouting" 
+        // of balloons that were queued while tab was inactive
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") {
+                this.tracks.left = { lastY: window.innerHeight + 50, lastTick: Date.now() };
+                this.tracks.right = { lastY: window.innerHeight + 50, lastTick: Date.now() };
+                if (!this.isRunning) this.start();
+            }
+        });
     }
 
     hasEnoughSpace() {
-        if (window.innerWidth <= 1000) return false;
-
+        if (window.innerWidth <= 1200) return false;
         const mainContainer = document.querySelector('.main-container');
         if (!mainContainer) return true;
-        
+
+        // Calculate the available margin on one side
         const margin = (window.innerWidth - mainContainer.offsetWidth) / 2;
-        
-        // Lowered threshold to 240px to be more permissive on small laptops
-        return margin > 240;
+        // More forgiving threshold: 320px is enough to show most of the 380px balloon
+        return margin >= 320;
     }
 
-    // New: Reposition active balloons when layout changes
     repositionBalloons() {
         const mainContainer = document.querySelector('.main-container');
-        if (!mainContainer) return;
-
-        // Recalculate safe margins
-        const margin = (window.innerWidth - mainContainer.offsetWidth) / 2;
+        let margin = mainContainer ? (window.innerWidth - mainContainer.offsetWidth) / 2 : 550;
+        
         const balloons = document.querySelectorAll('.floating-balloon');
+        const balloonWidth = 380;
+        const tailBuffer = 100;
+        const minOffset = 20;
 
         balloons.forEach(balloon => {
-            const isAd = balloon.classList.contains('twitter-balloon');
-            const width = isAd ? 380 : 320;
-            const minOffset = 40;
-            
-            // If space is too tight, fade them out but keep them moving
-            if (margin <= width + 10) {
-                balloon.style.opacity = '0.1';
-            } else {
-                balloon.style.opacity = '1';
+            if (margin < 320) {
+                balloon.style.opacity = '0';
+                balloon.style.pointerEvents = 'none';
+                return;
             }
+            balloon.style.opacity = '1';
+            balloon.style.pointerEvents = 'auto'; // Re-enable
+            
+            const side = balloon.dataset.side || (balloon.style.left && balloon.style.left !== 'auto' ? 'left' : 'right');
+            const maxOffset = Math.max(minOffset, margin - balloonWidth - tailBuffer);
+            // Keep current offset if within bounds, otherwise adjust
+            const currentOffset = parseFloat(side === 'left' ? balloon.style.left : balloon.style.right) || minOffset;
+            let newOffset = Math.min(Math.max(currentOffset, minOffset), maxOffset);
 
-            // Calculate safe boundaries
-            const maxOffset = Math.max(minOffset, margin - width - 20);
-
-            // Determine side and current offset
-            const isLeft = balloon.style.left && balloon.style.left !== 'auto';
-            const currentOffset = parseFloat(isLeft ? balloon.style.left : balloon.style.right) || minOffset;
-            
-            // If the balloon is now outside the safe zone (too far into the center),
-            // OR if it's too close to the edge, clamp it smoothly.
-            // We use a small buffer to avoid jitter.
-            let newOffset = currentOffset;
-            
-            if (currentOffset > maxOffset) {
-                newOffset = maxOffset; 
-            } else if (currentOffset < minOffset) {
-                newOffset = minOffset;
-            }
-            
-            // Apply new offset
-            if (isLeft) {
+            if (side === 'left') {
                 balloon.style.left = `${newOffset}px`;
+                balloon.style.right = 'auto'; // Ensure the other side is auto
             } else {
                 balloon.style.right = `${newOffset}px`;
+                balloon.style.left = 'auto'; // Ensure the other side is auto
             }
         });
     }
@@ -149,181 +143,136 @@ class BalloonSystem {
     }
 
     createBalloon(data) {
-        // Create temporary element to measure height
+        // Temporary measure to calculate height
         const temp = document.createElement("div");
         temp.className = "balloon-temp";
-        temp.style.cssText = `
-            position: absolute;
-            opacity: 0;
-            pointer-events: none;
-            width: ${data.type === 'ad' ? '380px' : '320px'}; /* Fix width for measurement */
-        `;
+        temp.style.cssText = `position: absolute; opacity: 0; pointer-events: none; width: 380px;`;
         temp.innerHTML = this.buildBalloonHTML(data);
-
         this.container.appendChild(temp);
         const height = temp.clientHeight;
         temp.remove();
 
         const side = this.chooseSide();
         const track = this.tracks[side];
-
-        // Spacing between balloons
-        const spacing = data.type === "ad" ? 220 : 120;
-
-        // Update track's lastY based on elapsed time since last check
+        
+        // Spacing: 300px for ads, 200px for regular
+        const spacing = data.type === "ad" ? 250 : 150;
+        
+        const isBusyPage = this.currentContext === 'home' || this.currentContext === 'academic';
+        const speed = isBusyPage ? 100 : 60;
+        
         const now = Date.now();
         const delta = (now - track.lastTick) / 1000;
         track.lastTick = now;
         
-        // Speed of movement
-        const speed = 60; // pixels per second
+        // Track positioning logic: CAP AT 300px below fold to avoid long "invisible" travel
+        // Also ensure startY is at least viewport + 50
+        track.lastY = Math.max(window.innerHeight + 50, track.lastY - (delta * speed));
+        if (track.lastY > window.innerHeight + 300) track.lastY = window.innerHeight + 300;
         
-        // Move the virtual "last balloon bottom" up based on elapsed time
-        track.lastY = Math.max(window.innerHeight + 100, track.lastY - (delta * speed));
-
-        // Use the current lastY as start position
         const startY = track.lastY;
-        
-        // Update track for next balloon: push the next spawn point further down
         track.lastY = startY + height + spacing;
 
-        // Random horizontal position within the available margin (safer logic)
-        // We want them centered in the margin space if possible
         const mainContainer = document.querySelector('.main-container');
-        const margin = mainContainer ? (window.innerWidth - mainContainer.offsetWidth) / 2 : 200;
-        
-        // Limit max offset to ensure it doesn't overlap content
-        const balloonWidth = data.type === 'ad' ? 380 : 320;
-        
-        // Safer margin: Minimum 40px from edge
-        // Max offset: Margin - balloonWidth - 20px safety buffer
-        const minOffset = 40;
-        const maxOffset = Math.max(minOffset, margin - balloonWidth - 20);
-        
-        // Random between min and max
+        const margin = mainContainer ? (window.innerWidth - mainContainer.offsetWidth) / 2 : 550;
+        const balloonWidth = 380;
+        const tailBuffer = 60; // Reduced buffer
+        const minOffset = 20;
+        const maxOffset = Math.max(minOffset, margin - balloonWidth - tailBuffer);
         const horizontalOffset = minOffset + Math.random() * (maxOffset - minOffset);
 
-        // Create actual balloon
         const balloon = document.createElement("div");
         balloon.className = "floating-balloon";
-        if (data.type === 'ad') balloon.classList.add('twitter-balloon');
-        
         balloon.innerHTML = this.buildBalloonHTML(data);
         
-        const travel = startY + height + 300;
-        const duration = travel / speed;
+        // Animation Duration & Distance
+        const totalTravelPx = window.innerHeight + height + 200; // Only travel enough to clear screen
+        const travelDistance = -(totalTravelPx + startY + 100); // end well above viewport
+        const duration = Math.abs(travelDistance) / speed;
+        
+        const rotation = (Math.random() - 0.5) * 8;
+        const currentZ = data.type === 'ad' ? 2000 : this.lastZIndex++;
 
+        balloon.dataset.side = side;
         balloon.style.cssText = `
             position: absolute;
             ${side}: ${horizontalOffset}px;
             top: ${startY}px;
+            --balloon-rotation: ${rotation}deg;
+            --balloon-travel-y: ${travelDistance}px;
             animation: balloon-move-up ${duration}s linear forwards;
-            z-index: ${data.type === 'ad' ? 100 : 90};
+            z-index: ${currentZ};
         `;
-
+        
+        // DUPLICATE PREVENTION: ADD TO ACTIVE SET
+        this.activeBalloons.add(data.id);
         this.container.appendChild(balloon);
-
-        // Remove balloon after animation
-        setTimeout(() => {
-            balloon.remove();
-        }, duration * 1000);
-
-        // Removed redundant track reset setTimeout
+        
+        // Cleanup after animation
+        setTimeout(() => { 
+            if (balloon.parentNode) balloon.remove(); 
+            this.activeBalloons.delete(data.id);
+        }, duration * 1000 + 1000);
     }
 
     buildBalloonHTML(data) {
-        if (data.type === "ad") {
-            const linkStart = data.link ? `<a href="${data.link}" target="_blank" rel="noopener noreferrer" class="twitter-link-overlay"></a>` : '';
-            
-            // Interaction links (using Web Intents for realism, or just the tweet link)
-            // For now, let's point everything to the tweet as requested
-            const actionLink = (type) => data.link ? `onclick="window.open('${data.link}', '_blank')"` : '';
-
-            return `
-                <div class="balloon-card balloon-twitter">
-                    ${linkStart}
-                    <div class="twitter-body">
-                        <img src="${data.userImage}" alt="${data.user}" class="twitter-avatar">
-                        <div class="twitter-right-col">
-                            <div class="twitter-header-row">
-                                <span class="twitter-name">${data.user}</span>
-                                <div class="twitter-verified-badge">
-                                    <i class="fa-solid fa-certificate"></i>
-                                    <i class="fa-solid fa-check"></i>
-                                </div>
-                                <span class="twitter-handle">${data.handle} &middot; ${data.time}</span>
-                            </div>
-                            
-                            <div class="twitter-content">
-                                ${data.content}
-                            </div>
-
-                            ${data.adImage ? `
-                            <div class="twitter-image-container">
-                                <img src="${data.adImage}" alt="Post Image" class="twitter-post-image">
-                            </div>
-                            ` : ''}
-
-                            <div class="twitter-footer">
-                                <div class="tweet-action action-reply" ${actionLink('reply')} title="Reply"><i class="fa-regular fa-comment"></i> <span>2</span></div>
-                                <div class="tweet-action action-retweet" ${actionLink('retweet')} title="Retweet"><i class="fa-solid fa-retweet"></i> <span>5</span></div>
-                                <div class="tweet-action action-like" ${actionLink('like')} title="Like"><i class="fa-regular fa-heart"></i> <span>18</span></div>
-                                <div class="tweet-action action-view" ${actionLink('view')} title="Views"><i class="fa-solid fa-chart-simple"></i> <span>1.2k</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
+        const colors = ['blue', 'green', 'yellow', 'orange', 'pink', 'purple'];
+        const randomColor = data.color || colors[Math.floor(Math.random() * colors.length)];
 
         return `
-            <div class="balloon-card">
-                <img src="${data.image}" alt="${data.name}" class="balloon-avatar">
-                <div class="balloon-content">
-                    <div class="balloon-header">
-                        <span class="balloon-name">${data.name}</span>
-                        ${data.badge ? `<span class="balloon-badge">${data.badge}</span>` : ""}
-                    </div>
-                    <div class="balloon-message">${data.message}</div>
+            <div class="balloon-card organic-balloon balloon-bg-${randomColor}">
+                ${data.image ? `<img src="${data.image}" alt="${data.name}" class="balloon-avatar">` : ''}
+                <div class="balloon-header">
+                    <span class="balloon-name">${data.name}</span>
+                    ${data.badge ? `<span class="balloon-badge">${data.badge}</span>` : ''}
                 </div>
+                <div class="balloon-message">${data.message}</div>
+                ${data.link ? `
+                     <div style="margin-top: 10px; font-size: 0.8rem; font-weight: 800; text-decoration: underline; cursor: pointer; color: #000;" 
+                          onclick="window.open('${data.link}', '_blank')">LEARN MORE →</div>
+                ` : ''}
             </div>
         `;
     }
 
     async start() {
         if (this.isRunning || !this.hasEnoughSpace()) return;
-        this.isRunning = true;
         
-        // Generate a unique ID for this run session
+        // Reset tracks for a fresh start
+        this.tracks.left = { lastY: window.innerHeight + 50, lastTick: Date.now() };
+        this.tracks.right = { lastY: window.innerHeight + 50, lastTick: Date.now() };
+        
+        this.isRunning = true;
         this.runId = (this.runId || 0) + 1;
         const currentRunId = this.runId;
 
         const spawn = async () => {
-            // Strict check: if runId changed, this loop is dead
             if (!this.isRunning || this.runId !== currentRunId) return;
-
             const data = await this.getBalloonData();
-            
-            // Check again after async wait (crucial!)
             if (!this.isRunning || this.runId !== currentRunId) return;
             
-            this.createBalloon(data);
-
-            // Much slower interval: 4-10 seconds
-            const next = 4000 + Math.random() * 6000;
-            this.spawnTimeout = setTimeout(spawn, next);
+            if (data) {
+                this.createBalloon(data);
+            }
+            
+            // Dynamic interval: 3-5s on About/Academic, 8-15s elsewhere
+            const isBusyPage = this.currentContext === 'home' || this.currentContext === 'academic';
+            const next = isBusyPage ? 
+                (3000 + Math.random() * 2000) : 
+                (8000 + Math.random() * 7000);
+            
+            // Faster retry if no data was found
+            const retryInterval = data ? next : 1000;
+            this.spawnTimeout = setTimeout(spawn, retryInterval);
         };
 
-        // Initial delay to prevent burst on rapid restarts (0.5s - 1.5s)
         const initialDelay = 500 + Math.random() * 1000;
         this.spawnTimeout = setTimeout(spawn, initialDelay);
     }
 
     stop() {
         this.isRunning = false;
-        // Increment runId to invalidate any pending async spawns immediately
         this.runId = (this.runId || 0) + 1;
-        
         if (this.spawnTimeout) {
             clearTimeout(this.spawnTimeout);
             this.spawnTimeout = null;
@@ -331,164 +280,89 @@ class BalloonSystem {
     }
 
     async getBalloonData() {
-        // Always show YellowHood ad first, then 4% chance for subsequent ads
-        if (!this.hasShownInitialAd || Math.random() < 0.04) {
-            this.hasShownInitialAd = true;
+        // 1. PRIORITY: Standardized YellowHood Ad
+        // We always try to show this first if it's not already on screen
+        if (!this.activeBalloons.has("ad-yellowhood-standard")) {
             return {
-                id: "ad-yellowhood-" + Date.now(),
+                id: "ad-yellowhood-standard",
                 type: "ad",
-                user: "Gabriel Baiano",
-                handle: "@uMagicalJake",
-                userImage: "assets/images/icon.jpg",
-                time: "2h",
-                content: "Discovering how to create unique digital experiences at <span style='color: #1d9bf0'>#AgenciaYellowHood</span>. Transform your online presence with strategy, design, and technology. <a href='https://yellowhood.com.br' style='color: #1d9bf0; text-decoration: none;'>https://yellowhood.com.br</a>",
-                adImage: "assets/images/banner.png",
-                link: "https://x.com/uMagicalJake/status/2004784426199466295"
+                name: "YELLOWHOOD AGENCY",
+                message: "Transform your idea into an elite digital product. Strategy, Design, and Full-stack.",
+                badge: "Agency",
+                color: "blue",
+                link: "https://yellowhood.com.br",
+                contexts: ['home', 'projects', 'academic', 'feed', 'photos']
             };
         }
 
-        let list = await this.getAllData();
+        // 2. VARIETY: If Ad is already active, pull from other sources
+        let pool = await this.getAllData();
         
-        // Filter by context
-        list = list.filter(item => {
-            if (!item.contexts) return true;
-            return item.contexts.includes(this.currentContext);
+        // Filter by context, active state, and recent logic
+        const validItems = pool.filter(item => {
+            const contextMatch = !item.contexts || item.contexts.includes(this.currentContext);
+            const notActive = !this.activeBalloons.has(item.id);
+            const notRecent = !this.recent.includes(item.id);
+            return contextMatch && notActive && notRecent;
         });
+
+        if (validItems.length === 0) return null;
+
+        // Pick random valid item
+        const selected = validItems[Math.floor(Math.random() * validItems.length)];
         
-        // Remove recently shown
-        list = list.filter(i => !this.recent.includes(i.id));
+        // Track recent to avoid same-balloon succession
+        this.recent.push(selected.id);
+        if (this.recent.length > this.maxRecent) this.recent.shift();
 
-        if (list.length === 0) {
-            this.recent = [];
-            list = (await this.getAllData()).filter(item => {
-                if (!item.contexts) return true;
-                return item.contexts.includes(this.currentContext);
-            });
-        }
-
-        // All notifications now (no ads)
-        if (list.length > 0) {
-            const item = list[Math.floor(Math.random() * list.length)];
-            this.recent.push(item.id);
-            if (this.recent.length > this.maxRecent) this.recent.shift();
-            return item;
-        }
-
-        // Return a safe default if absolutely nothing matches (prevents crash)
-        return {
-            id: "fallback-" + Date.now(),
-            type: "notification",
-            name: "Portfolio",
-            message: "Welcome to my portfolio!",
-            badge: "👋",
-            image: "assets/images/icon.jpg",
-            contexts: ['home', 'projects', 'shii-app']
-        };
+        return selected;
     }
 
     async getAllData() {
-        // Try to fetch from API first
         try {
             const context = this.currentContext;
-            let url;
-
-            if (context === 'home') {
-                url = '/api/get-balloon-data?context=home';
-            } else if (context === 'projects') {
-                url = '/api/get-balloon-data?context=projects';
-            } else {
-                // Specific project context
-                url = `/api/get-balloon-data?project=${context}`;
-            }
-            
-            const response = await fetch(url);
+            const response = await fetch(`/api/get-balloon-data?context=${context}`);
             const result = await response.json();
-            
-            if (result.success && result.data && result.data.length > 0) {
-                console.log(`Loaded ${result.data.length} balloons from API`);
-                return result.data;
-            }
-        } catch (error) {
-            console.error('Error fetching from API, using fallback:', error);
-        }
-
-        // Fallback to static data if API fails
+            if (result.success && result.data && result.data.length > 0) return result.data;
+        } catch (error) { }
         return this.getFallbackData();
     }
 
     getFallbackData() {
-        const baseData = [
-            {
-                id: "notif-5",
-                type: "notification",
-                name: "New Follower",
-                message: "Started following you on GitHub",
-                badge: "👥",
-                image: "https://api.dicebear.com/7.x/avataaars/svg?seed=user5",
-                contexts: ['home', 'projects']
-            },
-            {
-                id: "notif-8",
-                type: "notification",
-                name: "New Follower",
-                message: "Started following you on GitHub",
-                badge: "👥",
-                image: "https://api.dicebear.com/7.x/avataaars/svg?seed=user8",
-                contexts: ['home', 'projects']
-            }
+        return [
+            { id: "p1", type: "notification", name: "Shii App", message: "v2.1 Available!", badge: "Hot", color: "green", contexts: ['projects', 'home', 'academic'] },
+            { id: "p2", type: "notification", name: "New Release", message: "Performance updates pushed.", badge: "New", color: "green", contexts: ['projects', 'home', 'academic'] },
+            { id: "a1", type: "notification", name: "Publication", message: "New article about LLMs!", badge: "Article", color: "yellow", contexts: ['home', 'academic'] },
+            { id: "s1", type: "notification", name: "Twitter", message: "Discussion about dynamic UI.", badge: "Social", color: "pink", contexts: ['home', 'academic'] },
+            { id: "r1", type: "notification", name: "Reading", message: "Reading: Foundation.", badge: "Reading", image: "https://m.media-amazon.com/images/I/91M9Ef-07-L._AC_UF1000,1000_QL80_.jpg", color: "purple", contexts: ['home', 'academic'] },
+            { id: "c1", type: "notification", name: "Contact", message: "Let's chat on WhatsApp.", badge: "Links", color: "orange", link: "https://wa.me/seunumeroaqui", contexts: ['home', 'projects', 'academic'] }
         ];
-        return baseData;
     }
 
-    // Method to change context
     async updateContext() {
         const hash = window.location.hash;
-        
-        // Context: Projects Page (all projects)
-        if (hash === '#/projects') {
-            this.currentContext = 'projects';
-            console.log('🎈 Balloon Context: Projects (Aggregated)');
-        }
-        // Context: Specific Project Detail
+        if (hash === '#/projects') this.currentContext = 'projects';
+        else if (hash === '#/academic') this.currentContext = 'academic';
+        else if (hash === '#/home') this.currentContext = 'home';
         else if (hash.startsWith('#/detail/projects/')) {
             const projectId = hash.split('/').pop();
             try {
-                // Get repo slug from project ID (e.g., 'shii-app' -> 'shii-study-assistant')
-                const repoSlug = await DataService.getProjectRepoSlug(projectId);
-                
-                if (repoSlug) {
-                    this.currentContext = repoSlug;
-                    console.log(`🎈 Balloon Context: Project (${repoSlug})`);
+                // Assuming DataService is globally available or handled elsewhere
+                if (typeof DataService !== 'undefined') {
+                    const repoSlug = await DataService.getProjectRepoSlug(projectId);
+                    this.currentContext = repoSlug || 'home';
                 } else {
                     this.currentContext = 'home';
                 }
-            } catch (e) {
-                console.error('Error setting balloon context:', e);
-                this.currentContext = 'home';
-            }
+            } catch (e) { this.currentContext = 'home'; }
         }
-        // Default: Home
-        else {
-            this.currentContext = 'home';
-            console.log('🎈 Balloon Context: Home');
-        }
+        else this.currentContext = 'home';
         
-        // Reset recent list to ensure new context data is shown immediately
         this.recent = [];
-        
-        // Force reposition check on new context
         setTimeout(() => this.repositionBalloons(), 100);
     }
 }
 
-// Initialize balloon system
+// Global initialization
 const balloonSystem = new BalloonSystem();
-
-// Auto-start after page load
-window.addEventListener("load", () => {
-    if (balloonSystem.hasEnoughSpace()) {
-        setTimeout(() => {
-            balloonSystem.start();
-        }, 3000);
-    }
-});
+window.balloonSystem = balloonSystem;

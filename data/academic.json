@@ -122,9 +122,22 @@
       "author": "Robert C. Martin",
       "status": "Finished",
       "tag": "Tech",
+      "year": "2024",
       "image": "https://m.media-amazon.com/images/I/41-sN3TvE5L._AC_UF1000,1000_QL80_.jpg",
       "link": "https://github.com/GabrielBaiano/personal-library",
       "icon": "fa-solid fa-check-double"
-    }
+    },
+    { "id": "hobbit", "title": "O hobbity", "author": "J.R.R. Tolkien", "status": "Reading", "tag": "Fiction", "year": "2025", "link": "https://github.com/GabrielBaiano/personal-library" },
+    { "id": "1984", "title": "1984", "author": "George Orwell", "status": "Reading", "tag": "Fiction", "year": "2025", "link": "https://github.com/GabrielBaiano/personal-library" },
+    { "id": "espada-destino", "title": "A espada do destino", "author": "Andrzej Sapkowski", "status": "Reading", "tag": "Fiction", "year": "2025", "link": "https://github.com/GabrielBaiano/personal-library" },
+    { "id": "algoritmos", "title": "Entendendo algoritmos", "author": "Aditya Bhargava", "status": "Reading", "tag": "Tech", "year": "2025", "link": "https://github.com/GabrielBaiano/personal-library" },
+    { "id": "morte-vida", "title": "A morte não interrompe a vida", "author": "Zibia Gasparetto", "status": "Reading", "tag": "Spirituality", "year": "2025", "link": "https://github.com/GabrielBaiano/personal-library" },
+    { "id": "frankenstein", "title": "Frankstein", "author": "Mary Shelley", "status": "Reading", "tag": "Fiction", "year": "2025", "link": "https://github.com/GabrielBaiano/personal-library" },
+    { "id": "fundacao-1", "title": "Fundação 1", "author": "Isaac Asimov", "status": "Reading", "tag": "Sci-Fi", "year": "2025", "link": "https://github.com/GabrielBaiano/personal-library" },
+    { "id": "dante", "title": "Trabalhos de Dante", "author": "Dante Alighieri", "status": "Reading", "tag": "Classic", "year": "2025", "link": "https://github.com/GabrielBaiano/personal-library" },
+    { "id": "algoritmos-js", "title": "Algoritmos JS", "author": "Loiane Groner", "status": "Reading", "tag": "Tech", "year": "2025", "link": "https://github.com/GabrielBaiano/personal-library" },
+    { "id": "misto-quente", "title": "Misto quente", "author": "Charles Bukowski", "status": "Reading", "tag": "Fiction", "year": "2025", "link": "https://github.com/GabrielBaiano/personal-library" },
+    { "id": "overthinking-cure", "title": "The overthinking cure", "author": "Nick Trenton", "status": "Reading", "tag": "Health", "year": "2025", "link": "https://github.com/GabrielBaiano/personal-library" },
+    { "id": "metamorfose", "title": "Metamorfose", "author": "Franz Kafka", "status": "Reading", "tag": "Fiction", "year": "2025", "link": "https://github.com/GabrielBaiano/personal-library" }
   ]
 }

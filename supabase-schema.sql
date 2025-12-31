@@ -14,10 +14,10 @@ CREATE TABLE IF NOT EXISTS github_followers (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 2. Tabela de Project Data (stars, contributors, forks, issues, PRs)
+-- 2. Tabela de Project Data (stars, contributors, forks, issues, PRs, releases)
 CREATE TABLE IF NOT EXISTS github_project_data (
   id TEXT PRIMARY KEY,
-  type TEXT NOT NULL, -- 'star', 'contributor', 'fork', 'issue_opened', 'issue_closed', 'pr_opened', 'pr_merged'
+  type TEXT NOT NULL, -- 'star', 'contributor', 'fork', 'issue_opened', 'issue_closed', 'pr_opened', 'pr_merged', 'release'
   username TEXT NOT NULL,
   avatar_url TEXT,
   profile_url TEXT,
@@ -39,6 +39,10 @@ CREATE TABLE IF NOT EXISTS github_project_data (
   pr_title TEXT, -- Para PRs
   pr_url TEXT,
   pr_number INTEGER,
+  
+  -- Releases (NEW)
+  release_tag TEXT,
+  release_notes TEXT,
   
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -98,6 +102,3 @@ CREATE POLICY "Allow public read access on readmes"
 CREATE POLICY "Allow public read access on metadata"
   ON github_cache_metadata FOR SELECT
   USING (true);
-
--- Políticas de escrita apenas via service role
--- (Não precisa criar políticas de INSERT/UPDATE/DELETE pois só o service role terá acesso)

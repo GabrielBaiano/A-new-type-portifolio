@@ -1,6 +1,6 @@
 /**
  * Vercel Serverless Function - Complete GitHub Data Cache
- * Fetches followers, repos, stars, contributors, forks, issues, PRs, and READMEs
+ * Fetches followers, repos, stars, contributors, forks, issues, PRs, releases, and READMEs
  * Saves everything to Supabase via REST API
  */
 
@@ -53,7 +53,7 @@ export default async function handler(req, res) {
     );
     const followers = await followersRes.json();
 
-    const followersData = followers.map(f => ({
+    const followersData = Array.isArray(followers) ? followers.map(f => ({
       id: `follower-${f.id}`,
       type: 'follower',
       username: f.login,
@@ -61,7 +61,7 @@ export default async function handler(req, res) {
       profile_url: f.html_url,
       context: 'home',
       created_at: new Date().toISOString()
-    }));
+    })) : [];
 
     // ========================================
     // 2. REPOSITÓRIOS DO USUÁRIO
@@ -78,16 +78,14 @@ export default async function handler(req, res) {
     const priorityReposNames = ['shii-study-assistant', 'awesome-readme', 'A-new-type-portifolio'];
     
     // Filter priority repos from the list
-    const priorityRepos = repos.filter(r => priorityReposNames.includes(r.name));
+    const priorityRepos = Array.isArray(repos) ? repos.filter(r => priorityReposNames.includes(r.name)) : [];
     
     // Get other repos (excluding priority ones) up to a safe limit
-    // Total limit of 6 ensures execution time stays safely within Vercel's 10s limit for Hobby plan
-    // (6 repos * ~6 requests each = ~36 requests)
     const MAX_REPOS = 6;
     const remainingSlots = Math.max(0, MAX_REPOS - priorityRepos.length);
-    const otherRepos = repos
+    const otherRepos = Array.isArray(repos) ? repos
       .filter(r => !priorityReposNames.includes(r.name))
-      .slice(0, remainingSlots);
+      .slice(0, remainingSlots) : [];
 
     const reposToProcess = [...priorityRepos, ...otherRepos];
 
@@ -126,7 +124,7 @@ export default async function handler(req, res) {
               repo_full_name: repoFullName,
               context: 'projects',
               project_context: projectContext,
-              created_at: starItem.starred_at // Real timestamp
+              created_at: starItem.starred_at
             });
           });
         }
@@ -246,7 +244,34 @@ export default async function handler(req, res) {
         }
       } catch (e) { console.error('Error fetching PRs:', e); }
 
-      // 2.6 README
+      // 2.6 Releases (NEW)
+      try {
+        const releasesRes = await fetch(
+          `https://api.github.com/repos/${repoFullName}/releases?per_page=1`,
+          { headers: githubHeaders }
+        );
+        const releases = await releasesRes.json();
+        
+        if (Array.isArray(releases) && releases.length > 0) {
+          const latest = releases[0];
+          allProjectData.push({
+            id: `release-${repo.id}-${latest.id}`,
+            type: 'release',
+            username: latest.author.login,
+            avatar_url: latest.author.avatar_url,
+            profile_url: latest.author.html_url,
+            repo_name: repo.name,
+            repo_full_name: repoFullName,
+            release_tag: latest.tag_name,
+            release_notes: latest.body ? latest.body.substring(0, 150) : '',
+            context: 'projects',
+            project_context: projectContext,
+            created_at: latest.published_at
+          });
+        }
+      } catch (e) { console.error('Error fetching releases:', e); }
+
+      // 2.7 README
       try {
         let readmeRes = await fetch(
           `https://raw.githubusercontent.com/${repoFullName}/main/README.md`,
@@ -274,13 +299,8 @@ export default async function handler(req, res) {
         }
       } catch (e) { console.error('Error fetching README:', e); }
 
-      // Delay para não bater rate limit
       await new Promise(resolve => setTimeout(resolve, 100));
     }
-
-    // ========================================
-    // 3. SALVAR NO SUPABASE
-    // ========================================
 
     // ========================================
     // 3. SALVAR NO SUPABASE
@@ -290,16 +310,12 @@ export default async function handler(req, res) {
       reposFound: repos ? repos.length : 0,
       followersFound: followersData.length,
       projectDataCount: allProjectData.length,
-      sampleProjectData: allProjectData.length > 0 ? allProjectData[0] : null,
       errors: []
     };
 
-    // Only update if we actually found data (Safety Check)
     if (allProjectData.length > 0) {
-      // Limpar dados antigos
       await supabaseRequest('github_project_data?id=neq.dummy', 'DELETE');
       
-      // Normalize data to ensure all keys exist (Supabase requirement for bulk insert)
       const normalizedData = allProjectData.map(item => ({
         contributions: null,
         fork_url: null,
@@ -309,18 +325,16 @@ export default async function handler(req, res) {
         pr_title: null,
         pr_url: null,
         pr_number: null,
+        release_tag: null,
+        release_notes: null,
         ...item
       }));
 
-      // Inserir project data
       const insertRes = await supabaseRequest('github_project_data', 'POST', normalizedData);
       if (!insertRes.ok) {
         const errorText = await insertRes.text();
         debugInfo.errors.push(`Insert Project Data Failed: ${insertRes.statusText} - ${errorText}`);
-        console.error('Supabase Insert Error:', errorText);
       }
-    } else {
-      debugInfo.errors.push("No project data found to insert. Skipping DB wipe to preserve cache.");
     }
 
     if (followersData.length > 0) {
@@ -328,7 +342,6 @@ export default async function handler(req, res) {
         await supabaseRequest('github_followers', 'POST', followersData);
     }
     
-    // Atualizar metadata
     await supabaseRequest('github_cache_metadata', 'POST', {
       username: username,
       last_updated: new Date().toISOString(),
@@ -339,12 +352,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       success: true,
       updated_at: new Date().toISOString(),
-      debug: debugInfo,
-      data: {
-        followers: followersData.length,
-        project_data: allProjectData.length,
-        repos_processed: reposToProcess.length
-      }
+      debug: debugInfo
     });
 
   } catch (error) {

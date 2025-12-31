@@ -26,34 +26,49 @@ export default async function handler(req, res) {
 
     let data = [];
 
-    if (context === 'home') {
-      // Buscar followers para Home (Last 7 days)
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/github_followers?select=*&order=created_at.desc&limit=50${dateFilter}`,
-        { headers: supabaseHeaders }
-      );
-      const followers = await response.json();
-      
-      data = followers.map(f => ({
+    // For 'home' and 'academic', we want EVERYTHING (Followers + All Project Data)
+    if (context === 'home' || context === 'academic') {
+      const [followersRes, projectDataRes] = await Promise.all([
+        fetch(`${SUPABASE_URL}/rest/v1/github_followers?select=*&order=created_at.desc&limit=25${dateFilter}`, { headers: supabaseHeaders }),
+        fetch(`${SUPABASE_URL}/rest/v1/github_project_data?select=*&order=created_at.desc&limit=50${dateFilter}`, { headers: supabaseHeaders })
+      ]);
+
+      const followers = await followersRes.json();
+      const projectData = await projectDataRes.json();
+
+      const mappedFollowers = Array.isArray(followers) ? followers.map(f => ({
         id: f.id,
         type: 'notification',
         name: f.username,
         message: 'Started following you on GitHub',
-        badge: '👥',
+        badge: 'Follower',
         image: f.avatar_url,
         date: f.created_at,
-        contexts: ['home']
-      }));
-      
+        contexts: ['home', 'academic']
+      })) : [];
+
+      const mappedProjects = Array.isArray(projectData) ? projectData.map(item => ({
+        id: item.id,
+        type: 'notification',
+        name: item.username,
+        message: getMessageForType(item.type, item),
+        badge: getBadgeForType(item.type),
+        image: item.avatar_url,
+        date: item.created_at,
+        contexts: ['home', 'academic', 'projects']
+      })) : [];
+
+      data = [...mappedFollowers, ...mappedProjects];
+
     } else if (project) {
-      // Buscar dados de projeto específico (Last 7 days)
+      // Specific project context
       const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/github_project_data?project_context=eq.${project}&select=*&order=created_at.desc&limit=100${dateFilter}`,
+        `${SUPABASE_URL}/rest/v1/github_project_data?project_context=eq.${project}&select=*&order=created_at.desc&limit=50${dateFilter}`,
         { headers: supabaseHeaders }
       );
       const projectData = await response.json();
       
-      data = projectData.map(item => ({
+      data = Array.isArray(projectData) ? projectData.map(item => ({
         id: item.id,
         type: 'notification',
         name: item.username,
@@ -62,17 +77,17 @@ export default async function handler(req, res) {
         image: item.avatar_url,
         date: item.created_at,
         contexts: [project]
-      }));
+      })) : [];
       
     } else {
-      // Buscar todos os projetos (Last 7 days)
+      // General projects context
       const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/github_project_data?context=eq.projects&select=*&order=created_at.desc&limit=100${dateFilter}`,
+        `${SUPABASE_URL}/rest/v1/github_project_data?select=*&order=created_at.desc&limit=50${dateFilter}`,
         { headers: supabaseHeaders }
       );
       const projectData = await response.json();
       
-      data = projectData.map(item => ({
+      data = Array.isArray(projectData) ? projectData.map(item => ({
         id: item.id,
         type: 'notification',
         name: item.username,
@@ -81,7 +96,7 @@ export default async function handler(req, res) {
         image: item.avatar_url,
         date: item.created_at,
         contexts: ['projects']
-      }));
+      })) : [];
     }
 
     return res.status(200).json({
@@ -107,20 +122,22 @@ function getMessageForType(type, item) {
     'issue_opened': `Opened issue: ${item.issue_title}`,
     'issue_closed': `Closed issue in ${item.repo_name}`,
     'pr_opened': `Opened PR: ${item.pr_title}`,
-    'pr_merged': `Merged PR in ${item.repo_name}`
+    'pr_merged': `Merged PR in ${item.repo_name}`,
+    'release': `New release ${item.release_tag}: ${item.release_notes}`
   };
   return messages[type] || 'GitHub activity';
 }
 
 function getBadgeForType(type) {
   const badges = {
-    'star': '⭐',
-    'contributor': '💻',
-    'fork': '🍴',
-    'issue_opened': '🐛',
-    'issue_closed': '🔧',
-    'pr_opened': '📝',
-    'pr_merged': '✅'
+    'star': 'Star',
+    'contributor': 'Commit',
+    'fork': 'Fork',
+    'issue_opened': 'Issue',
+    'issue_closed': 'Fixed',
+    'pr_opened': 'PR',
+    'pr_merged': 'Merged',
+    'release': 'Release'
   };
-  return badges[type] || '📌';
+  return badges[type] || 'Activity';
 }

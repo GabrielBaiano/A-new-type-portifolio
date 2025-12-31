@@ -4,25 +4,9 @@ const AcademicPage = {
         return `
             <div class="sidebar-card">
                 <div class="sidebar-section">
-                    <span class="sidebar-label">Recently Reading</span>
-                    <div class="sidebar-link-list">
-                        ${readingListData && readingListData.length > 0 ? readingListData.map(book => `
-                            <div class="sidebar-link" style="cursor: default; pointer-events: none;">
-                                <i class="${book.icon || 'fa-solid fa-book'}"></i>
-                                <div style="display: flex; flex-direction: column;">
-                                    <span style="font-size: 0.9rem; font-weight: 700;">${book.title}</span>
-                                    <span style="font-size: 0.75rem; color: var(--text-muted);">${book.author}</span>
-                                </div>
-                                <span class="timeline-period" style="font-size: 0.65rem; padding: 2px 8px; margin-left: auto;">${book.status}</span>
-                            </div>
-                        `).join('') : '<p class="no-content-msg">No books added yet.</p>'}
-                    </div>
-                </div>
-
-                <div class="sidebar-section">
-                    <span class="sidebar-label">Core Expertise</span>
-                    <div class="tag-cloud">
-                        ${sidebarData.skills ? sidebarData.skills.map(skill => `<span class="sidebar-tag" data-tag="${skill}" style="cursor: default;">${skill}</span>`).join('') : ''}
+                    <span class="sidebar-label">Library Shelf</span>
+                    <div id="bookshelf-multi-container" class="bookshelf-multi-container">
+                        ${this.renderIndividualShelves(this.groupBooksByYear(readingListData))}
                     </div>
                 </div>
             </div>
@@ -114,32 +98,7 @@ const AcademicPage = {
                         </section>
                     </div>
 
-                    <!-- Visual Reading List Section -->
-                    <div class="card reading-section-card">
-                        <section class="cv-section" style="margin-bottom: 0;">
-                            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px;">
-                                <h2 class="cv-section-title" style="margin-bottom: 0;">Current Reading</h2>
-                                <a href="https://github.com/GabrielBaiano/personal-library" target="_blank" class="academic-link" style="font-size: 0.85rem;">View Full Library →</a>
-                            </div>
-                            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6;">A list of books I'm currently reading and have read recently. Click to explore reviews and notes.</p>
-                            
-                            <div class="reading-grid">
-                                ${data.readingList.map(book => `
-                                    <a href="${book.link}" target="_blank" class="book-card" style="text-decoration: none;">
-                                        <img src="${book.image}" alt="${book.title}" class="book-cover">
-                                        <div class="book-info">
-                                            <span class="book-tag">${book.tag}</span>
-                                            <h4 class="book-title">${book.title}${book.isBR ? '<sup style="font-size: 0.6em; margin-left: 2px; opacity: 0.6;">BR</sup>' : ''}</h4>
-                                            <div class="book-status-row">
-                                                <i class="${book.icon}"></i>
-                                                <span>Status: <strong>${book.status}</strong></span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                `).join('')}
-                            </div>
-                        </section>
-                    </div>
+                    <!-- Honors & Awards Section (End of main) -->
 
                     <!-- Mobile Sidebar Content -->
                     <div class="mobile-only">
@@ -192,27 +151,82 @@ const AcademicPage = {
     /**
      * Sync books dynamically from personal-library README
      */
+    /**
+     * Helper to group books by year for fallback data
+     */
+    groupBooksByYear(books) {
+        if (!books) return {};
+        const groups = {};
+        books.forEach(book => {
+            const year = book.year || 'Reading';
+            const key = year.includes('20') ? `${year} books` : year;
+            if (!groups[key]) groups[key] = [];
+            groups[key].push(book);
+        });
+        return groups;
+    },
+
+    /**
+     * Helper to render multiple shelves based on grouped data
+     */
+    renderIndividualShelves(groupedBooks) {
+        if (!groupedBooks || Object.keys(groupedBooks).length === 0) {
+            return '<p class="no-content-msg">No books added yet.</p>';
+        }
+
+        const sortedEntries = Object.entries(groupedBooks).sort(([a], [b]) => {
+            const isAReading = a.toLowerCase().includes('reading');
+            const isBReading = b.toLowerCase().includes('reading');
+            
+            if (isAReading) return -1;
+            if (isBReading) return 1;
+            
+            const yearA = parseInt(a.match(/\d+/)) || 0;
+            const yearB = parseInt(b.match(/\d+/)) || 0;
+            return yearB - yearA; // Recente primeiro
+        });
+
+        return sortedEntries.map(([year, books]) => {
+            // Chunk books into sets of 5-6 to avoid long wrapping rows without boards
+            const booksPerShelf = 6;
+            const chunks = [];
+            for (let i = 0; i < books.length; i += booksPerShelf) {
+                chunks.push(books.slice(i, i + booksPerShelf));
+            }
+
+            return `
+                <div class="shelf-group">
+                    <span class="shelf-year-label">${year}</span>
+                    <div class="shelves-wrapper">
+                        ${chunks.map(chunk => `
+                            <div class="bookshelf">
+                                ${chunk.map(book => `
+                                    <a href="${book.link}" target="_blank" class="spine-book" data-tag="${book.tag}" title="${book.title} - ${book.author}">
+                                        <span class="spine-title">${book.title}</span>
+                                        ${book.isBR ? '<span class="spine-br">BR</span>' : ''}
+                                    </a>
+                                `).join('')}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    },
+
     async syncGitHubBooks() {
-        const grid = document.querySelector('.reading-grid');
-        if (!grid) return;
+        const containers = document.querySelectorAll('#bookshelf-multi-container');
+        if (containers.length === 0) return;
 
         try {
-            const githubBooks = await DataService.getGitHubReadingList();
-            if (githubBooks && githubBooks.length > 0) {
-                grid.innerHTML = githubBooks.map(book => `
-                    <a href="${book.link}" target="_blank" class="book-card" style="text-decoration: none;">
-                        <img src="${book.image}" alt="${book.title}" class="book-cover">
-                        <div class="book-info">
-                            <span class="book-tag">${book.tag}</span>
-                            <h4 class="book-title">${book.title}${book.isBR ? '<sup style="font-size: 0.6em; margin-left: 2px; opacity: 0.6;">BR</sup>' : ''}</h4>
-                            <div class="book-status-row">
-                                <i class="${book.icon}"></i>
-                                <span>Status: <strong>${book.status}</strong></span>
-                            </div>
-                        </div>
-                    </a>
-                `).join('');
-                console.log('📚 Reading list synced with GitHub');
+            const groupedBooks = await DataService.getGitHubReadingList();
+            if (groupedBooks) {
+                const shelfHtml = this.renderIndividualShelves(groupedBooks);
+                
+                containers.forEach(container => {
+                    container.innerHTML = shelfHtml;
+                });
+                console.log('📚 Multi-year bookshelf synced');
             }
         } catch (err) {
             console.warn('Sync failed, using fallback data:', err);

@@ -1,8 +1,6 @@
 :root {
     --bg-color: #050505;
-    /* Fundo da página */
     --card-bg: #0a0a0a;
-    /* Fundo do card */
     --text-main: #ffffff;
     --text-muted: #888888;
     --border-color: #222222;
@@ -42,7 +40,6 @@
     --grid-color: #bbdefb;
     --accent-blue: #1976d2;
 }
-
 /* ... (lines 27-1727 skipped) ... */
 
 /* ===== Wide Layout System ===== */
@@ -95,6 +92,20 @@ body.wide-layout .main-container {
 
 [data-theme="light"] .bio p {
     color: #000000;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    /* Subtle grid pattern */
+    background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
+    background-size: 20px 20px;
+    padding: 40px 20px 120px 20px;
+    position: relative;
+    overflow-x: hidden;
+    margin: 0;
 }
 
 [data-theme="light"] .bio i {
@@ -208,18 +219,7 @@ body,
     padding: 0;
 }
 
-body {
-    background-color: var(--bg-color);
-    color: var(--text-main);
-    font-family: 'Inter', sans-serif;
-    min-height: 100vh;
-    /* Adicionando um padrão de grade sutil no fundo para estilo */
-    background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
-    background-size: 20px 20px;
-    padding: 40px 20px 120px 20px;
-    /* Aumentei o padding vertical e adicionei espaço inferior para a toolbar */
-    position: relative;
-}
+
 
 /* Main Container for SPA */
 .main-container {
@@ -290,37 +290,12 @@ body {
 .card {
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: 0.5rem;
+    border-radius: 1.2rem;
     padding: 32px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     position: relative;
     transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
     overflow: hidden;
-}
-
-/* Blueprint Details (Item 5) */
-.card::before {
-    content: "BR-01"; /* Blueprint Reference */
-    position: absolute;
-    top: 8px;
-    right: 12px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.6rem;
-    color: var(--accent-blue);
-    opacity: 0.4;
-    letter-spacing: 0.1em;
-}
-
-.card::after {
-    content: ""; 
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 20px;
-    height: 20px;
-    border-left: 1px solid var(--accent-blue);
-    border-bottom: 1px solid var(--accent-blue);
-    opacity: 0.3;
 }
 
 .card:hover {
@@ -844,94 +819,154 @@ body {
     color: var(--text-main);
 }
 
-/* Reading List - Visual Gallery Style */
+/* Bookshelf - Flat Minimalist Style */
 .reading-section {
     margin-top: 32px;
+    padding-bottom: 40px;
 }
 
-.reading-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 24px;
-    margin-top: 20px;
+/* Multi-Shelf Layout */
+.bookshelf-multi-container {
+    max-height: calc(100vh - 250px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px 12px 20px 0; /* Clear space at top/bottom */
+    margin-top: 10px;
+    scrollbar-width: thin;
 }
 
-.book-card {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 12px;
-    transition: all 0.3s ease;
+/* Custom scrollbar for the bookshelf area */
+.bookshelf-multi-container::-webkit-scrollbar {
+    width: 4px;
+}
+.bookshelf-multi-container::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 10px;
+}
+
+.shelf-group {
+    margin-bottom: 40px;
+    position: relative;
+    padding-top: 35px; /* More space for the year label */
+}
+
+.shelves-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 35px; /* Spanning between vertical shelf boards */
 }
 
-.book-card:hover {
-    transform: translateY(-5px);
-    border-color: var(--accent-blue);
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.book-cover {
-    width: 100%;
-    aspect-ratio: 2/3;
-    object-fit: cover;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-
-.book-info {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.book-tag {
-    align-self: flex-start;
+.shelf-year-label {
+    position: absolute;
+    top: -5px;
+    left: 10px;
     font-size: 0.65rem;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 4px;
-    background: var(--accent-blue);
-    color: white;
+    font-weight: 800;
+    color: var(--accent-blue);
     text-transform: uppercase;
+    letter-spacing: 0.12em;
+    opacity: 0.8;
 }
 
-.book-title {
-    font-family: 'Sora', sans-serif;
-    font-size: 0.95rem;
-    font-weight: 700;
-    margin: 0;
-    color: var(--text-main);
+.bookshelf {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    padding: 0 10px;
+    margin-top: 0; 
+    min-height: 150px; /* Increased to avoid clipping hover */
+    position: relative;
+    justify-content: flex-start;
+    border-bottom: 8px solid #e0e0e0;
 }
 
-.book-status-row {
+[data-theme="dark"] .bookshelf {
+    border-bottom-color: #333;
+}
+
+.bookshelf::after {
+    display: none;
+}
+
+.spine-book {
+    width: 25px;
+    height: 110px;
+    background: #444;
+    border-radius: 2px 2px 0 0;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.75rem;
-    color: var(--text-muted);
+    justify-content: center;
+    text-decoration: none;
+    margin-bottom: 0px;
+    padding: 10px 0;
 }
 
-.book-status-row i {
-    font-size: 0.8rem;
+.spine-book:hover {
+    transform: translateY(-10px) scale(1.05);
+    z-index: 10;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
 }
 
-.book-status-row strong {
-    color: var(--text-main);
+/* Vertical title inside the spine */
+.spine-title {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 0.55rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    pointer-events: none;
+    max-height: 85%;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
-/* Light Theme Adjustments for Reading List */
-[data-theme="light"] .book-card {
-    background: #ffffff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+.spine-br {
+    position: absolute;
+    bottom: 6px;
+    font-size: 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 800;
+    opacity: 0.5;
+    color: white;
 }
 
-[data-theme="light"] .book-tag {
-    background: #e3f2fd;
-    color: #1976d2;
-    border: 1px solid #bbdefb;
+/* Book variety - using nth-child for size diversity */
+.spine-book:nth-child(5n+1) { height: 115px; width: 28px; }
+.spine-book:nth-child(5n+2) { height: 125px; width: 32px; }
+.spine-book:nth-child(5n+3) { height: 105px; width: 22px; }
+.spine-book:nth-child(5n+4) { height: 110px; width: 26px; }
+.spine-book:nth-child(5n) { height: 120px; width: 30px; }
+
+/* Font variety for spines */
+.spine-book:nth-child(4n+1) .spine-title { font-family: 'Sora', sans-serif; }
+.spine-book:nth-child(4n+2) .spine-title { font-family: 'Outfit', sans-serif; }
+.spine-book:nth-child(4n+3) .spine-title { font-family: 'JetBrains Mono', monospace; }
+.spine-book:nth-child(4n) .spine-title { font-family: 'Inter', sans-serif; }
+
+/* non-repetitive organic colors */
+.spine-book:nth-child(7n+1) { background-color: #6b46c1; border-left: 2px solid rgba(0,0,0,0.1); }
+.spine-book:nth-child(7n+2) { background-color: #dd6b20; border-left: 2px solid rgba(0,0,0,0.1); }
+.spine-book:nth-child(7n+3) { background-color: #2b6cb0; border-left: 2px solid rgba(0,0,0,0.1); }
+.spine-book:nth-child(7n+4) { background-color: #38a169; border-left: 2px solid rgba(0,0,0,0.1); }
+.spine-book:nth-child(7n+5) { background-color: #e53e3e; border-left: 2px solid rgba(0,0,0,0.1); }
+.spine-book:nth-child(7n+6) { background-color: #3182ce; border-left: 2px solid rgba(0,0,0,0.1); }
+.spine-book:nth-child(7n) { background-color: #805ad5; border-left: 2px solid rgba(0,0,0,0.1); }
+
+/* Brightness jitter for more realism */
+.spine-book:nth-child(odd) { filter: brightness(1.05); }
+.spine-book:nth-child(3n) { filter: contrast(1.1) brightness(0.95); }
+
+/* Light Theme Adjustments */
+[data-theme="light"] .spine-book {
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+}
+[data-theme="light"] .spine-title {
+    color: rgba(255, 255, 255, 0.95);
 }
 
 /* Project info section - transparent background */
@@ -1568,249 +1603,134 @@ body {
 .floating-balloon {
     pointer-events: auto;
     cursor: pointer;
-    transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1), right 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease;
-    width: 320px;
+    width: 380px;
+}
+
+/* Use custom properties to avoid transform conflicts */
+.floating-balloon {
+    --balloon-rotation: 0deg;
+    transform: rotate(var(--balloon-rotation));
 }
 
 .floating-balloon:hover {
-    /* transform: translateY(-4px) !important; <--- CAUSES FLICKER, REMOVED */
-    animation-play-state: paused; /* Stop movement when hovering */
-    z-index: 1000; /* Ensure it stays on top */
+    animation-play-state: paused;
+    z-index: 1000;
 }
 
+/* Quadrilateral shapes with subtle rounding */
 .balloon-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 16px;
+    background: #fff;
+    padding: 32px;
     display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+    transition: transform 0.3s ease;
+    color: #000;
+    border-radius: 2.4rem;
+    min-width: 380px;
+    min-height: 160px; /* Enforce min-height for tails */
+}
+
+/* Round Avatars */
+.balloon-avatar {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    margin-bottom: 5px;
+    border: 3px solid rgba(255, 255, 255, 0.4);
+    border-radius: 50% !important; /* Force round */
+}
+
+/* Vibrant Colors + Diverse Geometric "Lobe" Tails */
+.balloon-bg-blue { background-color: #3b82f6; }
+.balloon-bg-blue::after {
+    content: ""; position: absolute; background: inherit; width: 100px; height: 60px;
+    bottom: -35px; left: 40px; border-radius: 0 0 50% 50%; z-index: -1;
+}
+
+.balloon-bg-green { background-color: #22c55e; }
+.balloon-bg-green::after {
+    content: ""; position: absolute; background: inherit; width: 100px; height: 50px;
+    top: -25px; right: 60px; border-radius: 20px 20px 0 0; transform: perspective(100px) rotateX(20deg); z-index: -1;
+}
+
+.balloon-bg-yellow { background-color: #eab308; }
+.balloon-bg-yellow::after {
+    content: ""; position: absolute; background: inherit; width: 60px; height: 60px;
+    top: 50%; right: -25px; transform: translateY(-50%) rotate(45deg); border-radius: 12px; z-index: -1;
+}
+
+.balloon-bg-orange { background-color: #f97316; }
+.balloon-bg-orange::after {
+    content: ""; position: absolute; background: inherit; width: 80px; height: 80px;
+    bottom: -30px; right: 40px; border-radius: 50%; z-index: -1;
+}
+
+.balloon-bg-pink { background-color: #ec4899; }
+.balloon-bg-pink::after {
+    content: ""; position: absolute; background: inherit; width: 60px; height: 100px;
+    top: 30px; left: -30px; border-radius: 50% 0 0 50%; z-index: -1;
+}
+
+.balloon-bg-purple { background-color: #a855f7; }
+.balloon-bg-purple::after {
+    content: ""; position: absolute; background: inherit; width: 120px; height: 40px;
+    bottom: -30px; left: 50%; transform: translateX(-50%); border-radius: 15px; z-index: -1;
 }
 
 .floating-balloon:hover .balloon-card {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-    border-color: var(--accent-blue);
+    transform: scale(1.05);
 }
 
-.balloon-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    border: 2px solid var(--border-color);
-    background-color: var(--badge-bg);
+.balloon-character {
+    display: none; /* Removed happy faces as requested */
 }
 
-.balloon-content {
-    flex: 1;
-    min-width: 0;
+.balloon-eyes {
+    font-family: 'Inter', sans-serif;
+    font-weight: 800;
+    letter-spacing: -2px;
 }
 
 .balloon-header {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 6px;
 }
 
 .balloon-name {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--text-main);
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #000;
 }
 
 .balloon-badge {
-    font-size: 1rem;
+    font-size: 0.85rem;
+    color: rgba(0, 0, 0, 0.45); /* Muted as in image */
+    margin-left: 8px;
+    font-weight: 600;
 }
 
 .balloon-message {
-    font-size: 0.85rem;
-    line-height: 1.4;
-    color: var(--text-muted);
-}
-
-/* Balloon size variations */
-.balloon-card.balloon-small {
-    padding: 12px;
-}
-
-.balloon-card.balloon-small .balloon-avatar {
-    width: 36px;
-    height: 36px;
-}
-
-.balloon-card.balloon-small .balloon-name {
-    font-size: 0.85rem;
-}
-
-.balloon-card.balloon-small .balloon-message {
-    font-size: 0.75rem;
-}
-
-.balloon-card.balloon-large {
-    padding: 20px;
-}
-
-.balloon-card.balloon-large .balloon-avatar {
-    width: 56px;
-    height: 56px;
-}
-
-.balloon-card.balloon-large .balloon-name {
-    font-size: 1.05rem;
-}
-
-.balloon-card.balloon-large .balloon-message {
-    font-size: 0.95rem;
-}
-
-/* Twitter Balloon Styles */
-.balloon-card.balloon-twitter {
-    padding: 12px 16px;
-    overflow: hidden;
-    cursor: default;
-    width: 380px;
-    background: #000000;
-    border: 1px solid #333;
-    display: block;
-}
-
-.twitter-link-overlay {
-    position: absolute;
-    inset: 0;
-    z-index: 10;
-    cursor: pointer;
-}
-
-.twitter-body {
-    display: flex;
-    gap: 12px;
-}
-
-.twitter-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
-}
-
-.twitter-right-col {
-    flex: 1;
-    min-width: 0;
-}
-
-.twitter-header-row {
-    display: flex;
-    align-items: center;
-    gap: 4px; /* Space between name, badge, handle */
-    font-size: 0.95rem;
+    font-size: 1.25rem; /* Larger text */
     line-height: 1.2;
-    margin-bottom: 4px;
-    flex-wrap: wrap; /* Handle long names gracefully */
+    font-weight: 800;
+    font-family: 'Sora', sans-serif;
+    letter-spacing: -0.02em;
+    color: #000;
 }
 
-.twitter-name {
-    font-weight: 700;
-    color: #fff;
-    white-space: nowrap;
+/* Standard notification layout overrides */
+.balloon-card.organic-balloon {
+    border: none;
+    box-shadow: none;
 }
 
-.twitter-verified-badge {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #1d9bf0;
-    font-size: 0.95rem;
-    margin-left: 0px; /* Adjust spacing */
-}
-
-.twitter-verified-badge .fa-check {
-    position: absolute;
-    color: white;
-    font-size: 0.5rem;
-    z-index: 2;
-}
-   
-.twitter-handle {
-    color: #71767b;
-    font-size: 0.95rem;
-    margin-left: 0; /* Tight spacing as per screenshot */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.twitter-content {
-    color: #e7e9ea;
-    font-size: 0.95rem;
-    line-height: 1.4;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    margin-bottom: 8px;
-    position: relative;
-    z-index: 20; /* Keep text interactions above overlay */
-    pointer-events: none; /* Let clicks pass through text to overlay... */
-}
-
-/* ...but allow clicks on links inside text */
-.twitter-content a {
-    pointer-events: auto;
-    position: relative;
-    z-index: 30;
-}
-
-.twitter-image-container {
-    margin-top: 8px;
-}
-
-.twitter-post-image {
-    width: 100%;
-    border-radius: 6px; /* Reduced from 12px to prevent clipping */
-    border: 1px solid #333;
-    object-fit: cover;
-}
-
-.twitter-footer {
-    display: flex;
-    justify-content: space-between;
-    padding-top: 12px;
-    max-width: 90%;
-    position: relative;
-    z-index: 20; /* Keep actions above overlay */
-}
-
-.tweet-action {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: #71767b;
-    font-size: 0.8rem;
-    transition: color 0.2s;
-    cursor: pointer;
-}
-
-.tweet-action:hover {
-    color: #1d9bf0; /* Default Blue (Reply/View) */
-}
-
-.tweet-action.action-retweet:hover {
-    color: #00ba7c; /* Twitter Green */
-}
-
-.tweet-action.action-like:hover {
-    color: #f91880; /* Twitter Red */
-}
-
-.tweet-action i {
-    font-size: 1rem;
-}
-
+/* Standardized YellowHood Ad styles concluded */
 .balloon-card.balloon-twitter:hover {
-    box-shadow: 0 0 15px rgba(29, 155, 240, 0.1);
     border-color: #333;
     background-color: #050505;
 }
@@ -1895,28 +1815,47 @@ body {
 }
 
 
-/* Floating animation - simple upward movement */
+
+.floating-balloon {
+    width: 380px;
+    transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1), 
+                right 0.8s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.5s ease;
+    will-change: left, right, transform;
+    pointer-events: auto;
+}
+
+.floating-balloon:hover {
+    z-index: 10000 !important;
+}
+
+.floating-balloon:hover .balloon-card {
+    transform: scale(1.02) rotate(0deg) !important;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Floating animation - perfectly synchronized with JS duration */
 @keyframes balloon-move-up {
     0% {
-        transform: translateY(0);
+        transform: translateY(0) rotate(var(--balloon-rotation));
         opacity: 1;
     }
-    90% {
+    95% {
         opacity: 1;
     }
     100% {
-        transform: translateY(-200vh);
+        transform: translateY(var(--balloon-travel-y, -200vh)) rotate(var(--balloon-rotation));
         opacity: 0;
     }
 }
 
 /* Light theme adjustments for balloons */
 [data-theme="light"] .balloon-card {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: none !important;
 }
 
 [data-theme="light"] .floating-balloon:hover .balloon-card {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    box-shadow: none !important;
 }
 
 /* Responsive adjustments */
