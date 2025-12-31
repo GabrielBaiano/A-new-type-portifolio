@@ -28,7 +28,7 @@ export default async function handler(req, res) {
 
     // Simplified: All contexts now fetch ONLY Project Data (Stars, Releases, etc.)
     const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/github_project_data?select=*&order=created_at.desc&limit=50${dateFilter}${project ? `&project_context=eq.${project}` : ''}`,
+      `${SUPABASE_URL}/rest/v1/github_project_data?select=*&order=created_at.desc&limit=100${project ? `&project_context=eq.${project}` : ''}`,
       { headers: supabaseHeaders }
     );
     const projectData = await response.json();
