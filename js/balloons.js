@@ -290,7 +290,12 @@ class BalloonSystem {
             const response = await fetch(`/api/get-balloon-data?context=all`);
             const result = await response.json();
             const ad = this.getAd();
-            if (result.success && result.data) return [ad, ...result.data];
+            
+            if (result.success && result.data) {
+                // Filter to ONLY show releases (extra safety)
+                const releases = result.data.filter(item => item.badge === 'Release');
+                return [ad, ...releases];
+            }
         } catch (error) { }
         return [this.getAd(), ...this.getFallbackData()];
     }
@@ -301,7 +306,7 @@ class BalloonSystem {
             name: "YELLOWHOOD AGENCY",
             message: "Transform your idea into an elite digital product. Strategy, Design, and Full-stack.",
             badge: "Agency",
-            color: "blue",
+            color: "blue", // Force blue for ad
             link: "https://yellowhood.com.br",
             contexts: ['home', 'projects', 'academic', 'feed', 'photos']
         };
@@ -309,12 +314,7 @@ class BalloonSystem {
 
     getFallbackData() {
         return [
-            { id: "p1", name: "Shii App", message: "v2.1 Available!", badge: "Hot", color: "green", contexts: ['projects', 'home'] },
-            { id: "p2", name: "New Release", message: "Performance updates pushed.", badge: "New", color: "green", contexts: ['projects', 'home'] },
-            { id: "a1", name: "Publication", message: "New article about LLMs!", badge: "Article", color: "yellow", contexts: ['home', 'academic'] },
-            { id: "s1", name: "Twitter", message: "Discussion about dynamic UI.", badge: "Social", color: "pink", contexts: ['home', 'academic'] },
-            { id: "r1", name: "Reading", message: "Reading: Foundation.", badge: "Reading", image: "https://m.media-amazon.com/images/I/91M9Ef-07-L._AC_UF1000,1000_QL80_.jpg", color: "purple", contexts: ['home', 'academic'] },
-            { id: "c1", name: "Contact", message: "Let's chat on WhatsApp.", badge: "Links", color: "orange", contexts: ['home', 'projects'] }
+            { id: "p1", name: "Shii App", message: "v2.1 Available!", badge: "Release", color: "green", contexts: ['projects', 'home'] }
         ];
     }
 

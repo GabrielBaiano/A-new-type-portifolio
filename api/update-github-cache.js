@@ -111,33 +111,6 @@ export default async function handler(req, res) {
         }
       } catch (e) { console.error('Error fetching stars:', e); }
 
-      // 2.2 Contributors (Keep for now as it's small/useful)
-      try {
-        const contribRes = await fetch(
-          `https://api.github.com/repos/${repoFullName}/contributors?per_page=100`,
-          { headers: githubHeaders }
-        );
-        const contributors = await contribRes.json();
-        
-        if (Array.isArray(contributors)) {
-          contributors.forEach(user => {
-            allProjectData.push({
-              id: `contributor-${repo.id}-${user.id}`,
-              type: 'contributor',
-              username: user.login,
-              avatar_url: user.avatar_url,
-              profile_url: user.html_url,
-              contributions: user.contributions,
-              repo_name: repo.name,
-              repo_full_name: repoFullName,
-              context: 'projects',
-              project_context: projectContext,
-              created_at: new Date().toISOString()
-            });
-          });
-        }
-      } catch (e) { console.error('Error fetching contributors:', e); }
-
       // 2.6 Releases (NEW)
       try {
         const releasesRes = await fetch(

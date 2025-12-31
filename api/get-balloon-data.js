@@ -33,21 +33,22 @@ export default async function handler(req, res) {
     );
     const projectData = await response.json();
     
-    data = Array.isArray(projectData) ? projectData.map(item => {
-      const isRelease = item.type === 'release';
-      return {
-        id: item.id,
-        type: 'notification',
-        name: isRelease ? formatRepoName(item.repo_name) : item.username,
-        message: getMessageForType(item.type, item),
-        badge: getBadgeForType(item.type),
-        image: item.avatar_url,
-        color: isRelease ? 'green' : (item.type === 'star' ? 'blue' : null),
-        link: isRelease ? `https://github.com/${item.repo_full_name}/releases/tag/${item.release_tag}` : `https://github.com/${item.username}`,
-        date: item.created_at,
-        contexts: project ? [project] : (context && context !== 'all' ? context.split(',') : ['home', 'academic', 'projects'])
-      };
-    }) : [];
+    data = Array.isArray(projectData) ? projectData
+      .filter(item => item.type === 'release')
+      .map(item => {
+        return {
+          id: item.id,
+          type: 'notification',
+          name: formatRepoName(item.repo_name),
+          message: `New release ${item.release_tag}: ${item.release_notes}`,
+          badge: 'Release',
+          image: item.avatar_url,
+          color: 'green', // Force green for releases
+          link: `https://github.com/${item.repo_full_name}/releases/tag/${item.release_tag}`,
+          date: item.created_at,
+          contexts: project ? [project] : (context && context !== 'all' ? context.split(',') : ['home', 'academic', 'projects'])
+        };
+      }) : [];
 
     return res.status(200).json({
       success: true,
@@ -67,12 +68,6 @@ export default async function handler(req, res) {
 function getMessageForType(type, item) {
   const messages = {
     'star': `Starred ${item.repo_name}`,
-    'contributor': `Contributed ${item.contributions || ''} times to ${item.repo_name}`,
-    'fork': `Forked ${item.repo_name}`,
-    'issue_opened': `Opened issue: ${item.issue_title}`,
-    'issue_closed': `Closed issue in ${item.repo_name}`,
-    'pr_opened': `Opened PR: ${item.pr_title}`,
-    'pr_merged': `Merged PR in ${item.repo_name}`,
     'release': `New release ${item.release_tag}: ${item.release_notes}`
   };
   return messages[type] || 'GitHub activity';
@@ -81,12 +76,6 @@ function getMessageForType(type, item) {
 function getBadgeForType(type) {
   const badges = {
     'star': 'Star',
-    'contributor': 'Commit',
-    'fork': 'Fork',
-    'issue_opened': 'Issue',
-    'issue_closed': 'Fixed',
-    'pr_opened': 'PR',
-    'pr_merged': 'Merged',
     'release': 'Release'
   };
   return badges[type] || 'Activity';
