@@ -54,10 +54,41 @@ const FeedPage = {
         `).join('');
     },
 
-    render() {
-        const articleTypes = DataService.toolsData?.articleTypes || [];
-        const feed = DataService.toolsData?.feed || [];
-        const sidebarData = DataService.toolsData?.sidebar || { categories: [], popularContent: [] };
+    async render() {
+        const toolsData = await DataService.loadToolsData();
+        const articleTypes = toolsData?.articleTypes || [];
+        const staticFeed = toolsData?.feed || [];
+        const sidebarData = toolsData?.sidebar || { categories: [], popularContent: [] };
+
+        // 1. Fetch Dynamic LeetCode Data
+        let leetcodeFeed = [];
+        try {
+            const response = await fetch('/api/get-balloon-data?context=all');
+            const result = await response.json();
+            if (result.success && result.data) {
+                leetcodeFeed = result.data
+                    .filter(item => item.type === 'leetcode')
+                    .map(item => ({
+                        id: item.id,
+                        type: 'leetcode',
+                        date: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                        tag: 'LeetCode',
+                        title: item.title,
+                        description: `New algorithm resolution posted! Streak: ${item.badge}. Check out the logic and code for this problem.`,
+                        link: item.link
+                    }));
+            }
+        } catch (e) {
+            console.error('[Feed] Error fetching LeetCode data:', e);
+        }
+
+        // 2. Merge and Sort by Date (descending)
+        const combinedFeed = [...staticFeed, ...leetcodeFeed].sort((a, b) => {
+            return new Date(b.date) - new Date(a.date);
+        });
+
+        // Store for onMount filtering
+        this.combinedFeed = combinedFeed;
 
         return `
             <div class="page-layout-grid">
@@ -92,7 +123,7 @@ const FeedPage = {
                         <p class="other-projects-description">Chronological updates on my latest works, releases, and platform updates.</p>
 
                         <div id="feed-container" class="feed-list">
-                            ${this.renderFeedItems(feed)}
+                            ${this.renderFeedItems(combinedFeed)}
                         </div>
                     </div>
                 </div>
@@ -111,7 +142,7 @@ const FeedPage = {
 
         const feedContainer = document.getElementById('feed-container');
         const clearBtn = document.getElementById('clear-filter');
-        const allItems = DataService.toolsData?.feed || [];
+        const allItems = this.combinedFeed || [];
 
         // Category card clicks (Navigate to category page)
         document.querySelectorAll('.clickable-category').forEach(card => {
@@ -128,7 +159,7 @@ const FeedPage = {
         // Feed Filter Logic
         const updateFeed = (filter, activeElement) => {
             const filtered = filter 
-                ? allItems.filter(item => item.tag.toLowerCase() === filter.toLowerCase())
+                ? allItems.filter(item => (item.tag || '').toLowerCase() === filter.toLowerCase())
                 : allItems;
             
             feedContainer.innerHTML = this.renderFeedItems(filtered);
@@ -148,7 +179,13 @@ const FeedPage = {
                 item.style.cursor = 'pointer';
                 item.addEventListener('click', () => {
                     const id = item.getAttribute('data-id');
-                    if (id) router.navigate(`detail/feed/${id}`);
+                    if (!id) return;
+                    
+                    if (id.startsWith('leetcode-')) {
+                        router.navigate(`leetcode/${id.replace('leetcode-', '')}`);
+                    } else {
+                        router.navigate(`detail/feed/${id}`);
+                    }
                 });
             });
         };
