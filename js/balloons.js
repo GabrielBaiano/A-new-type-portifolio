@@ -268,32 +268,35 @@ class BalloonSystem {
 
     buildBalloonHTML(data) {
         const colors = ['blue', 'green', 'yellow', 'orange', 'pink', 'purple'];
-        const randomColor = data.color || colors[Math.floor(Math.random() * colors.length)];
+        const color = data.color || colors[Math.floor(Math.random() * colors.length)];
         
-        // Hide avatar for releases as requested (green balloons)
-        const showAvatar = data.badge !== 'Release' && data.image;
-
         // Parse markdown if marked is available
         const formattedMessage = (typeof marked !== 'undefined' && data.message) 
             ? marked.parse(data.message) 
             : data.message;
 
+        // Determine visibility and labels based on color/type
+        const isRelease = color === 'green';
+        const isLeetCode = color === 'pink';
+        const showAvatar = !isRelease && !isLeetCode && data.image; 
+
         return `
-            <div class="balloon-card organic-balloon balloon-bg-${randomColor} ${data.badge === 'Release' ? 'balloon-type-release' : ''}">
-                ${showAvatar ? `<img src="${data.image}" alt="${data.name}" class="balloon-avatar">` : ''}
-                <div class="balloon-header">
-                    <span class="balloon-name">${data.name}</span>
-                    ${data.badge ? `<span class="balloon-badge">${data.badge}</span>` : ''}
+            <div class="balloon-card organic-balloon balloon-bg-${color} ${isRelease ? 'balloon-type-release' : ''} ${isLeetCode ? 'balloon-type-leetcode' : ''}">
+                <div class="balloon-inner">
+                    <div class="balloon-header">
+                        ${showAvatar ? `<img src="${data.image}" class="balloon-avatar" alt="">` : ''}
+                        <span class="balloon-name">${data.name}</span>
+                        ${data.badge ? `<span class="balloon-badge">${data.badge}</span>` : ''}
+                    </div>
+                    ${data.title ? `<div class="balloon-title">${data.title}</div>` : ''}
+                    <div class="balloon-message">${formattedMessage}</div>
+                    ${data.link ? `
+                         <a href="${data.link}" target="_blank" class="balloon-link">
+                            ${isRelease ? 'VIEW PATCH NOTES →' : 
+                              (isLeetCode ? 'VIEW RESOLUTION →' : (data.linkText || 'LEARN MORE →'))}
+                         </a>
+                    ` : ''}
                 </div>
-                ${data.title ? `<div class="balloon-title">${data.title}</div>` : ''}
-                <div class="balloon-message">${formattedMessage}</div>
-                ${data.link ? `
-                     <a href="${data.link}" target="_blank" class="balloon-link">
-                     <a href="${data.link}" target="_blank" class="balloon-link">
-                        ${data.badge === 'Release' ? 'VIEW PATCH NOTES →' : 
-                          (data.color === 'pink' ? 'VIEW ON LINKEDIN →' : (data.linkText || 'LEARN MORE →'))}
-                     </a>
-                ` : ''}
             </div>
         `;
     }

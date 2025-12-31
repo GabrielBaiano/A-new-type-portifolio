@@ -1736,8 +1736,8 @@ body,
 }
 
 /* Specific styling for Release and Daily Challenge balloons to fit more content */
-.balloon-green .balloon-message,
-.balloon-pink .balloon-message {
+.balloon-bg-green .balloon-message,
+.balloon-bg-pink .balloon-message {
     font-size: 0.9rem !important;
     -webkit-line-clamp: 15 !important;
     line-clamp: 15 !important;
@@ -1745,7 +1745,7 @@ body,
 }
 
 /* Regular balloons (blue ad) keep default appearance */
-.balloon-blue .balloon-message {
+.balloon-bg-blue .balloon-message {
     font-size: 1.15rem; /* Classic ad size */
     -webkit-line-clamp: 6;
     line-clamp: 6;
