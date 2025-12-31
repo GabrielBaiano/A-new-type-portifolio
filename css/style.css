@@ -1727,15 +1727,37 @@ body,
     
     /* Truncation for long messages (Patch Notes etc) */
     display: -webkit-box;
-    -webkit-line-clamp: 10; /* Max 10 lines */
-    line-clamp: 10;
+    -webkit-line-clamp: 15; /* Increased: Allow more text */
+    line-clamp: 15;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-height: 15.5em; /* Fallback for line-clamp */
+    max-height: 22em; /* Increased: Allow more height */
+    
+    font-size: 0.9rem; /* Reduced: Fit more space in the same card */
+    line-height: 1.4;
+}
+
+/* Specific styling for the new Title line */
+.balloon-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    font-family: 'Sora', sans-serif;
+    color: #444; /* Darker but not pure black to separate from headers */
+    margin: 8px 0 4px 0;
 }
 
 /* Markdown Support Inside Balloons */
+.balloon-message h1, .balloon-message h2, .balloon-message h3 {
+    font-family: 'Sora', sans-serif;
+    font-weight: 900;
+    margin: 12px 0 6px 0;
+    line-height: 1.2;
+}
+.balloon-message h1 { font-size: 1.25rem; }
+.balloon-message h2 { font-size: 1.15rem; }
+.balloon-message h3 { font-size: 1.05rem; }
+
 .balloon-message p {
     margin: 0 0 8px 0;
 }
@@ -2979,4 +3001,128 @@ body.detail-mode .main-container {
     .pub-card {
         padding: 30px;
     }
+}
+
+/* --------------------------------------------------------
+   LEETCODE MASTERY PAGE
+----------------------------------------------------------- */
+.leetcode-page {
+    padding-bottom: 151px;
+}
+
+.leetcode-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.leetcode-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 24px;
+    text-decoration: none;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.leetcode-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: #ff2d55;
+    transform: translateY(-5px);
+}
+
+.leetcode-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.leetcode-number {
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: #888;
+}
+
+.leetcode-streak {
+    background: #ff2d55;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+
+.leetcode-card-title {
+    font-family: 'Sora', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-color);
+}
+
+.leetcode-card-date {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: auto;
+}
+
+/* --------------------------------------------------------
+   LEETCODE DETAIL PAGE
+----------------------------------------------------------- */
+.leetcode-detail {
+    max-width: 800px;
+    margin: 0 auto;
+    padding-bottom: 151px;
+}
+
+.back-link {
+    display: inline-block;
+    color: #888;
+    text-decoration: none;
+    margin-bottom: 30px;
+    font-weight: 600;
+}
+
+.back-link:hover {
+    color: var(--text-color);
+}
+
+.article-header {
+    margin-bottom: 40px;
+}
+
+.article-badge {
+    color: #ff2d55;
+    font-weight: 800;
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+}
+
+.article-title {
+    font-size: 3.5rem;
+    font-weight: 950;
+    margin: 15px 0;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+}
+
+.article-meta {
+    display: flex;
+    gap: 20px;
+    color: #888;
+    font-weight: 600;
+}
+
+.streak-fire {
+    color: #ff2d55;
+}
+
+.article-content {
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.9);
 }

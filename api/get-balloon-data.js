@@ -27,28 +27,52 @@ export default async function handler(req, res) {
     let data = [];
 
     // Simplified: All contexts now fetch ONLY Project Data (Stars, Releases, etc.)
-    const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/github_project_data?select=*&order=created_at.desc&limit=100${project ? `&project_context=eq.${project}` : ''}`,
-      { headers: supabaseHeaders }
-    );
-    const projectData = await response.json();
+    const [projectDataRes, leetcodeRes] = await Promise.all([
+      fetch(
+        `${SUPABASE_URL}/rest/v1/github_project_data?select=*&order=created_at.desc&limit=100${project ? `&project_context=eq.${project}` : ''}`,
+        { headers: supabaseHeaders }
+      ),
+      fetch(
+        `${SUPABASE_URL}/rest/v1/leetcode_challenges?select=*&order=created_at.desc&limit=1`,
+        { headers: supabaseHeaders }
+      )
+    ]);
+
+    const projectData = await projectDataRes.json();
+    const leetcodeData = await leetcodeRes.json();
     
-    data = Array.isArray(projectData) ? projectData
+    const mappedReleases = Array.isArray(projectData) ? projectData
       .filter(item => item.type === 'release')
       .map(item => {
         return {
           id: item.id,
           type: 'notification',
           name: formatRepoName(item.repo_name),
-          message: `New release ${item.release_tag}: ${item.release_notes}`,
-          badge: 'Release',
+          title: `New release ${item.release_tag}`,
+          message: item.release_notes,
+          badge: item.release_tag,
           image: item.avatar_url,
-          color: 'green', // Force green for releases
+          color: 'green',
           link: `https://github.com/${item.repo_full_name}/releases/tag/${item.release_tag}`,
           date: item.created_at,
           contexts: project ? [project] : (context && context !== 'all' ? context.split(',') : ['home', 'academic', 'projects'])
         };
       }) : [];
+
+    const mappedLeetcode = Array.isArray(leetcodeData) ? leetcodeData.map(item => ({
+      id: `leetcode-${item.id}`,
+      type: 'leetcode',
+      name: 'LeetCode Challenge',
+      title: `Daily Challenge LeetCode: #${item.number} ${item.name}`,
+      message: `Progress: ${item.name}. Streak: ${item.streak} 🔥`,
+      badge: `${item.streak} 🔥`,
+      color: 'pink',
+      link: `#/leetcode/${item.id}`, // Route to the new blog page
+      date: item.created_at,
+      contexts: ['home', 'projects', 'academic']
+    })) : [];
+
+    data = [...mappedReleases, ...mappedLeetcode];
 
     return res.status(200).json({
       success: true,

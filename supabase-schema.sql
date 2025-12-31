@@ -109,3 +109,25 @@ CREATE POLICY "Allow public read access on readmes"
 CREATE POLICY "Allow public read access on metadata"
   ON github_cache_metadata FOR SELECT
   USING (true);
+
+-- --------------------------------------------------------
+-- LEETCODE DAILY CHALLENGES
+-- --------------------------------------------------------
+CREATE TABLE leetcode_challenges (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    number INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    content TEXT NOT NULL,
+    external_link TEXT,
+    streak INTEGER DEFAULT 1,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Index for fast lookup of the latest challenge
+CREATE INDEX idx_leetcode_created_at ON leetcode_challenges(created_at DESC);
+
+ALTER TABLE leetcode_challenges ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public read access on leetcode"
+  ON leetcode_challenges FOR SELECT
+  USING (true);

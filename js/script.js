@@ -21,6 +21,7 @@ function initializeSPA() {
     pageManager.registerPage('academic', AcademicPage);
     pageManager.registerPage('photos', PhotosPage);
     pageManager.registerPage('detail', DetailPage);
+    pageManager.registerPage('leetcode', LeetCode);
 
     // Register routes
     router.register('home', () => {
@@ -46,6 +47,15 @@ function initializeSPA() {
     router.register('photos', () => {
         pageManager.loadPage('photos');
         updateNavigation('photos');
+    });
+
+    router.register('leetcode', () => {
+        pageManager.loadPage('leetcode');
+        updateNavigation('leetcode');
+    });
+
+    router.register('leetcode/:id', (params) => {
+        pageManager.loadPage('leetcode', params);
     });
 
     // Register detail route with parameters
