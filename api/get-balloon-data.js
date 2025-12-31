@@ -33,7 +33,7 @@ export default async function handler(req, res) {
         { headers: supabaseHeaders }
       ),
       fetch(
-        `${SUPABASE_URL}/rest/v1/leetcode_challenges?select=*&order=created_at.desc&limit=1`,
+        `${SUPABASE_URL}/rest/v1/leetcode_challenges?select=*&order=created_at.desc&limit=50`,
         { headers: supabaseHeaders }
       )
     ]);
@@ -63,7 +63,7 @@ export default async function handler(req, res) {
       id: `leetcode-${item.id}`,
       type: 'leetcode',
       name: 'LeetCode Challenge',
-      title: `Daily Challenge LeetCode: #${item.number} ${item.name}`,
+      title: `#${item.number}: ${item.name}`,
       message: null,
       badge: `${item.streak} 🔥`,
       color: 'pink',

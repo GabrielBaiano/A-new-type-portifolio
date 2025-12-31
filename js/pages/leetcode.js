@@ -46,8 +46,8 @@ const LeetCode = {
 
             return `
                 <div class="page-container leetcode-page">
-                    <header class="section-header">
-                        <h2 class="section-title">LeetCode Mastery</h2>
+                    <header class="section-header leetcode-header">
+                        <h2 class="section-title pink-gradient-text">LeetCode Mastery</h2>
                         <p class="section-subtitle">Solving the world's most complex algorithms, one day at a time.</p>
                     </header>
 
