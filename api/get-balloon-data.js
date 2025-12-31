@@ -45,7 +45,7 @@ export default async function handler(req, res) {
         color: isRelease ? 'green' : (item.type === 'star' ? 'blue' : null),
         link: isRelease ? `https://github.com/${item.repo_full_name}/releases/tag/${item.release_tag}` : `https://github.com/${item.username}`,
         date: item.created_at,
-        contexts: project ? [project] : (context ? context.split(',') : ['home', 'academic', 'projects'])
+        contexts: project ? [project] : (context && context !== 'all' ? context.split(',') : ['home', 'academic', 'projects'])
       };
     }) : [];
 
