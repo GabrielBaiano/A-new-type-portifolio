@@ -101,9 +101,8 @@ class BalloonSystem {
         
         // 1. Immediately place static/important balloons
         const ad = this.getAd();
-        const linkedin = this.getLinkedIn();
         
-        [ad, linkedin].forEach(item => {
+        [ad].forEach(item => {
             if (this.isContextValid(item)) {
                 this.tryPlaceBalloon(item);
             }
@@ -114,7 +113,7 @@ class BalloonSystem {
         if (!dataSet || dataSet.length === 0) return;
 
         // Skip items we already placed
-        const dynamicOnly = dataSet.filter(item => item.id !== ad.id && item.id !== linkedin.id);
+        const dynamicOnly = dataSet.filter(item => item.id !== ad.id);
         const shuffled = [...dynamicOnly].sort(() => Math.random() - 0.5);
         
         for (const item of shuffled) {
@@ -351,17 +350,6 @@ class BalloonSystem {
         };
     }
 
-    getLinkedIn() {
-        return {
-            id: "linkedin-leetcode-daily",
-            name: "LeetCode Mastery",
-            message: "Daily Challenge: Solving the world's most complex algorithms. Check out today's post and logic!",
-            badge: "Daily",
-            color: "pink", // Pink as requested
-            link: "https://www.linkedin.com/in/gabrielbaiano/", // Replace with specific post later
-            contexts: ['home', 'projects', 'academic']
-        };
-    }
 
     getFallbackData() {
         return [
