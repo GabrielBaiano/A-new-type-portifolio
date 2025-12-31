@@ -289,7 +289,9 @@ class BalloonSystem {
                 <div class="balloon-message">${formattedMessage}</div>
                 ${data.link ? `
                      <a href="${data.link}" target="_blank" class="balloon-link">
-                        ${data.badge === 'Release' ? 'VIEW PATCH NOTES →' : (data.linkText || 'LEARN MORE →')}
+                     <a href="${data.link}" target="_blank" class="balloon-link">
+                        ${data.badge === 'Release' ? 'VIEW PATCH NOTES →' : 
+                          (data.color === 'pink' ? 'VIEW ON LINKEDIN →' : (data.linkText || 'LEARN MORE →'))}
                      </a>
                 ` : ''}
             </div>
@@ -301,14 +303,15 @@ class BalloonSystem {
             const response = await fetch(`/api/get-balloon-data?context=all`);
             const result = await response.json();
             const ad = this.getAd();
+            const linkedin = this.getLinkedIn();
             
             if (result.success && result.data) {
                 // Filter to ONLY show releases (extra safety)
                 const releases = result.data.filter(item => item.badge === 'Release');
-                return [ad, ...releases];
+                return [ad, linkedin, ...releases];
             }
         } catch (error) { }
-        return [this.getAd(), ...this.getFallbackData()];
+        return [this.getAd(), this.getLinkedIn(), ...this.getFallbackData()];
     }
 
     getAd() {
@@ -320,6 +323,18 @@ class BalloonSystem {
             color: "blue", // Force blue for ad
             link: "https://yellowhood.com.br",
             contexts: ['home', 'projects', 'academic', 'feed', 'photos']
+        };
+    }
+
+    getLinkedIn() {
+        return {
+            id: "linkedin-leetcode-daily",
+            name: "LeetCode Mastery",
+            message: "Daily Challenge: Solving the world's most complex algorithms. Check out today's post and logic!",
+            badge: "Daily",
+            color: "pink", // Pink as requested
+            link: "https://www.linkedin.com/in/gabrielbaiano/", // Replace with specific post later
+            contexts: ['home', 'projects', 'academic']
         };
     }
 
