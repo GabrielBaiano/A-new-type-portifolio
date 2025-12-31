@@ -3,7 +3,9 @@
 -- GitHub Cache Tables
 -- ========================================
 
--- 1. Tabela de Followers (para Home)
+-- 1. [DEPRECATED] Tabela de Followers
+-- Not used in current portfolio version
+/*
 CREATE TABLE IF NOT EXISTS github_followers (
   id TEXT PRIMARY KEY,
   type TEXT NOT NULL DEFAULT 'follower',
@@ -13,11 +15,12 @@ CREATE TABLE IF NOT EXISTS github_followers (
   context TEXT NOT NULL DEFAULT 'home',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+*/
 
--- 2. Tabela de Project Data (stars, contributors, forks, issues, PRs, releases)
+-- 2. Tabela de Project Data (stars, contributors, releases)
 CREATE TABLE IF NOT EXISTS github_project_data (
   id TEXT PRIMARY KEY,
-  type TEXT NOT NULL, -- 'star', 'contributor', 'fork', 'issue_opened', 'issue_closed', 'pr_opened', 'pr_merged', 'release'
+  type TEXT NOT NULL, -- 'star', 'contributor', 'release'
   username TEXT NOT NULL,
   avatar_url TEXT,
   profile_url TEXT,
@@ -32,15 +35,19 @@ CREATE TABLE IF NOT EXISTS github_project_data (
   
   -- Dados específicos por tipo
   contributions INTEGER, -- Para contributors
-  fork_url TEXT, -- Para forks
-  issue_title TEXT, -- Para issues
+  
+  -- [DEPRECATED] Granular tracking removed to simplify background balloons
+  /*
+  fork_url TEXT,
+  issue_title TEXT,
   issue_url TEXT,
   issue_number INTEGER,
-  pr_title TEXT, -- Para PRs
+  pr_title TEXT,
   pr_url TEXT,
   pr_number INTEGER,
+  */
   
-  -- Releases (NEW)
+  -- Releases
   release_tag TEXT,
   release_notes TEXT,
   

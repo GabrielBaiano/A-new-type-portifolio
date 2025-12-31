@@ -45,25 +45,6 @@ export default async function handler(req, res) {
     console.log(`Updating cache for user: ${username}`);
 
     // ========================================
-    // 1. FOLLOWERS (para Home)
-    // ========================================
-    const followersRes = await fetch(
-      `https://api.github.com/users/${username}/followers?per_page=100`,
-      { headers: githubHeaders }
-    );
-    const followers = await followersRes.json();
-
-    const followersData = Array.isArray(followers) ? followers.map(f => ({
-      id: `follower-${f.id}`,
-      type: 'follower',
-      username: f.login,
-      avatar_url: f.avatar_url,
-      profile_url: f.html_url,
-      context: 'home',
-      created_at: new Date().toISOString()
-    })) : [];
-
-    // ========================================
     // 2. REPOSITÓRIOS DO USUÁRIO
     // ========================================
     const reposRes = await fetch(
@@ -130,7 +111,7 @@ export default async function handler(req, res) {
         }
       } catch (e) { console.error('Error fetching stars:', e); }
 
-      // 2.2 Contributors
+      // 2.2 Contributors (Keep for now as it's small/useful)
       try {
         const contribRes = await fetch(
           `https://api.github.com/repos/${repoFullName}/contributors?per_page=100`,
@@ -156,93 +137,6 @@ export default async function handler(req, res) {
           });
         }
       } catch (e) { console.error('Error fetching contributors:', e); }
-
-      // 2.3 Forks
-      try {
-        const forksRes = await fetch(
-          `https://api.github.com/repos/${repoFullName}/forks?per_page=50`,
-          { headers: githubHeaders }
-        );
-        const forks = await forksRes.json();
-        
-        if (Array.isArray(forks)) {
-          forks.forEach(fork => {
-            allProjectData.push({
-              id: `fork-${repo.id}-${fork.id}`,
-              type: 'fork',
-              username: fork.owner.login,
-              avatar_url: fork.owner.avatar_url,
-              profile_url: fork.owner.html_url,
-              repo_name: repo.name,
-              repo_full_name: repoFullName,
-              fork_url: fork.html_url,
-              context: 'projects',
-              project_context: projectContext,
-              created_at: fork.created_at
-            });
-          });
-        }
-      } catch (e) { console.error('Error fetching forks:', e); }
-
-      // 2.4 Issues
-      try {
-        const issuesRes = await fetch(
-          `https://api.github.com/repos/${repoFullName}/issues?state=all&per_page=30`,
-          { headers: githubHeaders }
-        );
-        const issues = await issuesRes.json();
-        
-        if (Array.isArray(issues)) {
-          issues.forEach(issue => {
-            if (!issue.pull_request) {
-              allProjectData.push({
-                id: `issue-${repo.id}-${issue.id}`,
-                type: issue.state === 'closed' ? 'issue_closed' : 'issue_opened',
-                username: issue.user.login,
-                avatar_url: issue.user.avatar_url,
-                profile_url: issue.user.html_url,
-                issue_title: issue.title,
-                issue_url: issue.html_url,
-                issue_number: issue.number,
-                repo_name: repo.name,
-                repo_full_name: repoFullName,
-                context: 'projects',
-                project_context: projectContext,
-                created_at: issue.created_at
-              });
-            }
-          });
-        }
-      } catch (e) { console.error('Error fetching issues:', e); }
-
-      // 2.5 Pull Requests
-      try {
-        const prsRes = await fetch(
-          `https://api.github.com/repos/${repoFullName}/pulls?state=all&per_page=30`,
-          { headers: githubHeaders }
-        );
-        const prs = await prsRes.json();
-        
-        if (Array.isArray(prs)) {
-          prs.forEach(pr => {
-            allProjectData.push({
-              id: `pr-${repo.id}-${pr.id}`,
-              type: pr.state === 'closed' ? 'pr_merged' : 'pr_opened',
-              username: pr.user.login,
-              avatar_url: pr.user.avatar_url,
-              profile_url: pr.user.html_url,
-              pr_title: pr.title,
-              pr_url: pr.html_url,
-              pr_number: pr.number,
-              repo_name: repo.name,
-              repo_full_name: repoFullName,
-              context: 'projects',
-              project_context: projectContext,
-              created_at: pr.created_at
-            });
-          });
-        }
-      } catch (e) { console.error('Error fetching PRs:', e); }
 
       // 2.6 Releases (NEW)
       try {
@@ -308,7 +202,6 @@ export default async function handler(req, res) {
 
     const debugInfo = {
       reposFound: repos ? repos.length : 0,
-      followersFound: followersData.length,
       projectDataCount: allProjectData.length,
       errors: []
     };
@@ -336,16 +229,10 @@ export default async function handler(req, res) {
         debugInfo.errors.push(`Insert Project Data Failed: ${insertRes.statusText} - ${errorText}`);
       }
     }
-
-    if (followersData.length > 0) {
-        await supabaseRequest('github_followers?id=neq.dummy', 'DELETE');
-        await supabaseRequest('github_followers', 'POST', followersData);
-    }
     
     await supabaseRequest('github_cache_metadata', 'POST', {
       username: username,
       last_updated: new Date().toISOString(),
-      followers_count: followersData.length,
       project_data_count: allProjectData.length
     });
 

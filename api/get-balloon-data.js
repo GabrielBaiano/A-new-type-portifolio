@@ -26,78 +26,23 @@ export default async function handler(req, res) {
 
     let data = [];
 
-    // For 'home' and 'academic', we want EVERYTHING (Followers + All Project Data)
-    if (context === 'home' || context === 'academic') {
-      const [followersRes, projectDataRes] = await Promise.all([
-        fetch(`${SUPABASE_URL}/rest/v1/github_followers?select=*&order=created_at.desc&limit=25${dateFilter}`, { headers: supabaseHeaders }),
-        fetch(`${SUPABASE_URL}/rest/v1/github_project_data?select=*&order=created_at.desc&limit=50${dateFilter}`, { headers: supabaseHeaders })
-      ]);
-
-      const followers = await followersRes.json();
-      const projectData = await projectDataRes.json();
-
-      const mappedFollowers = Array.isArray(followers) ? followers.map(f => ({
-        id: f.id,
-        type: 'notification',
-        name: f.username,
-        message: 'Started following you on GitHub',
-        badge: 'Follower',
-        image: f.avatar_url,
-        date: f.created_at,
-        contexts: ['home', 'academic']
-      })) : [];
-
-      const mappedProjects = Array.isArray(projectData) ? projectData.map(item => ({
-        id: item.id,
-        type: 'notification',
-        name: item.username,
-        message: getMessageForType(item.type, item),
-        badge: getBadgeForType(item.type),
-        image: item.avatar_url,
-        date: item.created_at,
-        contexts: ['home', 'academic', 'projects']
-      })) : [];
-
-      data = [...mappedFollowers, ...mappedProjects];
-
-    } else if (project) {
-      // Specific project context
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/github_project_data?project_context=eq.${project}&select=*&order=created_at.desc&limit=50${dateFilter}`,
-        { headers: supabaseHeaders }
-      );
-      const projectData = await response.json();
-      
-      data = Array.isArray(projectData) ? projectData.map(item => ({
-        id: item.id,
-        type: 'notification',
-        name: item.username,
-        message: getMessageForType(item.type, item),
-        badge: getBadgeForType(item.type),
-        image: item.avatar_url,
-        date: item.created_at,
-        contexts: [project]
-      })) : [];
-      
-    } else {
-      // General projects context
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/github_project_data?select=*&order=created_at.desc&limit=50${dateFilter}`,
-        { headers: supabaseHeaders }
-      );
-      const projectData = await response.json();
-      
-      data = Array.isArray(projectData) ? projectData.map(item => ({
-        id: item.id,
-        type: 'notification',
-        name: item.username,
-        message: getMessageForType(item.type, item),
-        badge: getBadgeForType(item.type),
-        image: item.avatar_url,
-        date: item.created_at,
-        contexts: ['projects']
-      })) : [];
-    }
+    // Simplified: All contexts now fetch ONLY Project Data (Stars, Releases, etc.)
+    const response = await fetch(
+      `${SUPABASE_URL}/rest/v1/github_project_data?select=*&order=created_at.desc&limit=50${dateFilter}${project ? `&project_context=eq.${project}` : ''}`,
+      { headers: supabaseHeaders }
+    );
+    const projectData = await response.json();
+    
+    data = Array.isArray(projectData) ? projectData.map(item => ({
+      id: item.id,
+      type: 'notification',
+      name: item.username,
+      message: getMessageForType(item.type, item),
+      badge: getBadgeForType(item.type),
+      image: item.avatar_url,
+      date: item.created_at,
+      contexts: project ? [project] : (context ? context.split(',') : ['home', 'academic', 'projects'])
+    })) : [];
 
     return res.status(200).json({
       success: true,
