@@ -138,11 +138,11 @@ const LeetCode = {
                         const number = challenge.title.match(/#(\d+)/)?.[1] || challenge.number || '---';
                         const name = challenge.title.split(': ')[1] || challenge.name;
                         return `
-                            <div class="pub-card leetcode-item-card" onclick="location.hash='#/leetcode/${challenge.id.replace('leetcode-', '')}'">
+                            <a href="#/leetcode/${challenge.id.replace('leetcode-', '')}" class="pub-card leetcode-item-card">
                                 <h3>#${number}: ${name}</h3>
                                 <p>${new Date(challenge.date).toLocaleDateString()} — Algorithm resolution with ${challenge.badge} day streak status.</p>
-                                <span class="read-more-btn">Read resolution</span>
-                            </div>
+                                <span class="read-more-btn">Read resolution →</span>
+                            </a>
                         `;
                     }).join('')}
                 </div>
@@ -183,25 +183,35 @@ const LeetCode = {
                 </div>
             `;
         } catch (error) {
+            console.error('[LeetCode] Detail Error:', error);
             return `
-                <div class="page-container leetcode-error">
-                    <a href="#/leetcode" class="back-link">← Back to challenges</a>
+                <div class="card detail-card leetcode-card-theme">
+                    <button class="back-button" onclick="location.hash='#/leetcode'">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Back</span>
+                    </button>
                     <div class="error-state">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
                         <h2>Challenge not found</h2>
                         <p>We couldn't load the details for this challenge. It might have been moved or deleted.</p>
+                        <button class="retry-button" onclick="location.reload()">Retry</button>
                     </div>
                 </div>
             `;
         }
     },
 
-    onMount() {
-        console.log('[LeetCode] Page mounted - activating wide layout');
+    onMount(params) {
+        console.log('[LeetCode] Page mounted');
+        if (params && params.id) {
+            document.body.classList.add('detail-mode');
+        }
         document.body.classList.add('wide-layout');
     },
 
     onUnmount() {
-        console.log('[LeetCode] Page unmounted - removing wide layout');
+        console.log('[LeetCode] Page unmounted');
+        document.body.classList.remove('detail-mode');
         document.body.classList.remove('wide-layout');
     }
 };

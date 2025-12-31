@@ -3389,13 +3389,28 @@ body.detail-mode .main-container {
     text-decoration: underline;
 }
 
-/* Error and empty states */
-.error-state {
-    text-align: center;
-    padding: 100px 20px;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 40px;
-    border: 1px dashed rgba(255, 255, 255, 0.1);
+/* Light Mode Overrides for Detail Content */
+[data-theme="light"] .article-content {
+    color: #222222;
 }
 
-.error-state h2 { font-family: 'Sora'; font-weight: 800; color: #ff2d55; }
+[data-theme="light"] .article-content h1, 
+[data-theme="light"] .article-content h2, 
+[data-theme="light"] .article-content h3 {
+    color: #111111;
+}
+
+[data-theme="light"] .error-state {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .article-content code {
+    background: rgba(255, 45, 85, 0.05);
+    border: 1px solid rgba(255, 45, 85, 0.1);
+}
+
+/* Ensure detail-mode handles backgrounds if needed */
+body.detail-mode {
+    background-attachment: fixed;
+}
