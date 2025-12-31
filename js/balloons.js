@@ -310,7 +310,7 @@ class BalloonSystem {
                     ${data.title ? `<div class="balloon-title">${data.title}</div>` : ''}
                     ${formattedMessage ? `<div class="balloon-message">${formattedMessage}</div>` : ''}
                     ${data.link ? `
-                         <a href="${data.link}" target="_blank" class="balloon-link">
+                         <a href="${data.link}" ${isLeetCode ? '' : 'target="_blank"'} class="balloon-link">
                             ${isRelease ? 'VIEW PATCH NOTES →' : 
                               (isLeetCode ? 'VIEW RESOLUTION →' : (data.linkText || 'LEARN MORE →'))}
                          </a>

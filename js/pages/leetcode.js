@@ -96,10 +96,10 @@ const LeetCode = {
 
         return `
             <div class="card detail-card leetcode-card-theme">
-                <button class="back-button" onclick="location.hash='#/feed'">
+                <a href="#/feed" class="back-button">
                     <i class="fa-solid fa-arrow-left"></i>
                     <span>Back</span>
-                </button>
+                </a>
 
                 <div class="detail-header">
                     <h1 class="detail-title">LeetCode Resolutions</h1>
@@ -141,7 +141,7 @@ const LeetCode = {
                             <a href="#/leetcode/${challenge.id.replace('leetcode-', '')}" class="pub-card leetcode-item-card">
                                 <h3>#${number}: ${name}</h3>
                                 <p>${new Date(challenge.date).toLocaleDateString()} — Algorithm resolution with ${challenge.badge} day streak status.</p>
-                                <span class="read-more-btn">Read resolution →</span>
+                                <span class="read-more-btn">Read resolution</span>
                             </a>
                         `;
                     }).join('')}
@@ -162,10 +162,10 @@ const LeetCode = {
 
             return `
                 <div class="card detail-card leetcode-card-theme">
-                    <button class="back-button" onclick="location.hash='#/leetcode'">
+                    <a href="#/leetcode" class="back-button">
                         <i class="fa-solid fa-arrow-left"></i>
                         <span>Back</span>
-                    </button>
+                    </a>
 
                     <div class="detail-header">
                         <div class="article-badge">LEETCODE DAILY</div>
@@ -186,10 +186,10 @@ const LeetCode = {
             console.error('[LeetCode] Detail Error:', error);
             return `
                 <div class="card detail-card leetcode-card-theme">
-                    <button class="back-button" onclick="location.hash='#/leetcode'">
+                    <a href="#/leetcode" class="back-button">
                         <i class="fa-solid fa-arrow-left"></i>
                         <span>Back</span>
-                    </button>
+                    </a>
                     <div class="error-state">
                         <i class="fa-solid fa-triangle-exclamation"></i>
                         <h2>Challenge not found</h2>

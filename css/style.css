@@ -3257,17 +3257,27 @@ body.detail-mode .main-container {
     border-color: rgba(0, 0, 0, 0.05);
 }
 
-.read-more-btn {
-    color: #ff2d55 !important;
-}
-
-.leetcode-item-card:hover {
-    border-color: #ff2d55 !important;
-}
-
 /* --------------------------------------------------------
    LEETCODE DETAIL PAGE
 ----------------------------------------------------------- */
+a.pub-card, a.back-button {
+    text-decoration: none !important;
+    color: inherit !important;
+}
+
+a.pub-card *, a.back-button * {
+    text-decoration: none !important;
+}
+
+.leetcode-item-card h3 {
+    text-decoration: none !important;
+    color: var(--text-main);
+}
+
+.read-more-btn {
+    color: #ff2d55 !important;
+    text-decoration: none !important;
+}
 .leetcode-detail {
     padding-bottom: 120px;
 }
