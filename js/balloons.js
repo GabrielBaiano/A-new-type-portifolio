@@ -325,7 +325,6 @@ class BalloonSystem {
             const response = await fetch(`/api/get-balloon-data?context=all`);
             const result = await response.json();
             const ad = this.getAd();
-            const linkedin = this.getLinkedIn();
             
             if (result.success && result.data) {
                 // Filter to show green releases and pink leetcode challenges
@@ -335,7 +334,7 @@ class BalloonSystem {
                 return [ad, ...dynamicBalloons];
             }
         } catch (error) { }
-        return [this.getAd(), this.getLinkedIn(), ...this.getFallbackData()];
+        return [this.getAd(), ...this.getFallbackData()];
     }
 
     getAd() {
