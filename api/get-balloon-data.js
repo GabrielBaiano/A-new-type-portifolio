@@ -64,7 +64,7 @@ export default async function handler(req, res) {
       type: 'leetcode',
       name: 'LeetCode Challenge',
       title: `Daily Challenge LeetCode: #${item.number} ${item.name}`,
-      message: `Progress: ${item.name}. Streak: ${item.streak} 🔥`,
+      message: null,
       badge: `${item.streak} 🔥`,
       color: 'pink',
       link: `#/leetcode/${item.id}`, // Route to the new blog page

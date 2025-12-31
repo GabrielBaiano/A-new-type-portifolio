@@ -1711,9 +1711,24 @@ body,
 
 .balloon-badge {
     font-size: 0.85rem;
-    color: rgba(0, 0, 0, 0.45); /* Muted as in image */
+    color: rgba(0, 0, 0, 0.45);
     margin-left: 8px;
     font-weight: 600;
+}
+
+/* LeetCode specific streak bubble */
+.balloon-type-leetcode .balloon-badge {
+    background: white;
+    color: #ff2d55; /* Pink theme */
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-weight: 900;
+    margin-left: 10px;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    font-size: 0.9rem;
+    text-transform: uppercase;
 }
 
 .balloon-message {
@@ -1754,11 +1769,12 @@ body,
 
 /* Specific styling for the new Title line */
 .balloon-title {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     font-weight: 800;
     font-family: 'Sora', sans-serif;
-    color: #444; /* Darker but not pure black to separate from headers */
+    color: #000; /* Normalized to match message */
     margin: 8px 0 4px 0;
+    line-height: 1.25;
 }
 
 /* Markdown Support Inside Balloons */

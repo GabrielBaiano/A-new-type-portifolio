@@ -289,7 +289,7 @@ class BalloonSystem {
                         ${data.badge ? `<span class="balloon-badge">${data.badge}</span>` : ''}
                     </div>
                     ${data.title ? `<div class="balloon-title">${data.title}</div>` : ''}
-                    <div class="balloon-message">${formattedMessage}</div>
+                    ${formattedMessage ? `<div class="balloon-message">${formattedMessage}</div>` : ''}
                     ${data.link ? `
                          <a href="${data.link}" target="_blank" class="balloon-link">
                             ${isRelease ? 'VIEW PATCH NOTES →' : 
