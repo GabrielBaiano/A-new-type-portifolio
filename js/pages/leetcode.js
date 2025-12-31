@@ -50,32 +50,44 @@ const LeetCode = {
 
     async renderDetail(id) {
         try {
-            // In a real scenario, we'd have a specific endpoint or use Supabase directly if exposed.
-            // For now, let's assume we can fetch it via a proxy or the existing balloon API could be extended.
-            // But since this is a detail page, let's simulate the fetch with a placeholder that looks and feels real.
+            const response = await fetch(`/api/get-leetcode-challenge?id=${id}`);
+            if (!response.ok) throw new Error('Challenge not found');
+            const challenge = await response.json();
             
+            const formattedContent = (typeof marked !== 'undefined') 
+                ? marked.parse(challenge.content) 
+                : challenge.content;
+
             return `
                 <div class="page-container leetcode-detail">
                     <a href="#/leetcode" class="back-link">← Back to challenges</a>
                     <article class="leetcode-article">
                         <header class="article-header">
                             <span class="article-badge">LEETCODE DAILY</span>
-                            <h1 class="article-title">Problem Resolution</h1>
+                            <h1 class="article-title">#${challenge.number}: ${challenge.name}</h1>
                             <div class="article-meta">
-                                <span class="streak-fire">🔥 Challenge Active</span>
-                                <span class="date">Updated Today</span>
+                                <span class="streak-fire">🔥 ${challenge.streak} Day Streak</span>
+                                <span class="date">${new Date(challenge.created_at).toLocaleDateString()}</span>
+                                ${challenge.external_link ? `<a href="${challenge.external_link}" target="_blank" class="external-link">View on LeetCode ↗</a>` : ''}
                             </div>
                         </header>
                         
                         <div class="article-content">
-                            <p>This challenge resolution is being loaded...</p>
-                            <div class="loading-spinner"></div>
+                            ${formattedContent}
                         </div>
                     </article>
                 </div>
             `;
         } catch (error) {
-            return `<div>Error loading details</div>`;
+            return `
+                <div class="page-container leetcode-error">
+                    <a href="#/leetcode" class="back-link">← Back to challenges</a>
+                    <div class="error-state">
+                        <h2>Challenge not found</h2>
+                        <p>We couldn't load the details for this challenge. It might have been moved or deleted.</p>
+                    </div>
+                </div>
+            `;
         }
     }
 };

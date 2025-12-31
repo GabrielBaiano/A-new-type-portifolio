@@ -3137,6 +3137,85 @@ body.detail-mode .main-container {
 
 .article-content {
     font-size: 1.15rem;
-    line-height: 1.6;
-    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.85);
 }
+
+.article-content h1, .article-content h2, .article-content h3 {
+    font-family: 'Sora', sans-serif;
+    color: #fff;
+    margin-top: 2em;
+    margin-bottom: 0.8em;
+    font-weight: 800;
+}
+
+.article-content h2 { font-size: 1.8rem; border-left: 4px solid var(--pink); padding-left: 15px; }
+
+.article-content p { margin-bottom: 1.5em; }
+
+.article-content code {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--pink);
+    padding: 3px 6px;
+    border-radius: 6px;
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 0.95em;
+}
+
+.article-content pre {
+    background: #000;
+    padding: 24px;
+    border-radius: 20px;
+    overflow-x: auto;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin: 2em 0;
+}
+
+.article-content pre code {
+    background: transparent;
+    color: #fff;
+    padding: 0;
+    font-size: 0.9rem;
+}
+
+.article-content ul, .article-content ol {
+    margin-bottom: 1.5em;
+    padding-left: 20px;
+}
+
+.article-content li { margin-bottom: 10px; }
+
+.article-content img {
+    max-width: 100%;
+    border-radius: 24px;
+    margin: 2em 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.article-content a {
+    color: var(--pink);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.article-meta .external-link {
+    color: var(--pink);
+    text-decoration: none;
+    font-weight: 800;
+}
+
+.article-meta .external-link:hover {
+    text-decoration: underline;
+}
+
+/* Error and empty states */
+.error-state {
+    text-align: center;
+    padding: 100px 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 40px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.error-state h2 { font-family: 'Sora'; font-weight: 800; color: #ff2d55; }

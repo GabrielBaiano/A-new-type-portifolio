@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeetCode Admin | Gabriel Baiano</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --pink: #ff2d55;
+            --bg: #0a0a0a;
+            --card: #141414;
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #ffffff;
+            --text-muted: #888;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            gap: 2px;
+            background: var(--border);
+        }
+
+        /* --- Panel Styles --- */
+        .panel {
+            background: var(--bg);
+            padding: 40px;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .editor-panel {
+            border-right: 1px solid var(--border);
+        }
+
+        h1 {
+            font-family: 'Sora', sans-serif;
+            font-weight: 800;
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            color: var(--pink);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--pink);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        textarea {
+            height: 300px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.9rem;
+        }
+
+        .btn-post {
+            width: 100%;
+            padding: 20px;
+            background: var(--pink);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-family: 'Sora', sans-serif;
+            font-weight: 800;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .btn-post:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 45, 85, 0.3);
+            opacity: 0.9;
+        }
+
+        /* --- Preview Styles --- */
+        .preview-title {
+            font-family: 'Sora', sans-serif;
+            font-weight: 800;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .preview-content {
+            background: rgba(255, 255, 255, 0.01);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid var(--border);
+            min-height: 400px;
+            line-height: 1.6;
+        }
+
+        .preview-content h1,
+        .preview-content h2,
+        .preview-content h3 {
+            color: white;
+            margin-top: 24px;
+        }
+
+        .preview-content p {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .preview-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .preview-content pre {
+            background: #000;
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+
+        /* --- Balloon Mockup --- */
+        .balloon-mockup {
+            background: #ff2d55;
+            width: 300px;
+            border-radius: 40px;
+            padding: 25px;
+            color: white;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .balloon-mockup::after {
+            content: '';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 100px;
+        }
+
+        .mock-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .mock-name {
+            font-weight: 800;
+            font-family: 'Sora';
+            font-size: 0.9rem;
+        }
+
+        .mock-badge {
+            background: white;
+            color: #ff2d55;
+            padding: 2px 10px;
+            border-radius: 100px;
+            font-weight: 900;
+            font-size: 0.8rem;
+        }
+
+        .mock-title {
+            font-family: 'Sora';
+            font-weight: 800;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+
+        .mock-msg {
+            font-size: 0.85rem;
+            font-weight: 600;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .mock-link {
+            border-bottom: 2px solid white;
+            display: inline-block;
+            font-weight: 800;
+            font-size: 0.8rem;
+            letter-spacing: 0.05em;
+        }
+
+        #status-msg {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            display: none;
+            font-weight: 600;
+        }
+
+        .success {
+            background: rgba(0, 255, 127, 0.1);
+            color: #00ff7f;
+        }
+
+        .error {
+            background: rgba(255, 45, 85, 0.1);
+            color: #ff2d55;
+        }
+
+        @media (max-width: 1000px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .panel {
+                height: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Editor -->
+        <div class="panel editor-panel">
+            <h1>🔥 LeetCode Admin</h1>
+            <form id="leetcodeForm">
+                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Problem Number</label>
+                        <input type="number" id="number" required placeholder="1" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" id="name" required placeholder="Two Sum">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Resolution (Markdown)</label>
+                    <textarea id="content" required placeholder="### Logic&#10;Explain your algorithm..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>External Link</label>
+                    <input type="url" id="external_link" placeholder="LeetCode URL">
+                </div>
+
+                <div class="form-group">
+                    <label>Secret Access Key</label>
+                    <input type="password" id="secret" required placeholder="Enter token">
+                </div>
+
+                <button type="submit" class="btn-post">PUBLICAR DESAFIO 🔥</button>
+            </form>
+            <div id="status-msg"></div>
+        </div>
+
+        <!-- Preview -->
+        <div class="panel preview-panel">
+            <div class="preview-title">BALLOON PREVIEW</div>
+            <div class="balloon-mockup">
+                <div class="mock-header">
+                    <span class="mock-name">LeetCode Challenge</span>
+                    <span class="mock-badge" id="preview-badge">12 🔥</span>
+                </div>
+                <div class="mock-title" id="preview-title">Daily Challenge LeetCode: #1 Two Sum</div>
+                <div class="mock-msg" id="preview-msg">Progress: Two Sum. Streak: -- 🔥</div>
+                <div class="mock-link">VIEW RESOLUTION →</div>
+            </div>
+
+            <div class="preview-title">BLOG PAGE PREVIEW</div>
+            <div class="preview-content" id="markdown-preview">
+                <p style="color: grey;">Start typing to see the preview...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('leetcodeForm');
+        const numberInput = document.getElementById('number');
+        const nameInput = document.getElementById('name');
+        const contentInput = document.getElementById('content');
+        const previewTitle = document.getElementById('preview-title');
+        const previewMsg = document.getElementById('preview-msg');
+        const markdownPreview = document.getElementById('markdown-preview');
+
+        // Live Preview Logic
+        function updatePreviews() {
+            const num = numberInput.value || '0';
+            const name = nameInput.value || 'Problem Name';
+            const content = contentInput.value;
+
+            previewTitle.innerText = `Daily Challenge LeetCode: #${num} ${name}`;
+            previewMsg.innerText = `Progress: ${name}. Streak: -- 🔥`;
+
+            if (content) {
+                markdownPreview.innerHTML = marked.parse(content);
+            } else {
+                markdownPreview.innerHTML = '<p style="color: grey;">Start typing to see the preview...</p>';
+            }
+        }
+
+        [numberInput, nameInput, contentInput].forEach(el => {
+            el.addEventListener('input', updatePreviews);
+        });
+
+        // Submit Logic
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const status = document.getElementById('status-msg');
+            const btn = form.querySelector('.btn-post');
+
+            status.style.display = 'none';
+            btn.disabled = true;
+            btn.innerText = 'ENVIANDO...';
+
+            const payload = {
+                number: parseInt(numberInput.value),
+                name: nameInput.value,
+                content: contentInput.value,
+                external_link: document.getElementById('external_link').value,
+                secret: document.getElementById('secret').value
+            };
+
+            try {
+                const response = await fetch('/api/add-leetcode', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    status.className = 'success';
+                    status.innerText = result.message;
+                    status.style.display = 'block';
+                    form.reset();
+                    updatePreviews();
+                } else {
+                    throw new Error(result.error || 'Check your key');
+                }
+            } catch (err) {
+                status.className = 'error';
+                status.innerText = 'Error: ' + err.message;
+                status.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'PUBLICAR DESAFIO 🔥';
+            }
+        });
+    </script>
+</body>
+
+</html>
