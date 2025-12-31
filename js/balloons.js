@@ -269,15 +269,23 @@ class BalloonSystem {
     buildBalloonHTML(data) {
         const colors = ['blue', 'green', 'yellow', 'orange', 'pink', 'purple'];
         const randomColor = data.color || colors[Math.floor(Math.random() * colors.length)];
+        
+        // Hide avatar for releases as requested (green balloons)
+        const showAvatar = data.badge !== 'Release' && data.image;
+
+        // Parse markdown if marked is available
+        const formattedMessage = (typeof marked !== 'undefined' && data.message) 
+            ? marked.parse(data.message) 
+            : data.message;
 
         return `
-            <div class="balloon-card organic-balloon balloon-bg-${randomColor}">
-                ${data.image ? `<img src="${data.image}" alt="${data.name}" class="balloon-avatar">` : ''}
+            <div class="balloon-card organic-balloon balloon-bg-${randomColor} ${data.badge === 'Release' ? 'balloon-type-release' : ''}">
+                ${showAvatar ? `<img src="${data.image}" alt="${data.name}" class="balloon-avatar">` : ''}
                 <div class="balloon-header">
                     <span class="balloon-name">${data.name}</span>
                     ${data.badge ? `<span class="balloon-badge">${data.badge}</span>` : ''}
                 </div>
-                <div class="balloon-message">${data.message}</div>
+                <div class="balloon-message">${formattedMessage}</div>
                 ${data.link ? `
                      <a href="${data.link}" target="_blank" class="balloon-link">LEARN MORE →</a>
                 ` : ''}

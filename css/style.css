@@ -1735,6 +1735,24 @@ body,
     max-height: 15.5em; /* Fallback for line-clamp */
 }
 
+/* Markdown Support Inside Balloons */
+.balloon-message p {
+    margin: 0 0 8px 0;
+}
+.balloon-message p:last-child {
+    margin-bottom: 0;
+}
+.balloon-message ul, .balloon-message ol {
+    margin: 4px 0 8px 18px;
+    padding: 0;
+}
+.balloon-message li {
+    margin-bottom: 4px;
+}
+.balloon-message strong {
+    font-weight: 900;
+}
+
 /* Balloon Link/Button */
 .balloon-link {
     display: inline-block;
