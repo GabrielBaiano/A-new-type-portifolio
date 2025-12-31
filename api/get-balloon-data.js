@@ -67,6 +67,7 @@ export default async function handler(req, res) {
       message: null,
       badge: `${item.streak} 🔥`,
       color: 'pink',
+      category: item.category,
       link: `#/leetcode/${item.id}`, // Route to the new blog page
       date: item.created_at,
       contexts: ['home', 'projects', 'academic']

@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { number, name, content, external_link, secret } = req.body;
+  const { number, name, content, external_link, secret, category = 'daily' } = req.body;
 
   // Simple security check
   if (secret !== API_SECRET) {
@@ -75,7 +75,8 @@ export default async function handler(req, res) {
           name,
           content,
           external_link,
-          streak: currentStreak
+          streak: currentStreak,
+          category
         })
       }
     );

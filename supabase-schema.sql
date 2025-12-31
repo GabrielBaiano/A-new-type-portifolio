@@ -120,6 +120,7 @@ CREATE TABLE leetcode_challenges (
     content TEXT NOT NULL,
     external_link TEXT,
     streak INTEGER DEFAULT 1,
+    category TEXT DEFAULT 'daily',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

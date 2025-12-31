@@ -101,7 +101,7 @@
 
         textarea {
             height: 300px;
-            font-family: 'Monaco', 'Consolas', monospace;
+            font-family: 'JetBrains Mono', 'Monaco', 'Consolas', monospace;
             font-size: 0.9rem;
         }
 
@@ -270,15 +270,24 @@
         <div class="panel editor-panel">
             <h1>🔥 LeetCode Admin</h1>
             <form id="leetcodeForm">
-                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                     <div class="form-group">
                         <label>Problem Number</label>
                         <input type="number" id="number" required placeholder="1" value="1">
                     </div>
                     <div class="form-group">
-                        <label>Name</label>
-                        <input type="text" id="name" required placeholder="Two Sum">
+                        <label>Category</label>
+                        <select id="category"
+                            style="width: 100%; padding: 16px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 12px; color: white; font-size: 1rem; font-family: inherit; appearance: none; cursor: pointer;">
+                            <option value="daily">Daily Challenge</option>
+                            <option value="training">Training / Practice</option>
+                        </select>
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Problem Name</label>
+                    <input type="text" id="name" required placeholder="Two Sum">
                 </div>
 
                 <div class="form-group">
@@ -325,6 +334,7 @@
         const form = document.getElementById('leetcodeForm');
         const numberInput = document.getElementById('number');
         const nameInput = document.getElementById('name');
+        const categoryInput = document.getElementById('category');
         const contentInput = document.getElementById('content');
         const previewTitle = document.getElementById('preview-title');
         const previewMsg = document.getElementById('preview-msg');
@@ -334,9 +344,11 @@
         function updatePreviews() {
             const num = numberInput.value || '0';
             const name = nameInput.value || 'Problem Name';
+            const cat = categoryInput.value;
             const content = contentInput.value;
 
-            previewTitle.innerText = `Daily Challenge LeetCode: #${num} ${name}`;
+            const catLabel = cat === 'daily' ? 'Daily Challenge' : 'Training Resolution';
+            previewTitle.innerText = `${catLabel} LeetCode: #${num} ${name}`;
 
             if (content) {
                 markdownPreview.innerHTML = marked.parse(content);
@@ -345,7 +357,7 @@
             }
         }
 
-        [numberInput, nameInput, contentInput].forEach(el => {
+        [numberInput, nameInput, contentInput, categoryInput].forEach(el => {
             el.addEventListener('input', updatePreviews);
         });
 
@@ -363,6 +375,7 @@
                 number: parseInt(numberInput.value),
                 name: nameInput.value,
                 content: contentInput.value,
+                category: categoryInput.value,
                 external_link: document.getElementById('external_link').value,
                 secret: document.getElementById('secret').value
             };
