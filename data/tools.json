@@ -15,11 +15,11 @@
       "gradient": "bg-green-gradient"
     },
     {
-      "id": "courses-certs",
-      "title": "Certs & Courses",
-      "subtitle": "Learning paths and certifications",
-      "icon": "fa-solid fa-graduation-cap",
-      "gradient": "bg-orange-gradient"
+      "id": "leetcode-resolutions",
+      "title": "LeetCode Resolutions",
+      "subtitle": "Daily algorithm challenges and logic",
+      "icon": "fa-solid fa-code",
+      "gradient": "bg-pink-gradient"
     },
     {
       "id": "study-notes",

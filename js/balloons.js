@@ -98,13 +98,33 @@ class BalloonSystem {
 
     async initialFill() {
         this.clearBalloons();
+        
+        // 1. Immediately place static/important balloons
+        const ad = this.getAd();
+        const linkedin = this.getLinkedIn();
+        
+        [ad, linkedin].forEach(item => {
+            if (this.isContextValid(item)) {
+                this.tryPlaceBalloon(item);
+            }
+        });
+
+        // 2. Fetch dynamic ones in background
         const dataSet = await this.getAvailableData();
         if (!dataSet || dataSet.length === 0) return;
 
-        const shuffled = [...dataSet].sort(() => Math.random() - 0.5);
+        // Skip items we already placed
+        const dynamicOnly = dataSet.filter(item => item.id !== ad.id && item.id !== linkedin.id);
+        const shuffled = [...dynamicOnly].sort(() => Math.random() - 0.5);
+        
         for (const item of shuffled) {
             this.tryPlaceBalloon(item);
         }
+    }
+
+    isContextValid(item) {
+        if (!item.contexts) return true;
+        return item.contexts.includes(this.currentContext);
     }
 
     startReplenishment() {

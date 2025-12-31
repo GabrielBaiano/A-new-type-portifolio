@@ -3040,11 +3040,67 @@ body.detail-mode .main-container {
     padding-bottom: 151px;
 }
 
+.leetcode-heatmap-container {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 24px;
+    margin: 40px 0;
+}
+
+.leetcode-heatmap-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.leetcode-heatmap-title {
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: #ff2d55;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.leetcode-heatmap {
+    display: flex;
+    gap: 5px;
+    justify-content: flex-start;
+    padding-bottom: 10px;
+    overflow-x: auto;
+}
+
+.heatmap-week {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.heatmap-day {
+    width: 13px;
+    height: 13px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+    transition: all 0.2s;
+}
+
+.heatmap-day.active {
+    background: #ff2d55;
+    box-shadow: 0 0 10px rgba(255, 45, 85, 0.3);
+}
+
+.heatmap-day:hover {
+    transform: scale(1.2);
+    z-index: 5;
+    background: rgba(255, 45, 85, 0.6);
+}
+
 .leetcode-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 30px;
-    margin-top: 40px;
+    gap: 20px;
 }
 
 .leetcode-card {

@@ -117,7 +117,11 @@ const FeedPage = {
         document.querySelectorAll('.clickable-category').forEach(card => {
             card.addEventListener('click', () => {
                 const typeId = card.getAttribute('data-type-id');
-                router.navigate(`detail/category/${typeId}`);
+                if (typeId === 'leetcode-resolutions') {
+                    router.navigate('leetcode');
+                } else {
+                    router.navigate(`detail/category/${typeId}`);
+                }
             });
         });
 

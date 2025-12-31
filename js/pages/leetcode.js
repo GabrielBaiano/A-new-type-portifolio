@@ -20,7 +20,29 @@ const LeetCode = {
             const response = await fetch('/api/get-balloon-data?context=all');
             const result = await response.json();
             
-            const leetcodeChallenges = result.data ? result.data.filter(item => item.type === 'leetcode') : [];
+            const leetcodeChallenges = result.data 
+                ? result.data
+                    .filter(item => item.type === 'leetcode')
+                    .sort((a, b) => new Date(b.date) - new Date(a.date)) 
+                : [];
+
+            // Heatmap logic: Last 12 weeks
+            const today = new Date();
+            const heatmapData = [];
+            const activeDates = new Set(leetcodeChallenges.map(c => new Date(c.date).toDateString()));
+
+            for (let i = 11; i >= 0; i--) {
+                const week = [];
+                for (let j = 0; j < 7; j++) {
+                    const day = new Date(today);
+                    day.setDate(today.getDate() - (i * 7 + (6 - j)));
+                    week.push({
+                        date: day.toDateString(),
+                        active: activeDates.has(day.toDateString())
+                    });
+                }
+                heatmapData.push(week);
+            }
 
             return `
                 <div class="page-container leetcode-page">
@@ -29,14 +51,30 @@ const LeetCode = {
                         <p class="section-subtitle">Solving the world's most complex algorithms, one day at a time.</p>
                     </header>
 
+                    <div class="leetcode-heatmap-container">
+                        <div class="leetcode-heatmap-header">
+                            <span class="leetcode-heatmap-title">Activity Monitor</span>
+                            <span class="streak-fire">🔥 ${leetcodeChallenges[0]?.badge || '0 🔥'} Current Streak</span>
+                        </div>
+                        <div class="leetcode-heatmap">
+                            ${heatmapData.map(week => `
+                                <div class="heatmap-week">
+                                    ${week.map(day => `
+                                        <div class="heatmap-day ${day.active ? 'active' : ''}" title="${day.date}"></div>
+                                    `).join('')}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
                     <div class="leetcode-grid">
                         ${leetcodeChallenges.length > 0 ? leetcodeChallenges.map(challenge => `
                             <a href="#/leetcode/${challenge.id.replace('leetcode-', '')}" class="leetcode-card">
                                 <div class="leetcode-card-header">
-                                    <span class="leetcode-number">#${challenge.title.match(/#(\d+)/)[1]}</span>
+                                    <span class="leetcode-number">#${challenge.title.match(/#(\d+)/)?.[1] || '---'}</span>
                                     <span class="leetcode-streak">${challenge.badge}</span>
                                 </div>
-                                <h3 class="leetcode-card-title">${challenge.title.split(': ')[1]}</h3>
+                                <h3 class="leetcode-card-title">${challenge.title.split(': ')[1] || challenge.name}</h3>
                                 <p class="leetcode-card-date">${new Date(challenge.date).toLocaleDateString()}</p>
                             </a>
                         `).join('') : '<p class="empty-state">No challenges recorded yet. Starting soon! 🔥</p>'}
