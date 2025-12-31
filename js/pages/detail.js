@@ -38,6 +38,7 @@ const DetailPage = {
     async onMount() {
         console.log(`[Detail] Mounted: ${this.currentType}/${this.currentId}`);
         document.body.classList.add('detail-mode');
+        document.body.classList.add('wide-layout');
         
         const statusEl = document.getElementById('loading-status');
         const updateStatus = (msg) => { if (statusEl) statusEl.textContent = msg; };
@@ -199,6 +200,7 @@ const DetailPage = {
      */
     onUnmount() {
         document.body.classList.remove('detail-mode');
+        document.body.classList.remove('wide-layout');
         this.currentType = null;
         this.currentId = null;
         this.currentData = null;
