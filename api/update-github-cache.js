@@ -98,7 +98,7 @@ export default async function handler(req, res) {
             repo_name: repo.name,
             repo_full_name: repoFullName,
             release_tag: latest.tag_name,
-            release_notes: latest.body ? latest.body.substring(0, 150) : '',
+            release_notes: latest.body ? latest.body.substring(0, 500) : '',
             context: 'projects',
             project_context: projectContext,
             created_at: latest.published_at
