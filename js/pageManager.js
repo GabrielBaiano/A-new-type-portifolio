@@ -58,7 +58,7 @@ class PageManager {
         }
 
         // Renderiza nova página (passa parâmetros)
-        const content = page.render(params);
+        const content = await page.render(params);
         this.container.innerHTML = content;
 
         // Chama onMount da nova página ANTES do fadeIn para evitar pulos de layout
