@@ -211,13 +211,6 @@ export default async function handler(req, res) {
       
       const normalizedData = allProjectData.map(item => ({
         contributions: null,
-        fork_url: null,
-        issue_title: null,
-        issue_url: null,
-        issue_number: null,
-        pr_title: null,
-        pr_url: null,
-        pr_number: null,
         release_tag: null,
         release_notes: null,
         ...item
