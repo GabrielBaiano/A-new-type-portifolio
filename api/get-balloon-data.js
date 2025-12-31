@@ -33,16 +33,21 @@ export default async function handler(req, res) {
     );
     const projectData = await response.json();
     
-    data = Array.isArray(projectData) ? projectData.map(item => ({
-      id: item.id,
-      type: 'notification',
-      name: item.username,
-      message: getMessageForType(item.type, item),
-      badge: getBadgeForType(item.type),
-      image: item.avatar_url,
-      date: item.created_at,
-      contexts: project ? [project] : (context ? context.split(',') : ['home', 'academic', 'projects'])
-    })) : [];
+    data = Array.isArray(projectData) ? projectData.map(item => {
+      const isRelease = item.type === 'release';
+      return {
+        id: item.id,
+        type: 'notification',
+        name: isRelease ? formatRepoName(item.repo_name) : item.username,
+        message: getMessageForType(item.type, item),
+        badge: getBadgeForType(item.type),
+        image: item.avatar_url,
+        color: isRelease ? 'green' : (item.type === 'star' ? 'blue' : null),
+        link: isRelease ? `https://github.com/${item.repo_full_name}/releases/tag/${item.release_tag}` : `https://github.com/${item.username}`,
+        date: item.created_at,
+        contexts: project ? [project] : (context ? context.split(',') : ['home', 'academic', 'projects'])
+      };
+    }) : [];
 
     return res.status(200).json({
       success: true,
@@ -85,4 +90,13 @@ function getBadgeForType(type) {
     'release': 'Release'
   };
   return badges[type] || 'Activity';
+}
+
+function formatRepoName(repoName) {
+  if (!repoName) return '';
+  // Turn "shii-study-assistant" into "Shii Study Assistant"
+  return repoName
+    .split(/[-_]/)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 }
