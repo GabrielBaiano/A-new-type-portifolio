@@ -285,9 +285,12 @@ class BalloonSystem {
                     <span class="balloon-name">${data.name}</span>
                     ${data.badge ? `<span class="balloon-badge">${data.badge}</span>` : ''}
                 </div>
+                ${data.title ? `<div class="balloon-title">${data.title}</div>` : ''}
                 <div class="balloon-message">${formattedMessage}</div>
                 ${data.link ? `
-                     <a href="${data.link}" target="_blank" class="balloon-link">LEARN MORE →</a>
+                     <a href="${data.link}" target="_blank" class="balloon-link">
+                        ${data.badge === 'Release' ? 'VIEW PATCH NOTES →' : (data.linkText || 'LEARN MORE →')}
+                     </a>
                 ` : ''}
             </div>
         `;
