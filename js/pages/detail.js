@@ -16,10 +16,10 @@ const DetailPage = {
         // Show loading state initially
         return `
             <div class="card detail-card">
-                <button class="back-button" onclick="history.back()">
+                <a href="#/feed" class="back-button">
                     <i class="fa-solid fa-arrow-left"></i>
                     <span>Back</span>
-                </button>
+                </a>
                 
                 <div id="detail-content" class="detail-content">
                     <div class="loading-state">

@@ -7,6 +7,7 @@ const LeetCode = {
     async render(params) {
         const challengeId = params ? params.id : null;
         
+        // Ensure detail mode class is handled by lifecycle, but clear state just in case
         if (challengeId) {
             return await this.renderDetail(challengeId);
         }
