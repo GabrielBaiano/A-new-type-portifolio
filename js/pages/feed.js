@@ -1,5 +1,5 @@
-// Tools Page Component - Renders user-created tools from JSON configuration
-const ToolsPage = {
+// Feed Page Component
+const FeedPage = {
     renderSidebar(sidebarData, isMobile = false) {
         return `
             <div class="sidebar-card">

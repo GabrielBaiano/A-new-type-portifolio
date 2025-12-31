@@ -1,5 +1,5 @@
-// Blog Page Component - Renders from JSON configuration
-const BlogPage = {
+// Academic Page Component - Renders from JSON configuration
+const AcademicPage = {
     renderSidebar(readingListData, sidebarData, isMobile = false) {
         return `
             <div class="sidebar-card">
@@ -31,7 +31,7 @@ const BlogPage = {
 
     render() {
         // Get preloaded data
-        const data = DataService.blogData || { profile: {}, education: [], professionalExperience: [], publications: [], skills: [], readingList: [] };
+        const data = DataService.academicData || { profile: {}, education: [], professionalExperience: [], publications: [], skills: [], readingList: [] };
         const toolsSidebar = DataService.toolsData?.sidebar || { categories: [], popularContent: [] };
 
         return `
@@ -153,7 +153,7 @@ const BlogPage = {
                 e.preventDefault();
                 const id = item.getAttribute('data-id');
                 if (id) {
-                    router.navigate(`detail/blog/${id}`);
+                    router.navigate(`detail/academic/${id}`);
                 }
             });
         });

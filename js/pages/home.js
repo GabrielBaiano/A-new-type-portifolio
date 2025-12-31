@@ -48,7 +48,7 @@ Welcome, i'm a Brazilian Full-Stack Developer with over 3 years of experience, a
                     <a href="https://github.com/GabrielBaiano" class="social-btn"><i class="fa-brands fa-github"></i>
                         GitHub</a>
                     <a href="http://lattes.cnpq.br/1588167693631178" target="_blank" class="social-btn"><i class="fa-solid fa-graduation-cap"></i> Lattes CV</a>
-                    <a href="mailto:gabrielngama@gmail.com" class="social-btn"><i class="fa-solid fa-envelope"></i> Mail</a>
+                    <a href="mailto:gabrielngama@gmail.com" class="social-btn contact-email"><i class="fa-solid fa-envelope"></i> Mail</a>
                 </div>
 
                 <!-- Linha Divisória -->
@@ -162,6 +162,25 @@ Welcome, i'm a Brazilian Full-Stack Developer with over 3 years of experience, a
             // Click manual para flipar
             avatarContainer.addEventListener('click', () => {
                 avatarFlipper.classList.toggle('flip');
+            });
+        }
+
+        // Feature: Copy Email to clipboard
+        const emailBtn = document.querySelector('.contact-email');
+        if (emailBtn) {
+            emailBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const email = "gabrielngama@gmail.com";
+                navigator.clipboard.writeText(email).then(() => {
+                    const originalText = emailBtn.innerHTML;
+                    emailBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+                    emailBtn.style.backgroundColor = '#00a650';
+                    
+                    setTimeout(() => {
+                        emailBtn.innerHTML = originalText;
+                        emailBtn.style.backgroundColor = '';
+                    }, 2000);
+                });
             });
         }
     },

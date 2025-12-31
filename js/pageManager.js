@@ -72,7 +72,7 @@ class PageManager {
 
         this.currentPage = pageName;
         this.isTransitioning = false;
-
+        
         // Se há uma página pendente, carrega ela
         if (this.pendingPage && this.pendingPage.name !== pageName) {
             const nextPage = this.pendingPage;

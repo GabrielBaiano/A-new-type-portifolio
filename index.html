@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
@@ -12,35 +12,78 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="css/style.css?v=3">
+
+    <!-- SEO Meta Tags -->
+    <meta name="description"
+        content="Gabriel Nascimento Gama - Full Stack Developer & Academic Researcher. Especialista em Ecossistema JavaScript (Node.js, TypeScript), AWS e SQL.">
+    <meta name="keywords"
+        content="Portfolio, Full Stack Developer, Gabriel Nascimento Gama, Node.js, TypeScript, AWS, React, Web Development">
+    <meta name="author" content="Gabriel Nascimento Gama">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://gabrielbaiano.github.io/A-new-type-portifolio/">
+    <meta property="og:title" content="Gabriel Nascimento Gama | Full Stack Dev">
+    <meta property="og:description"
+        content="Explore o portfólio de Gabriel Nascimento Gama, Full Stack Developer e Pesquisador.">
+    <meta property="og:image" content="assets/images/me.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://gabrielbaiano.github.io/A-new-type-portifolio/">
+    <meta property="twitter:title" content="Gabriel Nascimento Gama | Full Stack Dev">
+    <meta property="twitter:description"
+        content="Explore o portfólio de Gabriel Nascimento Gama, Full Stack Developer e Pesquisador.">
+    <meta property="twitter:image" content="assets/images/me.png">
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Gabriel Nascimento Gama",
+      "url": "https://gabrielbaiano.github.io/A-new-type-portifolio/",
+      "image": "assets/images/me.png",
+      "sameAs": [
+        "https://github.com/GabrielBaiano",
+        "https://www.linkedin.com/in/gabriel-nascimento-gama-5b0b30185/"
+      ],
+      "jobTitle": "Full Stack Developer",
+      "worksFor": {
+        "@type": "Organization",
+        "name": "YellowHood"
+      }
+    }
+    </script>
 </head>
 
 <body>
 
     <!-- SPA Container -->
-    <div id="app" class="main-container">
+    <main id="app" class="main-container">
         <!-- Content will be dynamically loaded here -->
-    </div>
+    </main>
 
     <!-- Bottom Navigation Bar -->
     <nav class="bottom-nav">
         <div class="nav-group main-nav">
-            <a href="#/tools" class="nav-item active" data-route="tools">
+            <a href="#/feed" class="nav-item active" data-route="feed" aria-label="Feed">
                 <i class="fa-solid fa-rss"></i>
                 <span>Feed</span>
             </a>
-            <a href="#/projects" class="nav-item" data-route="projects">
+            <a href="#/projects" class="nav-item" data-route="projects" aria-label="Projects">
                 <i class="fa-solid fa-cube"></i>
                 <span>Projects</span>
             </a>
-            <a href="#/blog" class="nav-item" data-route="blog">
+            <a href="#/academic" class="nav-item" data-route="academic" aria-label="Academic">
                 <i class="fa-solid fa-graduation-cap"></i>
                 <span>Academic</span>
             </a>
-            <a href="#/photos" class="nav-item" data-route="photos">
+            <a href="#/photos" class="nav-item" data-route="photos" aria-label="Photos">
                 <i class="fa-solid fa-camera"></i>
                 <span>Photos</span>
             </a>
-            <a href="#/home" class="nav-item" data-route="home">
+            <a href="#/home" class="nav-item" data-route="home" aria-label="About Me">
                 <i class="fa-solid fa-user"></i>
                 <span>About</span>
             </a>
@@ -68,8 +111,8 @@
     <!-- Page Components -->
     <script src="js/pages/home.js"></script>
     <script src="js/pages/projects.js"></script>
-    <script src="js/pages/tools.js"></script>
-    <script src="js/pages/blog.js"></script>
+    <script src="js/pages/feed.js"></script>
+    <script src="js/pages/academic.js"></script>
     <script src="js/pages/photos.js"></script>
     <script src="js/pages/detail.js"></script>
 

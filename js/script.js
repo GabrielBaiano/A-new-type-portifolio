@@ -17,8 +17,8 @@ function initializeSPA() {
     // Register all pages
     pageManager.registerPage('home', HomePage);
     pageManager.registerPage('projects', ProjectsPage);
-    pageManager.registerPage('tools', ToolsPage);
-    pageManager.registerPage('blog', BlogPage);
+    pageManager.registerPage('feed', FeedPage);
+    pageManager.registerPage('academic', AcademicPage);
     pageManager.registerPage('photos', PhotosPage);
     pageManager.registerPage('detail', DetailPage);
 
@@ -33,14 +33,14 @@ function initializeSPA() {
         updateNavigation('projects');
     });
     
-    router.register('tools', () => {
-        pageManager.loadPage('tools');
-        updateNavigation('tools');
+    router.register('feed', () => {
+        pageManager.loadPage('feed');
+        updateNavigation('feed');
     });
     
-    router.register('blog', () => {
-        pageManager.loadPage('blog');
-        updateNavigation('blog');
+    router.register('academic', () => {
+        pageManager.loadPage('academic');
+        updateNavigation('academic');
     });
     
     router.register('photos', () => {
@@ -55,7 +55,7 @@ function initializeSPA() {
     });
 
     // Set default route
-    router.setDefaultRoute('tools');
+    router.setDefaultRoute('feed');
 }
 
 /**

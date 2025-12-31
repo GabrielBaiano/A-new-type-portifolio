@@ -5,7 +5,7 @@ const DataService = {
     // Cache for loaded data
     projectsData: null,
     toolsData: null,
-    blogData: null,
+    academicData: null,
 
     /**
      * Load projects data from JSON
@@ -32,12 +32,12 @@ const DataService = {
     /**
      * Load academic (cv) data from JSON
      */
-    async loadBlogData() {
-        if (!this.blogData) {
+    async loadAcademicData() {
+        if (!this.academicData) {
             const response = await fetch('data/academic.json');
-            this.blogData = await response.json();
+            this.academicData = await response.json();
         }
-        return this.blogData;
+        return this.academicData;
     },
 
     /**
@@ -49,7 +49,7 @@ const DataService = {
             await Promise.all([
                 this.loadProjectsData(),
                 this.loadToolsData(),
-                this.loadBlogData()
+                this.loadAcademicData()
             ]);
             console.log('✅ All data preloaded successfully');
         } catch (error) {
@@ -168,7 +168,7 @@ const DataService = {
      * @returns {Promise<Array>} Array of blog posts
      */
     async getAllBlogPosts() {
-        const data = await this.loadBlogData();
+        const data = await this.loadAcademicData();
         return data.posts;
     },
 
@@ -178,7 +178,7 @@ const DataService = {
      * @returns {Promise<Object>} Blog post data
      */
     async getBlogPostById(id) {
-        const data = await this.loadBlogData();
+        const data = await this.loadAcademicData();
         const post = data.publications.find(p => p.id === id);
         
         if (post) {
@@ -221,17 +221,17 @@ const DataService = {
      * @param {string} typeId - Category identifier (articles, tutorials, etc.)
      */
     async getPublicationsByCategory(typeId) {
-        const blogData = await this.loadBlogData();
+        const academicData = await this.loadAcademicData();
         const toolsData = await this.loadToolsData();
         const type = toolsData.articleTypes.find(t => t.id === typeId);
         
         // Filter academic publications
         let items = [];
         if (typeId === 'articles') {
-            items = blogData.publications.filter(p => p.category === 'Articles');
+            items = academicData.publications.filter(p => p.category === 'Articles');
         } else {
             // For now, other categories filter from the same pool or as placeholders
-            items = blogData.publications.filter(p => p.category.toLowerCase() === typeId);
+            items = academicData.publications.filter(p => p.category.toLowerCase() === typeId);
         }
 
         return {

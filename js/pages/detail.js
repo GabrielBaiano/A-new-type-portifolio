@@ -57,7 +57,7 @@ const DetailPage = {
                 case 'project':
                     data = await DataService.getProjectById(this.currentId);
                     break;
-                case 'blog':
+                case 'academic':
                     data = await DataService.getBlogPostById(this.currentId);
                     break;
                 case 'tool':

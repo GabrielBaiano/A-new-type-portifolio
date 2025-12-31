@@ -12,6 +12,25 @@
     --grid-color: #1a1a1a;
 }
 
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 5px;
+    border: 2px solid var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
 /* Light Theme */
 [data-theme="light"] {
     --bg-color: #2b5c96; /* Blueprint Blue Background */
@@ -246,6 +265,13 @@ body {
     padding: 32px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-blue);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
 }
 
 /* Cabeçalho (Avatar + Nome) */
@@ -583,6 +609,11 @@ body {
 .nav-item:hover {
     color: #fff;
     background-color: rgba(255, 255, 255, 0.05);
+    transform: scale(1.05);
+}
+
+.nav-item:active {
+    transform: scale(0.95);
 }
 
 .nav-item.active {
@@ -829,6 +860,7 @@ body {
     display: -webkit-box;
     line-clamp: 2;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
 }
 
