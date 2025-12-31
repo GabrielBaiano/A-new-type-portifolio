@@ -161,23 +161,25 @@ const LeetCode = {
                 : challenge.content;
 
             return `
-                <div class="page-container leetcode-detail">
-                    <a href="#/leetcode" class="back-link">← Back to challenges</a>
-                    <article class="leetcode-article">
-                        <header class="article-header">
-                            <span class="article-badge">LEETCODE DAILY</span>
-                            <h1 class="article-title">#${challenge.number}: ${challenge.name}</h1>
-                            <div class="article-meta">
-                                <span class="streak-fire">🔥 ${challenge.streak} Day Streak</span>
-                                <span class="date">${new Date(challenge.created_at).toLocaleDateString()}</span>
-                                ${challenge.external_link ? `<a href="${challenge.external_link}" target="_blank" class="external-link">View on LeetCode ↗</a>` : ''}
-                            </div>
-                        </header>
-                        
-                        <div class="article-content">
-                            ${formattedContent}
+                <div class="card detail-card leetcode-card-theme">
+                    <button class="back-button" onclick="location.hash='#/leetcode'">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Back</span>
+                    </button>
+
+                    <div class="detail-header">
+                        <div class="article-badge">LEETCODE DAILY</div>
+                        <h1 class="detail-title">#${challenge.number}: ${challenge.name}</h1>
+                        <div class="detail-date article-meta">
+                            <span class="streak-fire">🔥 ${challenge.streak} Day Streak</span>
+                            <span>${new Date(challenge.created_at).toLocaleDateString()}</span>
+                            ${challenge.external_link ? `<a href="${challenge.external_link}" target="_blank" class="external-link" style="margin-left: 10px; color: #ff2d55;">View on LeetCode ↗</a>` : ''}
                         </div>
-                    </article>
+                    </div>
+                    
+                    <div class="article-content">
+                        ${formattedContent}
+                    </div>
                 </div>
             `;
         } catch (error) {

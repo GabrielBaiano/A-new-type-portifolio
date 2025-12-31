@@ -3269,22 +3269,9 @@ body.detail-mode .main-container {
    LEETCODE DETAIL PAGE
 ----------------------------------------------------------- */
 .leetcode-detail {
-    max-width: 800px;
-    margin: 0 auto;
-    padding-bottom: 151px;
+    padding-bottom: 120px;
 }
 
-.back-link {
-    display: inline-block;
-    color: #888;
-    text-decoration: none;
-    margin-bottom: 30px;
-    font-weight: 600;
-}
-
-.back-link:hover {
-    color: var(--text-color);
-}
 
 .article-header {
     margin-bottom: 40px;
@@ -3298,18 +3285,20 @@ body.detail-mode .main-container {
 }
 
 .article-title {
-    font-size: 3.5rem;
-    font-weight: 950;
-    margin: 15px 0;
-    line-height: 1.1;
-    letter-spacing: -0.04em;
+    font-size: 2.5rem;
+    font-weight: 850;
+    margin: 12px 0;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: var(--text-main);
 }
 
 .article-meta {
     display: flex;
-    gap: 20px;
-    color: #888;
-    font-weight: 600;
+    gap: 16px;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.9rem;
 }
 
 .streak-fire {
@@ -3317,44 +3306,54 @@ body.detail-mode .main-container {
 }
 
 .article-content {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     line-height: 1.7;
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--text-main);
+    opacity: 0.95;
 }
 
 .article-content h1, .article-content h2, .article-content h3 {
     font-family: 'Sora', sans-serif;
-    color: #fff;
-    margin-top: 2em;
-    margin-bottom: 0.8em;
+    color: var(--text-main);
+    margin-top: 1.8em;
+    margin-bottom: 0.6em;
     font-weight: 800;
 }
 
-.article-content h2 { font-size: 1.8rem; border-left: 4px solid var(--pink); padding-left: 15px; }
+.article-content h2 { 
+    font-size: 1.6rem; 
+    border-left: 4px solid #ff2d55; 
+    padding-left: 15px; 
+}
 
 .article-content p { margin-bottom: 1.5em; }
 
 .article-content code {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--pink);
-    padding: 3px 6px;
-    border-radius: 6px;
-    font-family: 'Monaco', 'Consolas', monospace;
-    font-size: 0.95em;
+    background: rgba(255, 45, 85, 0.08);
+    color: #ff2d55;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
 }
 
 .article-content pre {
-    background: #000;
+    background: #0d0d0d;
     padding: 24px;
-    border-radius: 20px;
+    border-radius: 12px;
+    margin: 24px 0;
     overflow-x: auto;
     border: 1px solid rgba(255, 255, 255, 0.05);
-    margin: 2em 0;
+}
+
+[data-theme="light"] .article-content pre {
+    background: #f8f9fa;
+    border-color: rgba(0, 0, 0, 0.05);
 }
 
 .article-content pre code {
     background: transparent;
-    color: #fff;
+    color: inherit;
     padding: 0;
     font-size: 0.9rem;
 }
