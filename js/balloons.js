@@ -306,9 +306,11 @@ class BalloonSystem {
             const linkedin = this.getLinkedIn();
             
             if (result.success && result.data) {
-                // Filter to ONLY show releases (extra safety)
-                const releases = result.data.filter(item => item.badge === 'Release');
-                return [ad, linkedin, ...releases];
+                // Filter to show green releases and pink leetcode challenges
+                const dynamicBalloons = result.data.filter(item => 
+                    item.color === 'green' || item.color === 'pink'
+                );
+                return [ad, ...dynamicBalloons];
             }
         } catch (error) { }
         return [this.getAd(), this.getLinkedIn(), ...this.getFallbackData()];
