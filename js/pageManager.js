@@ -49,39 +49,54 @@ class PageManager {
         // Previne múltiplas transições simultâneas
         this.isTransitioning = true;
 
-        // Transição de saída
-        await this.fadeOut();
+        try {
+            // Transição de saída
+            await this.fadeOut();
 
-        // Chama onUnmount da página anterior APÓS o fadeOut para evitar
-        // que elementos sumam ou mudem de tamanho enquanto ainda estão visíveis
-        if (this.currentPage && this.pages[this.currentPage]?.onUnmount) {
-            this.pages[this.currentPage].onUnmount();
-        }
+            // Chama onUnmount da página anterior
+            if (this.currentPage && this.pages[this.currentPage]?.onUnmount) {
+                try {
+                    this.pages[this.currentPage].onUnmount();
+                } catch (e) {
+                    console.error(`[PageManager] Error in onUnmount of ${this.currentPage}:`, e);
+                }
+            }
 
-        // Renderiza nova página (passa parâmetros)
-        const content = await page.render(params);
-        this.container.innerHTML = content;
+            // Renderiza nova página
+            const content = await page.render(params);
+            this.container.innerHTML = content;
 
-        // Chama onMount da nova página ANTES do fadeIn para evitar pulos de layout
-        // (ex: adicionar classes no body que mudam o tamanho do container)
-        if (page.onMount) {
-            page.onMount(params);
-        }
+            // Chama onMount da nova página
+            if (page.onMount) {
+                try {
+                    page.onMount(params);
+                } catch (e) {
+                    console.error(`[PageManager] Error in onMount of ${pageName}:`, e);
+                }
+            }
 
-        // Transição de entrada
-        await this.fadeIn();
+            // Transição de entrada
+            await this.fadeIn();
 
-        this.currentPage = pageName;
-        this.currentParams = params;
-        this.isTransitioning = false;
-        
-        // Se há uma página pendente, carrega ela
-        if (this.pendingPage && this.pendingPage.name !== pageName) {
-            const nextPage = this.pendingPage;
-            this.pendingPage = null;
-            this.loadPage(nextPage.name, nextPage.params);
-        } else {
-            this.pendingPage = null;
+            this.currentPage = pageName;
+            this.currentParams = params;
+            
+        } catch (error) {
+            console.error(`[PageManager] Error loading page ${pageName}:`, error);
+            // Emergency restore: show container if it failed during fade
+            this.container.style.opacity = '1';
+            this.container.style.transform = 'translateY(0)';
+        } finally {
+            this.isTransitioning = false;
+            
+            // Se há uma página pendente, carrega ela
+            if (this.pendingPage && this.pendingPage.name !== pageName) {
+                const nextPage = this.pendingPage;
+                this.pendingPage = null;
+                this.loadPage(nextPage.name, nextPage.params);
+            } else {
+                this.pendingPage = null;
+            }
         }
     }
 

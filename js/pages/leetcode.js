@@ -114,7 +114,7 @@ const LeetCode = {
                 <div class="detail-header">
                     <h1 class="detail-title">LeetCode Resolutions</h1>
                     <p class="detail-subtitle">Chronological updates on my latest algorithm resolutions and logic challenges.</p>
-                    <div class="detail-date leetcode-badge-pink">${leetcodeChallenges.length} Resolutions</div>
+                    <div class="detail-date leetcode-badge-pink">${challenges.length} Resolutions</div>
                 </div>
 
                 <div class="leetcode-heatmap-container">
@@ -329,6 +329,10 @@ const LeetCode = {
         console.log('[LeetCode] Page unmounted');
         document.body.classList.remove('detail-mode');
         document.body.classList.remove('wide-layout');
+        // Reset state for next mount
+        this.searchQuery = '';
+        this.currentFilter = 'all';
+        this.currentSort = 'date-desc';
     }
 };
 
