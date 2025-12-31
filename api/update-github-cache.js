@@ -79,38 +79,6 @@ export default async function handler(req, res) {
       
       console.log(`Processing: ${repoFullName}`);
 
-      // 2.1 Stargazers
-      try {
-        const starsRes = await fetch(
-          `https://api.github.com/repos/${repoFullName}/stargazers?per_page=100`,
-          { 
-            headers: {
-              ...githubHeaders,
-              'Accept': 'application/vnd.github.v3.star+json'
-            }
-          }
-        );
-        const stars = await starsRes.json();
-        
-        if (Array.isArray(stars)) {
-          stars.forEach(starItem => {
-            const user = starItem.user;
-            allProjectData.push({
-              id: `star-${repo.id}-${user.id}`,
-              type: 'star',
-              username: user.login,
-              avatar_url: user.avatar_url,
-              profile_url: user.html_url,
-              repo_name: repo.name,
-              repo_full_name: repoFullName,
-              context: 'projects',
-              project_context: projectContext,
-              created_at: starItem.starred_at
-            });
-          });
-        }
-      } catch (e) { console.error('Error fetching stars:', e); }
-
       // 2.6 Releases (NEW)
       try {
         const releasesRes = await fetch(
