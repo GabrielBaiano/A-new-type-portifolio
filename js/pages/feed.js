@@ -6,7 +6,7 @@ const FeedPage = {
                 <div class="sidebar-section">
                     <span class="sidebar-label">Browse by Category</span>
                     <div class="tag-cloud">
-                        ${sidebarData.categories.map(cat => `<span class="sidebar-tag clickable-filter ${cat === 'LeetCode' ? 'tag-leetcode' : ''}" data-filter="${cat}" data-tag="${cat}">${cat}</span>`).join('')}
+                        ${sidebarData.categories.map(cat => `<span class="sidebar-tag clickable-filter" data-filter="${cat}" data-tag="${cat}">${cat}</span>`).join('')}
                     </div>
                 </div>
 
@@ -37,7 +37,7 @@ const FeedPage = {
             <div class="feed-item feed-item-btn" data-id="${item.id}">
                 <div class="feed-item-header">
                     <span class="feed-date">${item.date}</span>
-                    <span class="feed-tag ${item.tag === 'LeetCode' ? 'tag-leetcode' : ''}">${item.tag}</span>
+                    <span class="feed-tag" data-tag="${item.tag}">${item.tag}</span>
                 </div>
                 
                 ${item.image ? `

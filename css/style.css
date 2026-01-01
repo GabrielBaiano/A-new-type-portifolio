@@ -781,16 +781,7 @@ body,
     height: auto !important;
 }
 
-.type-card::before {
-    content: "LOG-ID";
-    position: absolute;
-    top: 4px; /* Tighter */
-    right: 8px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.5rem; /* Smaller */
-    color: var(--accent-blue);
-    opacity: 0.2; /* More subtle */
-}
+
 
 .type-card-header {
     background: none !important;
@@ -2274,11 +2265,7 @@ body.wide-layout .photos-masonry {
     letter-spacing: 0.05em;
 }
 
-.tag-leetcode {
-    background-color: rgba(255, 45, 85, 0.1) !important;
-    color: #ff2d55 !important;
-    border: 1px solid rgba(255, 45, 85, 0.2);
-}
+
 
 .feed-title {
     font-size: 1.1rem;
@@ -2817,6 +2804,8 @@ body.detail-mode .main-container {
 .sidebar-tag[data-tag="C++"] { --hover-color: #00599c; }
 .sidebar-tag[data-tag="Node.js"] { --hover-color: #339933; }
 .sidebar-tag[data-tag="TypeScript"] { --hover-color: #3178c6; }
+.sidebar-tag[data-tag="LeetCode"] { --hover-color: #ff2d55; }
+
 
 /* Sidebar Link List */
 .sidebar-link-list {
