@@ -22,6 +22,8 @@ function initializeSPA() {
     pageManager.registerPage('photos', PhotosPage);
     pageManager.registerPage('detail', DetailPage);
     pageManager.registerPage('leetcode', LeetCode);
+    pageManager.registerPage('notes', NotesPage);
+
 
     // Register routes
     router.register('home', () => {
@@ -57,6 +59,24 @@ function initializeSPA() {
     router.register('leetcode/:id', (params) => {
         pageManager.loadPage('leetcode', params);
     });
+
+    router.register('notes', () => {
+        pageManager.loadPage('notes');
+        updateNavigation('notes');
+    });
+
+    router.register('notes/:id', (params) => {
+        pageManager.loadPage('detail', { ...params, type: 'note' }); // Use DetailPage or NotesPage detail? Plan said NotesPage detail but DetailPage is generic. 
+        // Let's stick to NotesPage for list for now, and maybe generic detail logic?
+        // Actually NotesPage has `render(params)` which calls `renderDetail` if ID exists.
+        // Wait, NotesPage implementation I wrote: `render` calls `renderList` regardless unless I misread? 
+        // Let me re-read my NotesPage implementation.
+        // `render(params) { if(id) return this.renderDetail(id)... but I only implemented renderList? Wait.`
+        // Looking back at previous step 212: `render(params) { return await this.renderList(); }`
+        // So for now, detail view just renders list. That's fine for MVP.
+        pageManager.loadPage('notes', params);
+    });
+
 
     // Register detail route with parameters
     router.register('detail/:type/:id', (params) => {

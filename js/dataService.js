@@ -6,6 +6,8 @@ const DataService = {
     projectsData: null,
     toolsData: null,
     academicData: null,
+    notesData: null,
+
 
     /**
      * Load projects data from JSON
@@ -39,6 +41,18 @@ const DataService = {
         }
         return this.academicData;
     },
+
+    /**
+     * Load notes data from JSON
+     */
+    async loadNotesData() {
+        if (!this.notesData) {
+            const response = await fetch('data/notes.json');
+            this.notesData = await response.json();
+        }
+        return this.notesData;
+    },
+
 
     /**
      * Preload all data at once to avoid loading states when navigating

@@ -536,7 +536,7 @@ body,
     text-transform: uppercase;
     letter-spacing: 0.2em;
     margin-bottom: 24px;
-    color: var(--accent-blue);
+    color: var(--text-main);
     opacity: 1;
 }
 
@@ -3556,4 +3556,207 @@ a.pub-card *, a.back-button * {
 /* Ensure detail-mode handles backgrounds if needed */
 body.detail-mode {
     background-attachment: fixed;
+}
+
+/* ===== Study Notes Page Styles ===== */
+.notes-card-theme {
+    min-height: 80vh;
+}
+
+.notes-controls {
+    margin: 12px 0 24px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.notes-search-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
+}
+
+.notes-search-box:focus-within {
+    border-color: var(--accent-blue);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.1);
+}
+
+.notes-search-box input {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    width: 100%;
+    font-size: 1rem;
+    outline: none;
+}
+
+.notes-tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.tag-cloud-label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-right: 8px;
+    font-weight: 500;
+}
+
+.tags-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+
+
+.clear-tags-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-left: 8px;
+}
+
+.clear-tags-btn:hover {
+    color: var(--text-main);
+}
+
+.notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 32px;
+}
+
+.note-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.note-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent-blue);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.note-date {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-family: monospace;
+}
+
+.note-tags {
+    display: flex;
+    gap: 6px;
+}
+
+
+
+.note-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text-main);
+    line-height: 1.4;
+}
+
+.note-excerpt {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 24px;
+    flex-grow: 1;
+}
+
+.read-note-btn {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent-blue);
+    text-decoration: none;
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: gap 0.2s ease;
+}
+
+.read-note-btn:hover {
+    gap: 10px;
+}
+
+/* Tag Overflow Tooltip */
+.more-tags {
+    position: relative;
+    cursor: help;
+    background: transparent !important;
+    color: var(--text-muted) !important;
+    padding: 0 4px !important;
+    font-size: 1.2rem !important;
+    line-height: 0.5;
+    top: 4px;
+}
+
+.more-tags:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    white-space: pre-wrap;
+    min-width: 150px;
+    max-width: 200px;
+    z-index: 1000;
+    margin-bottom: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    border: 1px solid var(--border-color);
+    text-align: center;
+    pointer-events: none;
+    line-height: 1.4;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+/* Tooltip Arrow */
+.more-tags:hover::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -6px;
+    border-width: 6px;
+    border-style: solid;
+    border-color: rgba(0,0,0,0.9) transparent transparent transparent;
+    z-index: 1000;
+    margin-bottom: -4px; /* Adjust based on gap */
 }

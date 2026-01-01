@@ -150,6 +150,8 @@ const FeedPage = {
                 const typeId = card.getAttribute('data-type-id');
                 if (typeId === 'leetcode-resolutions') {
                     router.navigate('leetcode');
+                } else if (typeId === 'study-notes') {
+                    router.navigate('notes');
                 } else {
                     router.navigate(`detail/category/${typeId}`);
                 }
