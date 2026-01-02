@@ -23,40 +23,15 @@ const githubHeaders = {
 };
 
 export default async function handler(req, res) {
-  if (req.method === 'GET') {
-    try {
-      const { context, project } = req.query;
-      const [projectDataRes, leetcodeRes] = await Promise.all([
-        fetch(`${SUPABASE_URL}/rest/v1/github_project_data?select=*&order=created_at.desc&limit=100${project ? `&project_context=eq.${project}` : ''}`, { headers: supabaseHeaders }),
-        fetch(`${SUPABASE_URL}/rest/v1/leetcode_challenges?select=*&order=created_at.desc&limit=50`, { headers: supabaseHeaders })
-      ]);
-      const projectData = await projectDataRes.json();
-      const leetcodeData = await leetcodeRes.json();
-      
-      const mappedReleases = (Array.isArray(projectData) ? projectData : []).filter(item => item.type === 'release').map(item => ({
-        id: item.id, type: 'notification', name: item.repo_name, title: `New release ${item.release_tag}`,
-        message: item.release_notes, badge: item.release_tag, image: item.avatar_url, color: 'green',
-        link: `https://github.com/${item.repo_full_name}/releases/tag/${item.release_tag}`,
-        date: item.created_at, contexts: project ? [project] : (context && context !== 'all' ? context.split(',') : ['home', 'academic', 'projects'])
-      }));
+  // Allow cron or manual trigger via GET/POST
+  const isUpdateTrigger = (req.method === 'POST') || (req.method === 'GET' && req.query.update === 'true');
+  const secret = req.method === 'POST' ? req.body.secret : req.query.secret;
 
-      const mappedLeetcode = (Array.isArray(leetcodeData) ? leetcodeData : []).map(item => ({
-        id: `leetcode-${item.id}`, type: 'leetcode', name: 'LeetCode Challenge', title: `#${item.number}: ${item.name}`,
-        message: null, badge: `${item.streak} 🔥`, color: 'pink', category: item.category, link: `#/leetcode/${item.id}`,
-        date: item.created_at, contexts: ['home', 'projects', 'academic']
-      }));
-
-      return res.status(200).json({ success: true, count: mappedReleases.length + mappedLeetcode.length, data: [...mappedReleases, ...mappedLeetcode] });
-    } catch (error) {
-      return res.status(500).json({ success: false, error: error.message });
-    }
-  }
-
-  if (req.method === 'POST') {
-    const { secret, username = 'GabrielBaiano' } = req.body;
+  if (isUpdateTrigger) {
     if (secret !== API_SECRET) return res.status(401).json({ error: 'Unauthorized' });
-
+    // Cache update logic...
     try {
+      const username = (req.method === 'POST' ? req.body.username : req.query.username) || 'GabrielBaiano';
       const reposRes = await fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`, { headers: githubHeaders });
       const repos = await reposRes.json();
       const priorityReposNames = ['shii-study-assistant', 'awesome-readme', 'A-new-type-portifolio'];
@@ -96,6 +71,35 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true, updated_at: new Date().toISOString() });
     } catch (error) {
        return res.status(500).json({ success: false, error: error.message });
+    }
+  }
+
+  if (req.method === 'GET') {
+    try {
+      const { context, project } = req.query;
+      const [projectDataRes, leetcodeRes] = await Promise.all([
+        fetch(`${SUPABASE_URL}/rest/v1/github_project_data?select=*&order=created_at.desc&limit=100${project ? `&project_context=eq.${project}` : ''}`, { headers: supabaseHeaders }),
+        fetch(`${SUPABASE_URL}/rest/v1/leetcode_challenges?select=*&order=created_at.desc&limit=50`, { headers: supabaseHeaders })
+      ]);
+      const projectData = await projectDataRes.json();
+      const leetcodeData = await leetcodeRes.json();
+      
+      const mappedReleases = (Array.isArray(projectData) ? projectData : []).filter(item => item.type === 'release').map(item => ({
+        id: item.id, type: 'notification', name: item.repo_name, title: `New release ${item.release_tag}`,
+        message: item.release_notes, badge: item.release_tag, image: item.avatar_url, color: 'green',
+        link: `https://github.com/${item.repo_full_name}/releases/tag/${item.release_tag}`,
+        date: item.created_at, contexts: project ? [project] : (context && context !== 'all' ? context.split(',') : ['home', 'academic', 'projects'])
+      }));
+
+      const mappedLeetcode = (Array.isArray(leetcodeData) ? leetcodeData : []).map(item => ({
+        id: `leetcode-${item.id}`, type: 'leetcode', name: 'LeetCode Challenge', title: `#${item.number}: ${item.name}`,
+        message: null, badge: `${item.streak} 🔥`, color: 'pink', category: item.category, link: `#/leetcode/${item.id}`,
+        date: item.created_at, contexts: ['home', 'projects', 'academic']
+      }));
+
+      return res.status(200).json({ success: true, count: mappedReleases.length + mappedLeetcode.length, data: [...mappedReleases, ...mappedLeetcode] });
+    } catch (error) {
+      return res.status(500).json({ success: false, error: error.message });
     }
   }
 

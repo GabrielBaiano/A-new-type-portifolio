@@ -277,7 +277,7 @@
             grid.innerHTML = '<div class="loading-text">Fetching live balloons...</div>';
 
             try {
-                const response = await fetch(`/api/get-balloon-data?context=${context}`);
+                const response = await fetch(`/api/balloons?context=${context}`);
                 const result = await response.json();
 
                 if (result.success && result.data && result.data.length > 0) {

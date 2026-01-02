@@ -1,12 +1,12 @@
 {
   "functions": {
-    "api/update-github-cache.js": {
+    "api/balloons.js": {
       "maxDuration": 10
     }
   },
   "crons": [
     {
-      "path": "/api/update-github-cache",
+      "path": "/api/balloons?update=true",
       "schedule": "0 0 * * *"
     }
   ]
