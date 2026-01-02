@@ -1,4 +1,32 @@
 {
-  "reviews": [],
+  "reviews": [
+    {
+      "image": "https://books.google.com/books/content?id=x8quCgAAQBAJ&printsec=frontcover&img=1&zoom=1",
+      "title": "Fundação",
+      "status": "Reading",
+      "tag": "Book",
+      "id": "funda-o",
+      "link": "https://github.com/GabrielBaiano/personal-library",
+      "date": "2026-01-02"
+    },
+    {
+      "image": "https://books.google.com/books/content?id=ldPIxgRaEuoC&printsec=frontcover&img=1&zoom=1",
+      "title": "Os Bórgias",
+      "status": "Reading",
+      "tag": "Book",
+      "id": "os-b-rgias",
+      "link": "https://github.com/GabrielBaiano/personal-library",
+      "date": "2026-01-02"
+    },
+    {
+      "image": "https://books.google.com/books/content?id=HWewDgAAQBAJ&printsec=frontcover&img=1&zoom=1",
+      "title": "Entendendo Algoritmos",
+      "status": "Reading",
+      "tag": "Book",
+      "id": "entendendo-algoritmos",
+      "link": "https://github.com/GabrielBaiano/personal-library",
+      "date": "2026-01-02"
+    }
+  ],
   "shelves": []
 }
