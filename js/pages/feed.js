@@ -176,10 +176,16 @@ const FeedPage = {
                 item.style.cursor = 'pointer';
                 item.addEventListener('click', () => {
                     const id = item.getAttribute('data-id');
-                    if (!id) return;
+                    const itemData = allItems.find(i => i.id === id);
+                    if (!id || !itemData) return;
                     
                     if (id.startsWith('leetcode-')) {
                         router.navigate(`leetcode/${id.replace('leetcode-', '')}`);
+                    } else if (itemData.type === 'full-reviews') {
+                        // Only open review if status is Finished
+                        if (itemData.status === 'Finished') {
+                            router.navigate(`review-view/${id}`);
+                        }
                     } else {
                         router.navigate(`detail/feed/${id}`);
                     }

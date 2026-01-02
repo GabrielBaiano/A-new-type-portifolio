@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Review Admin | Gabriel Baiano</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --purple: #a855f7;
+            --green: #22c55e;
+            --bg: #0a0a0a;
+            --card: #141414;
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #ffffff;
+            --text-muted: #888;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            gap: 2px;
+            background: var(--border);
+        }
+
+        .panel {
+            background: var(--bg);
+            padding: 40px;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .editor-panel {
+            border-right: 1px solid var(--border);
+        }
+
+        h1 {
+            font-family: 'Sora', sans-serif;
+            font-weight: 800;
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            color: var(--purple);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--purple);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        textarea {
+            height: 150px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .btn-post {
+            width: 100%;
+            padding: 20px;
+            background: var(--purple);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-family: 'Sora', sans-serif;
+            font-weight: 800;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .btn-post:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(168, 85, 247, 0.3);
+            opacity: 0.9;
+        }
+
+        .preview-title {
+            font-family: 'Sora', sans-serif;
+            font-weight: 800;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .book-preview-card {
+            display: flex;
+            gap: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            margin-bottom: 40px;
+        }
+
+        .book-preview-card img {
+            width: 100px;
+            height: 150px;
+            object-fit: contain;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        .book-preview-info h3 {
+            margin: 0 0 10px 0;
+            font-family: 'Sora';
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .status-reading {
+            background: var(--green);
+            color: black;
+        }
+
+        .status-finished {
+            background: var(--purple);
+            color: white;
+        }
+
+        .preview-content {
+            background: rgba(255, 255, 255, 0.01);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid var(--border);
+            min-height: 400px;
+            line-height: 1.8;
+            color: #ddd;
+        }
+
+        #status-msg {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            display: none;
+            font-weight: 600;
+        }
+
+        .success {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        @media (max-width: 1000px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .panel {
+                height: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Editor -->
+        <div class="panel editor-panel">
+            <h1>📚 Book Review Admin</h1>
+            <form id="bookForm">
+                <div class="form-group">
+                    <label>Book Title</label>
+                    <input type="text" id="title" required placeholder="Dune">
+                </div>
+
+                <div class="form-group">
+                    <label>Cover Image URL</label>
+                    <input type="url" id="image" required placeholder="https://...">
+                </div>
+
+                <div class="form-group">
+                    <label>Reading Status</label>
+                    <select id="status">
+                        <option value="Reading">📖 Currently Reading</option>
+                        <option value="Finished" selected>✅ Finished & Review</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Markdown URL (from GitHub library repo)</label>
+                    <input type="url" id="mdLink" placeholder="https://raw.githubusercontent.com/.../review.md">
+                </div>
+
+                <div class="form-group">
+                    <label>Tags (Comma separated)</label>
+                    <input type="text" id="tags" placeholder="Sci-Fi, Epic, Classic">
+                </div>
+
+                <div class="form-group">
+                    <label>Secret Access Key</label>
+                    <input type="password" id="secret" required placeholder="••••••••••••">
+                </div>
+
+                <button type="submit" class="btn-post">PUBLICAR REVIEW 🚀</button>
+            </form>
+            <div id="status-msg"></div>
+        </div>
+
+        <!-- Preview -->
+        <div class="panel preview-panel">
+            <div class="preview-title">FEED / GRID PREVIEW</div>
+            <div class="book-preview-card">
+                <img id="prev-img" src="https://via.placeholder.com/150x225?text=Cover" alt="Cover">
+                <div class="book-preview-info">
+                    <h3 id="prev-title">Book Title</h3>
+                    <div id="prev-status" class="status-badge status-finished">FINISHED</div>
+                    <p id="prev-tags" style="color: grey; font-size: 0.8rem; margin-top: 10px;">Tags: --</p>
+                </div>
+            </div>
+
+            <div class="preview-title">MARKDOWN PREVIEW (Live Text Only)</div>
+            <div class="preview-content">
+                <p style="color: grey;">The content will be fetched from the URL provided above during render in the
+                    live site.</p>
+                <div id="md-test-preview"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('bookForm');
+        const titleInput = document.getElementById('title');
+        const imageInput = document.getElementById('image');
+        const statusInput = document.getElementById('status');
+        const tagsInput = document.getElementById('tags');
+
+        function updatePreview() {
+            document.getElementById('prev-title').innerText = titleInput.value || 'Book Title';
+            document.getElementById('prev-img').src = imageInput.value || 'https://via.placeholder.com/150x225?text=Cover';
+
+            const badge = document.getElementById('prev-status');
+            badge.innerText = statusInput.value.toUpperCase();
+            badge.className = `status-badge status-${statusInput.value.toLowerCase()}`;
+
+            document.getElementById('prev-tags').innerText = 'Tags: ' + (tagsInput.value || '--');
+        }
+
+        [titleInput, imageInput, statusInput, tagsInput].forEach(el => {
+            el.addEventListener('input', updatePreview);
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const status = document.getElementById('status-msg');
+            const btn = form.querySelector('.btn-post');
+
+            status.style.display = 'none';
+            btn.disabled = true;
+            btn.innerText = 'ENVIANDO...';
+
+            const payload = {
+                title: titleInput.value,
+                image: imageInput.value,
+                status: statusInput.value,
+                mdLink: document.getElementById('mdLink').value,
+                tags: tagsInput.value.split(',').map(t => t.trim()).filter(t => t),
+                secret: document.getElementById('secret').value
+            };
+
+            try {
+                const response = await fetch('/api/add-book', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    status.className = 'success';
+                    status.innerText = 'Review publicada com sucesso! 🎉';
+                    status.style.display = 'block';
+                    form.reset();
+                    updatePreview();
+                } else {
+                    throw new Error(result.error || 'Check your secret key');
+                }
+            } catch (err) {
+                status.className = 'error';
+                status.innerText = 'Erro: ' + err.message;
+                status.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'PUBLICAR REVIEW 🚀';
+            }
+        });
+    </script>
+</body>
+
+</html>

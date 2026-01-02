@@ -24,6 +24,8 @@ function initializeSPA() {
     pageManager.registerPage('leetcode', LeetCode);
     pageManager.registerPage('notes', NotesPage);
     pageManager.registerPage('reviews', ReviewsPage);
+    pageManager.registerPage('book-admin', BookAdmin);
+    pageManager.registerPage('review-view', ReviewView);
 
 
 
@@ -69,7 +71,14 @@ function initializeSPA() {
 
     router.register('reviews', () => {
         pageManager.loadPage('reviews');
-        // updateNavigation('reviews'); // No nav item for reviews, accessed via card
+    });
+
+    router.register('book-admin', () => {
+        pageManager.loadPage('book-admin');
+    });
+
+    router.register('review-view/:id', (params) => {
+        pageManager.loadPage('review-view', params);
     });
 
     router.register('notes/:id', (params) => {

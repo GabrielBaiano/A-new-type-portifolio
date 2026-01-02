@@ -56,12 +56,30 @@ const DataService = {
     },
 
     /**
-     * Load reviews data from JSON
+     * Load reviews data from JSON and API
      */
     async loadReviewsData() {
         if (!this.reviewsData) {
-            const response = await fetch('data/reviews.json');
-            this.reviewsData = await response.json();
+            try {
+                const [jsonRes, apiRes] = await Promise.all([
+                    fetch('data/reviews.json').then(r => r.json()).catch(() => ({ reviews: [], shelves: [] })),
+                    fetch('/api/get-books').then(r => r.json()).catch(() => ({ data: [] }))
+                ]);
+
+                // Merge JSON and API reviews
+                const manualReviews = (apiRes.data || []).map(b => ({
+                    ...b,
+                    _source: 'supabase'
+                }));
+
+                this.reviewsData = {
+                    ...jsonRes,
+                    reviews: [...(jsonRes.reviews || []), ...manualReviews]
+                };
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+                this.reviewsData = { reviews: [], shelves: [] };
+            }
         }
         return this.reviewsData;
     },
@@ -337,7 +355,7 @@ const DataService = {
             });
         }
 
-        // 4. Dynamic API (LeetCode)
+        // 4. Dynamic API (LeetCode & Blocks)
         let apiFeed = [];
         try {
             const apiRes = await fetch('/api/get-balloon-data?context=all');
@@ -348,7 +366,7 @@ const DataService = {
                         return {
                             id: item.id,
                             type: 'leetcode-resolutions',
-                            date: item.date,
+                            date: item.date || item.created_at,
                             tag: 'LeetCode',
                             title: item.title,
                             description: `Streak: ${item.badge}. ${item.name}`,
@@ -359,7 +377,7 @@ const DataService = {
                          return {
                             id: item.id,
                             type: 'projects-labs',
-                            date: item.date,
+                            date: item.date || item.created_at,
                             tag: 'Release',
                             title: item.title,
                             description: item.message,
@@ -375,11 +393,29 @@ const DataService = {
             console.error('Feed API Error:', e);
         }
 
+        // 5. Manual Books from Supabase (if they aren't already in reviewsData)
+        // We'll trust combined list logic:
+        const mergedReviews = await this.loadReviewsData();
+        const finalReviewsFeed = mergedReviews.reviews.map(review => ({
+            id: review.id,
+            type: 'full-reviews',
+            date: review.date,
+            tag: 'Book Review',
+            title: review.title,
+            description: review.status === 'Reading' 
+                ? `Starting reading this book: ${review.title}` 
+                : `Review: Check out my thoughts on ${review.title}`,
+            link: `#/review-view/${review.id}`,
+            image: review.image,
+            status: review.status,
+            _source: review._source || 'reviews'
+        }));
+
         // Merge All
         const combined = [
             ...staticFeed,
             ...notesFeed,
-            ...reviewsFeed,
+            ...finalReviewsFeed,
             ...apiFeed
         ];
 
