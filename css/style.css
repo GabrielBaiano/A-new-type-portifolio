@@ -4626,6 +4626,31 @@ body.detail-mode {
     font-size: 0.9rem;
 }
 
+.upload-row {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-upload-label {
+    flex: 0 0 45px;
+    height: 40px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: 0 !important;
+}
+
+.btn-upload-label:hover {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+}
+
 .btn-save {
     width: 100%;
     padding: 12px;

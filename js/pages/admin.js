@@ -11,6 +11,7 @@ const AdminPage = {
     allLeetCode: [],
     allBalloons: [],
     editingItem: null,
+    isUploading: false,
 
     async render() {
         if (!this.isAuthenticated) {
@@ -192,7 +193,13 @@ const AdminPage = {
                         </div>
                         <div class="form-group">
                             <label>Image URL</label>
-                            <input type="url" id="book-image" value="${this.editingItem?.image || ''}" required>
+                            <div class="upload-row">
+                                <input type="url" id="book-image" value="${this.editingItem?.image || ''}" placeholder="https://..." required>
+                                <label for="book-upload" class="btn-upload-label" title="Upload from computer">
+                                    <i class="fa-solid ${this.isUploading ? 'fa-spinner fa-spin' : 'fa-cloud-arrow-up'}"></i>
+                                    <input type="file" id="book-upload" accept="image/*" style="display: none;">
+                                </label>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Status</label>
@@ -390,7 +397,13 @@ const AdminPage = {
                         <input type="hidden" id="photo-id" value="${this.editingItem?.id || ''}">
                         <div class="form-group">
                             <label>Image URL</label>
-                            <input type="url" id="photo-image" value="${this.editingItem?.image || ''}" required>
+                            <div class="upload-row">
+                                <input type="url" id="photo-image" value="${this.editingItem?.image || ''}" placeholder="https://..." required>
+                                <label for="photo-upload" class="btn-upload-label" title="Upload from computer">
+                                    <i class="fa-solid ${this.isUploading ? 'fa-spinner fa-spin' : 'fa-cloud-arrow-up'}"></i>
+                                    <input type="file" id="photo-upload" accept="image/*" style="display: none;">
+                                </label>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Description</label>
@@ -720,6 +733,23 @@ const AdminPage = {
             }
         });
 
+        const uploadInput = document.getElementById('book-upload');
+        if (uploadInput) {
+            uploadInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    this.isUploading = true;
+                    pageManager.loadPage('admin');
+                    try {
+                        await this.uploadImage(file, 'book-image', updateLivePreview);
+                    } finally {
+                        this.isUploading = false;
+                        pageManager.loadPage('admin');
+                    }
+                }
+            });
+        }
+
         if (newBtn) {
             newBtn.addEventListener('click', () => {
                 this.editingItem = null;
@@ -786,6 +816,23 @@ const AdminPage = {
             if (el) el.addEventListener('input', updateLivePreview);
         });
 
+        const uploadInput = document.getElementById('photo-upload');
+        if (uploadInput) {
+            uploadInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    this.isUploading = true;
+                    pageManager.loadPage('admin');
+                    try {
+                        await this.uploadImage(file, 'photo-image', updateLivePreview);
+                    } finally {
+                        this.isUploading = false;
+                        pageManager.loadPage('admin');
+                    }
+                }
+            });
+        }
+
         if (newBtn) {
             newBtn.addEventListener('click', () => {
                 this.editingItem = null;
@@ -830,5 +877,51 @@ const AdminPage = {
         // This is a bit hacky in this simple PageManager, 
         // usually would use an observable or partial re-render.
         // For now, onMount handles the initial load.
+    },
+
+    async uploadImage(file, targetInputId, previewCallback) {
+        if (!file) return;
+        
+        const secret = sessionStorage.getItem('admin_secret');
+        const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
+        
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async () => {
+                const base64Data = reader.result.split(',')[1];
+                
+                try {
+                    const res = await fetch('/api/upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            fileName,
+                            fileData: base64Data,
+                            contentType: file.type,
+                            secret
+                        })
+                    });
+                    
+                    const data = await res.json();
+                    if (data.success) {
+                        const input = document.getElementById(targetInputId);
+                        if (input) {
+                            input.value = data.url;
+                            if (previewCallback) previewCallback();
+                        }
+                        resolve(data.url);
+                    } else {
+                        throw new Error(data.error);
+                    }
+                } catch (error) {
+                    alert('Upload failed: ' + error.message);
+                    reject(error);
+                }
+            };
+            reader.onerror = reject;
+        });
     }
 };
+
+window.AdminPage = AdminPage;
