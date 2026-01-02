@@ -113,6 +113,36 @@ const AdminPage = {
         `;
     },
 
+    renderBookPreview(book) {
+        if (!book) return '<p style="color: grey; padding: 20px;">Select a book to preview.</p>';
+        return `
+            <div class="book-card-preview" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; text-align: center;">
+                <img src="${book.image || ''}" style="width: 120px; height: 170px; object-fit: cover; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+                <h4 style="margin: 0; font-family: 'Sora', sans-serif;">${book.title || 'Untitled'}</h4>
+                <p style="font-size: 0.8rem; color: var(--accent-blue); margin: 5px 0;">${book.status || 'Status'}</p>
+                <div style="display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; margin-top: 10px;">
+                    ${(book.tags || []).map(t => `<span style="font-size: 0.65rem; background: rgba(0,112,243,0.1); color: var(--accent-blue); padding: 2px 8px; border-radius: 4px;">${t}</span>`).join('')}
+                </div>
+            </div>
+            <div style="margin-top: 20px; font-size: 0.75rem; color: var(--text-muted);">
+                <i class="fa-solid fa-link"></i> Markdown: ${book.md_link || 'Not set'}
+            </div>
+        `;
+    },
+
+    renderPhotoPreview(photo) {
+        if (!photo) return '<p style="color: grey; padding: 20px;">Select a photo to preview.</p>';
+        return `
+            <div class="photo-card-preview" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden;">
+                <img src="${photo.image || ''}" style="width: 100%; aspect-ratio: 16/10; object-fit: cover;">
+                <div style="padding: 15px;">
+                    <p style="margin: 0; font-size: 0.85rem; line-height: 1.4;">${photo.description || 'No description provided.'}</p>
+                    ${photo.link ? `<p style="margin-top: 10px; font-size: 0.75rem; color: var(--accent-blue);"><i class="fa-solid fa-external-link"></i> ${photo.link}</p>` : ''}
+                </div>
+            </div>
+        `;
+    },
+
     renderBooksModule() {
         return `
             <div class="admin-tab-header">
@@ -169,7 +199,7 @@ const AdminPage = {
                 <div class="panel-preview">
                     <h3>Preview</h3>
                     <div id="book-preview-container">
-                        <!-- Preview rendered here -->
+                        ${this.renderBookPreview(this.editingItem)}
                     </div>
                 </div>
             </div>
@@ -217,7 +247,7 @@ const AdminPage = {
                 <div class="panel-preview">
                     <h3>Preview</h3>
                     <div id="photo-preview-container">
-                        <!-- Preview rendered here -->
+                        ${this.renderPhotoPreview(this.editingItem)}
                     </div>
                 </div>
             </div>
@@ -371,6 +401,28 @@ const AdminPage = {
 
         const listItems = document.querySelectorAll('#books-inventory .inventory-item');
         const newBtn = document.getElementById('btn-new-book');
+        const previewContainer = document.getElementById('book-preview-container');
+
+        const updateLivePreview = () => {
+            if (!previewContainer) return;
+            const liveBook = {
+                title: document.getElementById('book-title').value,
+                image: document.getElementById('book-image').value,
+                status: document.getElementById('book-status').value,
+                md_link: document.getElementById('book-md').value,
+                tags: document.getElementById('book-tags').value.split(',').map(t => t.trim()).filter(Boolean)
+            };
+            previewContainer.innerHTML = this.renderBookPreview(liveBook);
+        };
+
+        // Add input listeners for live preview
+        ['book-title', 'book-image', 'book-status', 'book-md', 'book-tags'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', updateLivePreview);
+                if (el.tagName === 'SELECT') el.addEventListener('change', updateLivePreview);
+            }
+        });
 
         if (newBtn) {
             newBtn.addEventListener('click', () => {
@@ -420,6 +472,23 @@ const AdminPage = {
 
         const gridItems = document.querySelectorAll('#photos-inventory .grid-item');
         const newBtn = document.getElementById('btn-new-photo');
+        const previewContainer = document.getElementById('photo-preview-container');
+
+        const updateLivePreview = () => {
+            if (!previewContainer) return;
+            const livePhoto = {
+                image: document.getElementById('photo-image').value,
+                description: document.getElementById('photo-desc').value,
+                link: document.getElementById('photo-link').value
+            };
+            previewContainer.innerHTML = this.renderPhotoPreview(livePhoto);
+        };
+
+        // Add input listeners for live preview
+        ['photo-image', 'photo-desc', 'photo-link'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', updateLivePreview);
+        });
 
         if (newBtn) {
             newBtn.addEventListener('click', () => {
