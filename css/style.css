@@ -781,6 +781,51 @@ body,
     height: auto !important;
 }
 
+/* Theme variations for Type Cards */
+.bg-purple-gradient i { 
+    background: rgba(168, 85, 247, 0.1) !important; 
+    color: #a855f7 !important; 
+    border-color: rgba(168, 85, 247, 0.2) !important; 
+}
+.type-card.bg-purple-gradient:hover { border-color: #a855f7 !important; }
+
+.bg-pink-gradient i { 
+    background: rgba(236, 72, 153, 0.1) !important; 
+    color: #ec4899 !important; 
+    border-color: rgba(236, 72, 153, 0.2) !important; 
+}
+.type-card.bg-pink-gradient:hover { border-color: #ec4899 !important; }
+
+.bg-green-gradient i { 
+    background: rgba(34, 197, 94, 0.1) !important; 
+    color: #22c55e !important; 
+    border-color: rgba(34, 197, 94, 0.2) !important; 
+}
+.type-card.bg-green-gradient:hover { border-color: #22c55e !important; }
+
+.bg-cyan-gradient i { 
+    background: rgba(6, 182, 212, 0.1) !important; 
+    color: #06b6d4 !important; 
+    border-color: rgba(6, 182, 212, 0.2) !important; 
+}
+.type-card.bg-cyan-gradient:hover { border-color: #06b6d4 !important; }
+
+.bg-orange-gradient i { 
+    background: rgba(249, 115, 22, 0.1) !important; 
+    color: #f97316 !important; 
+    border-color: rgba(249, 115, 22, 0.2) !important; 
+}
+.type-card.bg-orange-gradient:hover { border-color: #f97316 !important; }
+
+.bg-blue-gradient i { 
+    background: rgba(59, 130, 246, 0.1) !important; 
+    color: #3b82f6 !important; 
+    border-color: rgba(59, 130, 246, 0.2) !important; 
+}
+.type-card.bg-blue-gradient:hover { border-color: #3b82f6 !important; }
+
+
+
 
 
 .type-card-header {

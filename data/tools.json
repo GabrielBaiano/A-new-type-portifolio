@@ -12,7 +12,7 @@
       "title": "Full Reviews",
       "subtitle": "Deep dives into architecture & books",
       "icon": "fa-solid fa-flask-vial",
-      "gradient": "bg-green-gradient"
+      "gradient": "bg-purple-gradient"
     },
     {
       "id": "leetcode-resolutions",
