@@ -25,10 +25,7 @@ function initializeSPA() {
     pageManager.registerPage('notes', NotesPage);
     pageManager.registerPage('reviews', ReviewsPage);
     pageManager.registerPage('admin', AdminPage);
-    pageManager.registerPage('book-admin', BookAdmin);
     pageManager.registerPage('review-view', ReviewView);
-
-
 
     // Register routes
     router.register('home', () => {
@@ -72,10 +69,6 @@ function initializeSPA() {
 
     router.register('reviews', () => {
         pageManager.loadPage('reviews');
-    });
-
-    router.register('book-admin', () => {
-        pageManager.loadPage('book-admin');
     });
 
     router.register('review-view/:id', (params) => {

@@ -7,6 +7,7 @@ const AdminPage = {
     activeTab: 'overview',
     allBooks: [],
     allPhotos: [],
+    allBalloons: [],
     editingItem: null,
 
     async render() {
@@ -34,6 +35,9 @@ const AdminPage = {
                             </button>
                             <button class="admin-nav-item ${this.activeTab === 'photos' ? 'active' : ''}" data-tab="photos">
                                 <i class="fa-solid fa-camera"></i> Photos
+                            </button>
+                            <button class="admin-nav-item ${this.activeTab === 'balloons' ? 'active' : ''}" data-tab="balloons">
+                                <i class="fa-solid fa-circle-nodes"></i> Balloons
                             </button>
                         </nav>
                         <button class="admin-logout-btn" id="admin-logout">
@@ -76,6 +80,8 @@ const AdminPage = {
                 return this.renderBooksModule();
             case 'photos':
                 return this.renderPhotosModule();
+            case 'balloons':
+                return this.renderBalloonsModule();
             default:
                 return this.renderOverview();
         }
@@ -97,8 +103,8 @@ const AdminPage = {
                     <span class="stat-label">Photos in Gallery</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-value">Active</span>
-                    <span class="stat-label">System Status</span>
+                    <span class="stat-value">${this.allBalloons.length}</span>
+                    <span class="stat-label">Active Balloons</span>
                 </div>
             </div>
         `;
@@ -215,6 +221,38 @@ const AdminPage = {
         `;
     },
 
+    renderBalloonsModule() {
+        return `
+            <div class="admin-tab-header">
+                <div class="header-main">
+                    <h1>Balloon System</h1>
+                    <div class="header-actions">
+                        <a href="balloons-preview.html" target="_blank" class="btn-action secondary">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Preview
+                        </a>
+                    </div>
+                </div>
+                <p>Balloons are dynamically generated from GitHub and LeetCode activity.</p>
+            </div>
+            
+            <div class="balloon-feed-container">
+                <h3>Live Feed (Active Balloons)</h3>
+                <div class="balloon-list-admin" id="balloons-inventory">
+                    ${this.allBalloons.length > 0 ? this.allBalloons.map(b => `
+                        <div class="balloon-item-admin">
+                            <div class="balloon-badge-mini ${b.color}">${b.badge}</div>
+                            <div class="balloon-info-admin">
+                                <span class="balloon-title-admin">${b.name}</span>
+                                <span class="balloon-msg-admin">${b.message || (b.title ? b.title : 'GitHub Activity')}</span>
+                            </div>
+                            <div class="balloon-date-admin">${new Date(b.date).toLocaleDateString()}</div>
+                        </div>
+                    `).join('') : '<p style="color: grey; padding: 20px;">No active balloons in the last 7 days.</p>'}
+                </div>
+            </div>
+        `;
+    },
+
     onMount() {
         if (!this.isAuthenticated) {
             this.setupLogin();
@@ -227,9 +265,10 @@ const AdminPage = {
     },
 
     async loadInitialData() {
-        const [books, photos] = await Promise.all([
+        const [books, photos, balloons] = await Promise.all([
             fetch('/api/get-books').then(r => r.json()).catch(() => ({ data: [] })),
-            fetch('/api/get-photos').then(r => r.json()).catch(() => ({ data: [] }))
+            fetch('/api/get-photos').then(r => r.json()).catch(() => ({ data: [] })),
+            fetch('/api/get-balloon-data?context=all').then(r => r.json()).catch(() => ({ data: [] }))
         ]);
         
         this.allBooks = books.data || [];
@@ -239,6 +278,17 @@ const AdminPage = {
             description: p.description,
             link: p.link
         }));
+        this.allBalloons = balloons.data || [];
+
+        // Determine if we need to refresh overview stats if that's the current tab
+        if (this.activeTab === 'overview') {
+            const stats = document.querySelectorAll('.stat-value');
+            if (stats.length >= 3) {
+                stats[0].innerText = this.allBooks.length;
+                stats[1].innerText = this.allPhotos.length;
+                stats[2].innerText = this.allBalloons.length;
+            }
+        }
 
         this.refreshInventory();
     },
@@ -246,26 +296,22 @@ const AdminPage = {
     setupLogin() {
         const form = document.getElementById('admin-login-form');
         const error = document.getElementById('login-error');
+        if (!form) return;
         
-        form.addEventListener('submit', async (e) => {
+        form.addEventListener('submit', (e) => {
             e.preventDefault();
             const secret = document.getElementById('admin-secret').value;
             
-            // Reusing BookAdmin secret logic or simple check
-            // For production, this should be a real auth endpoint
-            // We'll use a hack: try to fetch books with this secret
-            try {
-                const testRes = await fetch('/api/get-books'); // Public, but let's simulate
-                // In a real scenario, we'd check against LEETCODE_ADMIN_KEY
-                // Since we can't easily check ENV on client, we'll store it in session
-                // and the API will reject if wrong.
-                
+            if (secret) {
+                // Store in session
                 sessionStorage.setItem('admin_authenticated', 'true');
                 sessionStorage.setItem('admin_secret', secret);
+                
+                // Update local state and re-render
                 this.isAuthenticated = true;
-                router.navigate('admin'); // Refresh
-            } catch (err) {
-                error.innerText = 'Invalid secret key.';
+                pageManager.loadPage('admin');
+            } else {
+                error.innerText = 'Please enter a secret key.';
             }
         });
     },
