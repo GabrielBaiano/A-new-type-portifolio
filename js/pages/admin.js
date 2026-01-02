@@ -25,7 +25,7 @@ const AdminPage = {
                             <div class="admin-avatar">GB</div>
                             <div class="admin-user-details">
                                 <span class="admin-name">Gabriel Baiano</span>
-                                <span class="admin-role">Administrator</span>
+                                <span class="admin-role">Administrator v1.1</span>
                             </div>
                         </div>
                         <nav class="admin-nav">
