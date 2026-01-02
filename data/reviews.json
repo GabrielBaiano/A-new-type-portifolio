@@ -1,21 +1,4 @@
 {
-  "reviews": [
-    {
-      "id": "clean-code",
-      "title": "Clean Code",
-      "status": "Reading",
-      "image": "https://m.media-amazon.com/images/I/41xShlnTZTL._SX376_BO1,204,203,200_.jpg",
-      "date": "2024-01-02",
-      "link": "https://github.com/GabrielBaiano/personal-library"
-    },
-    {
-      "id": "the-pragmatic-programmer",
-      "title": "The Pragmatic Programmer",
-      "status": "Finished",
-      "image": "https://m.media-amazon.com/images/I/51A8l+FxX4L._SX329_BO1,204,203,200_.jpg",
-      "date": "2023-12-15",
-      "link": "https://github.com/GabrielBaiano/personal-library"
-    }
-  ],
+  "reviews": [],
   "shelves": []
 }
