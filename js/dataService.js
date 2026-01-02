@@ -61,20 +61,35 @@ const DataService = {
     async loadReviewsData() {
         if (!this.reviewsData) {
             try {
-                const [jsonRes, apiRes] = await Promise.all([
+                const [jsonRes, apiRes, readingRes] = await Promise.all([
                     fetch('data/reviews.json').then(r => r.json()).catch(() => ({ reviews: [], shelves: [] })),
-                    fetch('/api/get-books').then(r => r.json()).catch(() => ({ data: [] }))
+                    fetch('/api/get-books').then(r => r.json()).catch(() => ({ data: [] })),
+                    this.getGitHubReadingList().catch(() => null)
                 ]);
 
-                // Merge JSON and API reviews
+                // 1. Manual Finished Reviews from Supabase
                 const manualReviews = (apiRes.data || []).map(b => ({
                     ...b,
                     _source: 'supabase'
                 }));
 
+                // 2. Automated "Currently Reading" from GitHub
+                let readingBooks = [];
+                if (readingRes && readingRes['Reading']) {
+                    readingBooks = readingRes['Reading'].map(b => ({
+                        id: `reading-${b.title.replace(/\s+/g, '-').toLowerCase()}`,
+                        title: b.title,
+                        image: b.image,
+                        status: 'Reading',
+                        link: b.link,
+                        date: new Date().toISOString().split('T')[0],
+                        _source: 'github-sync'
+                    }));
+                }
+
                 this.reviewsData = {
                     ...jsonRes,
-                    reviews: [...(jsonRes.reviews || []), ...manualReviews]
+                    reviews: [...(jsonRes.reviews || []), ...manualReviews, ...readingBooks]
                 };
             } catch (error) {
                 console.error('Error loading reviews:', error);
@@ -393,23 +408,22 @@ const DataService = {
             console.error('Feed API Error:', e);
         }
 
-        // 5. Manual Books from Supabase (if they aren't already in reviewsData)
-        // We'll trust combined list logic:
+        // 5. Manual Books from Supabase (Filtering for Reading only for now as requested)
         const mergedReviews = await this.loadReviewsData();
-        const finalReviewsFeed = mergedReviews.reviews.map(review => ({
-            id: review.id,
-            type: 'full-reviews',
-            date: review.date,
-            tag: 'Book Review',
-            title: review.title,
-            description: review.status === 'Reading' 
-                ? `Starting reading this book: ${review.title}` 
-                : `Review: Check out my thoughts on ${review.title}`,
-            link: `#/review-view/${review.id}`,
-            image: review.image,
-            status: review.status,
-            _source: review._source || 'reviews'
-        }));
+        const finalReviewsFeed = mergedReviews.reviews
+            .filter(review => review.status === 'Reading') // User requested to hide finished posts/reviews for now
+            .map(review => ({
+                id: review.id,
+                type: 'full-reviews',
+                date: review.date,
+                tag: 'Book Review',
+                title: review.title,
+                description: `Starting reading this book: ${review.title}`,
+                link: `#/review-view/${review.id}`,
+                image: review.image,
+                status: review.status,
+                _source: review._source || 'reviews'
+            }));
 
         // Merge All
         const combined = [
@@ -447,29 +461,32 @@ const DataService = {
                 if (!headerMatch) return;
 
                 const sectionTitle = headerMatch[1].trim();
-                // Filter titles to only those that likely contain books (Reading or Years)
-                if (!/Reading|\d{4}/i.test(sectionTitle)) return;
+                // ONLY SYNC THE "Reading" SECTION
+                if (!/Reading/i.test(sectionTitle)) return;
 
                 const booksInTitle = [];
                 let match;
                 while ((match = itemRegex.exec(section)) !== null) {
-                    booksInTitle.push({
-                        image: match[1],
-                        tag: match[2],
-                        title: match[3],
-                        status: match[4],
-                        link: `https://github.com/${username}/${repo}`,
-                        icon: match[4].toLowerCase().includes('reading') ? 'fa-solid fa-book-open' : 'fa-solid fa-check-double',
-                        isBR: match[3].includes('BR')
-                    });
+                    const status = match[4];
+                    // ONLY KEEP BOOKS THAT ARE STILL BEING READ
+                    if (status.toLowerCase().includes('reading')) {
+                        booksInTitle.push({
+                            image: match[1],
+                            tag: match[2],
+                            title: match[3],
+                            status: status,
+                            link: `https://github.com/${username}/${repo}`,
+                            icon: 'fa-solid fa-book-open',
+                            isBR: match[3].includes('BR')
+                        });
+                    }
                 }
 
                 if (booksInTitle.length > 0) {
-                    groupedBooks[sectionTitle] = booksInTitle;
+                    groupedBooks['Reading'] = booksInTitle;
                 }
             });
 
-            console.log('Grouped books found:', Object.keys(groupedBooks));
             return Object.keys(groupedBooks).length > 0 ? groupedBooks : null;
         } catch (error) {
             console.error('Error syncing reading list:', error);

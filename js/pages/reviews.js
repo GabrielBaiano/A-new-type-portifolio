@@ -11,7 +11,7 @@ const ReviewsPage = {
         try {
             const data = await DataService.loadReviewsData();
             this.allShelves = data.shelves || [];
-            this.flatReviews = data.reviews || []; // The new sync data
+            this.flatReviews = (data.reviews || []).filter(b => b.status === 'Reading'); // Show only current reads per user request
         } catch (error) {
             console.error('[Reviews] Error loading data:', error);
             this.allShelves = [];
