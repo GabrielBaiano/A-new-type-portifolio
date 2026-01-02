@@ -4071,3 +4071,31 @@ body.detail-mode {
     border: 1px solid rgba(234, 179, 8, 0.2);
 }
 
+
+
+/* Tag Color Variations - Fixed */
+.feed-tag.tag-pink {
+    background: rgba(236, 72, 153, 0.1) !important;
+    color: #ec4899 !important;
+}
+
+.feed-tag.tag-green {
+    background: rgba(34, 197, 94, 0.1) !important;
+    color: #22c55e !important;
+}
+
+.feed-tag.tag-cyan {
+    background: rgba(6, 182, 212, 0.1) !important;
+    color: #06b6d4 !important;
+}
+
+.feed-tag.tag-purple {
+    background: rgba(168, 85, 247, 0.1) !important;
+    color: #a855f7 !important;
+}
+
+.feed-tag.tag-blue {
+    background: rgba(59, 130, 246, 0.1) !important;
+    color: #3b82f6 !important;
+}
+
