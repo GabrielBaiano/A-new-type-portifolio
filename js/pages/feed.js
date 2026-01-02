@@ -39,9 +39,9 @@ const FeedPage = {
             const tag = (item.tag || '').toLowerCase();
 
             if (type === 'leetcode-resolutions' || tag.includes('leetcode')) tagClass = 'tag-pink';
-            else if (type === 'full-reviews' || tag.includes('book') || tag.includes('review')) tagClass = 'tag-green';
+            else if (type === 'full-reviews' || tag.includes('book') || tag.includes('review')) tagClass = 'tag-purple';
             else if (type === 'study-notes' || tag.includes('note')) tagClass = 'tag-cyan';
-            else if (type === 'projects-labs' || tag.includes('project') || tag.includes('release')) tagClass = 'tag-purple';
+            else if (type === 'projects-labs' || tag.includes('project') || tag.includes('release')) tagClass = 'tag-green';
             else tagClass = 'tag-blue';
 
             return `
