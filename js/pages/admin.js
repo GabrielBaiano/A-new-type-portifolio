@@ -11,11 +11,6 @@ const AdminPage = {
     editingItem: null,
 
     async render() {
-        // Check session storage every time we render
-        if (sessionStorage.getItem('admin_authenticated') === 'true') {
-            this.isAuthenticated = true;
-        }
-
         if (!this.isAuthenticated) {
             return this.renderLogin();
         }

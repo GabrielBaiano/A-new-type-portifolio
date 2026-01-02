@@ -27,13 +27,8 @@ class PageManager {
      * @param {Object} params - Parâmetros da rota (opcional)
      */
     async loadPage(pageName, params = {}) {
-        // Se já estamos nessa página E com os mesmos parâmetros, não faz nada
-        const paramsMatch = JSON.stringify(this.currentParams) === JSON.stringify(params);
-        if (this.currentPage === pageName && paramsMatch && !this.isTransitioning) {
-            return;
-        }
-
-        // Se está em transição, guarda a página pendente
+        // Permite carregar a mesma página (útil para re-renderizar após mudanças de estado interno)
+        // Apenas bloqueia se já estiver em transição
         if (this.isTransitioning) {
             this.pendingPage = { name: pageName, params };
             return;
