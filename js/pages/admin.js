@@ -3,7 +3,7 @@
  * Centralized dashboard for managing books, photos, and other site content.
  */
 const AdminPage = {
-    isAuthenticated: sessionStorage.getItem('admin_authenticated') === 'true',
+    isAuthenticated: false,
     activeTab: 'overview',
     allBooks: [],
     allPhotos: [],
@@ -11,6 +11,11 @@ const AdminPage = {
     editingItem: null,
 
     async render() {
+        // Check session storage every time we render
+        if (sessionStorage.getItem('admin_authenticated') === 'true') {
+            this.isAuthenticated = true;
+        }
+
         if (!this.isAuthenticated) {
             return this.renderLogin();
         }
@@ -64,7 +69,10 @@ const AdminPage = {
                     </div>
                     <form id="admin-login-form" class="login-form">
                         <div class="form-group">
-                            <input type="password" id="admin-secret" placeholder="••••••••••••" required autofocus>
+                            <input type="password" id="admin-secret" placeholder="••••••••••••" required autofocus autocomplete="off">
+                            <div id="caps-warning" class="caps-warning-msg" style="display: none;">
+                                <i class="fa-solid fa-triangle-exclamation"></i> Caps Lock is ON
+                            </div>
                         </div>
                         <button type="submit" class="btn-login">Unlock Dashboard</button>
                         <div id="login-error" class="login-error-msg"></div>
@@ -295,12 +303,32 @@ const AdminPage = {
 
     setupLogin() {
         const form = document.getElementById('admin-login-form');
+        const secretInput = document.getElementById('admin-secret');
+        const capsWarning = document.getElementById('caps-warning');
         const error = document.getElementById('login-error');
+        
         if (!form) return;
+
+        // Caps Lock detection
+        secretInput.addEventListener('keyup', (event) => {
+            if (event.getModifierState('CapsLock')) {
+                capsWarning.style.display = 'block';
+            } else {
+                capsWarning.style.display = 'none';
+            }
+        });
+
+        secretInput.addEventListener('keydown', (event) => {
+            if (event.getModifierState('CapsLock')) {
+                capsWarning.style.display = 'block';
+            } else {
+                capsWarning.style.display = 'none';
+            }
+        });
         
         form.addEventListener('submit', (e) => {
             e.preventDefault();
-            const secret = document.getElementById('admin-secret').value;
+            const secret = secretInput.value;
             
             if (secret) {
                 // Store in session
@@ -326,12 +354,15 @@ const AdminPage = {
             });
         });
 
-        document.getElementById('admin-logout').addEventListener('click', () => {
-            sessionStorage.removeItem('admin_authenticated');
-            sessionStorage.removeItem('admin_secret');
-            this.isAuthenticated = false;
-            router.navigate('home');
-        });
+        const logoutBtn = document.getElementById('admin-logout');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                sessionStorage.removeItem('admin_authenticated');
+                sessionStorage.removeItem('admin_secret');
+                this.isAuthenticated = false;
+                router.navigate('home');
+            });
+        }
     },
 
     setupModules() {
