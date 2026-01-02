@@ -24,11 +24,12 @@ const githubHeaders = {
 
 export default async function handler(req, res) {
   // Allow cron or manual trigger via GET/POST
+  const isCron = req.headers['x-vercel-cron'] === '1';
   const isUpdateTrigger = (req.method === 'POST') || (req.method === 'GET' && req.query.update === 'true');
   const secret = req.method === 'POST' ? req.body.secret : req.query.secret;
 
   if (isUpdateTrigger) {
-    if (secret !== API_SECRET) return res.status(401).json({ error: 'Unauthorized' });
+    if (!isCron && secret !== API_SECRET) return res.status(401).json({ error: 'Unauthorized' });
     // Cache update logic...
     try {
       const username = (req.method === 'POST' ? req.body.username : req.query.username) || 'GabrielBaiano';
