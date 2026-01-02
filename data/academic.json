@@ -10,71 +10,8 @@
       { "name": "English", "level": "Professional" }
     ]
   },
-  "publications": [
-    {
-      "id": "research-llm-agents",
-      "title": "Exploring Autonomy in LLM Agents",
-      "category": "Articles",
-      "date": "Dec 2024",
-      "institution": "Journal of AI Research",
-      "excerpt": "A study on the capabilities and limitations of agentic systems in complex coding environments.",
-      "contentFile": "data/content/academic/research-llm-agents.md"
-    },
-    {
-      "id": "workshop-ai-design",
-      "title": "Workshop: Generative AI in Interface Design",
-      "category": "Presentations",
-      "date": "Nov 2024",
-      "institution": "Design Conf 2024",
-      "excerpt": "Facilitating discussions on the future of AI-assisted design tools.",
-      "contentFile": "data/content/academic/workshop-ai-design.md"
-    },
-    {
-      "id": "publication-modern-frameworks",
-      "title": "Paper: Modern Frameworks & Web Performance",
-      "category": "Articles",
-      "date": "Oct 2024",
-      "institution": "Web Dev Summit",
-      "excerpt": "A comparative analysis between SPA frameworks and server-side rendering approaches.",
-      "contentFile": "data/content/academic/publication-modern-frameworks.md"
-    },
-    {
-      "id": "css-subgrid-layouts",
-      "title": "Brand New Layouts with CSS Subgrid",
-      "category": "Articles",
-      "date": "Dec 2024",
-      "institution": "CSS Weekly",
-      "excerpt": "Subgrid allows us to extend a grid template down through the DOM tree, so that deeply-nested elements can participate in the same grid layout."
-    },
-    {
-      "id": "container-queries",
-      "title": "Container Queries Unleashed",
-      "category": "Articles",
-      "date": "Nov 2024",
-      "institution": "Modern Web",
-      "excerpt": "Container queries expand the universe of designs that can be implemented, giving us whole new superpowers. Now that container queries are broadly available, I think it's time we start exploring this potential!"
-    }
-  ],
-  "honors": [
-    {
-      "title": "1st Place - Global AI Hackathon",
-      "date": "Oct 2024",
-      "institution": "Tech Global",
-      "description": "Led the team to victory with an innovative multi-agent system for automated code refactoring."
-    },
-    {
-      "title": "Best Technical Solution - Open Source Summit",
-      "date": "Aug 2024",
-      "institution": "FOSS Community",
-      "description": "Recognized for significant contributions to the performance optimization of high-scale web frameworks."
-    },
-    {
-      "title": "Top Full Stack Dev 2024",
-      "date": "Jan 2024",
-      "institution": "Innovation Labs",
-      "description": "Awarded for excellence in bridging the gap between design and high-performance engineering."
-    }
-  ],
+  "publications": [],
+  "honors": [],
   "skills": [
     "Large Language Models",
     "Full Stack Development",

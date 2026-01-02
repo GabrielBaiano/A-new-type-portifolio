@@ -1,28 +1,3 @@
 {
-  "posts": [
-    {
-      "id": "research-llm-agents",
-      "title": "Exploring Autonomy in LLM Agents",
-      "date": "Dec 2024",
-      "type": "Research",
-      "excerpt": "A study on the capabilities and limitations of agentic systems in complex coding environments.",
-      "contentFile": "data/content/academic/research-llm-agents.md"
-    },
-    {
-      "id": "workshop-ai-design",
-      "title": "Workshop: Generative AI in Interface Design",
-      "date": "Nov 2024",
-      "type": "Workshop",
-      "excerpt": "Facilitating discussions on the future of AI-assisted design tools.",
-      "contentFile": "data/content/academic/workshop-ai-design.md"
-    },
-    {
-      "id": "publication-modern-frameworks",
-      "title": "Paper: Modern Frameworks & Web Performance",
-      "date": "Oct 2024",
-      "type": "Publication",
-      "excerpt": "A comparative analysis between SPA frameworks and server-side rendering approaches.",
-      "contentFile": "data/content/academic/publication-modern-frameworks.md"
-    }
-  ]
+  "posts": []
 }
