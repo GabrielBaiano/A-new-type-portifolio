@@ -33,7 +33,18 @@ const FeedPage = {
         if (items.length === 0) {
             return '<p class="no-results">No items found for this category.</p>';
         }
-        return items.map(item => `
+        return items.map(item => {
+            let tagClass = '';
+            const type = item.type || '';
+            const tag = (item.tag || '').toLowerCase();
+
+            if (type === 'leetcode-resolutions' || tag.includes('leetcode')) tagClass = 'tag-pink';
+            else if (type === 'full-reviews' || tag.includes('book') || tag.includes('review')) tagClass = 'tag-green';
+            else if (type === 'study-notes' || tag.includes('note')) tagClass = 'tag-cyan';
+            else if (type === 'projects-labs' || tag.includes('project') || tag.includes('release')) tagClass = 'tag-purple';
+            else tagClass = 'tag-blue';
+
+            return `
             <div class="feed-item feed-item-btn" data-id="${item.id}">
                 <div class="feed-item-header">
                     <span class="feed-date">${(() => {
@@ -42,7 +53,7 @@ const FeedPage = {
                             return isNaN(d) ? item.date : d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
                         } catch (e) { return item.date; }
                     })()}</span>
-                    <span class="feed-tag" data-tag="${item.tag}">${item.tag}</span>
+                    <span class="feed-tag ${tagClass}" data-tag="${item.tag}">${item.tag}</span>
                 </div>
                 
                 ${item.image ? `
