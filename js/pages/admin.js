@@ -585,12 +585,17 @@ const AdminPage = {
 
         const updateLivePreview = () => {
             if (!previewContainer) return;
-            const livePost = {
-                title: document.getElementById('post-title').value,
-                content: document.getElementById('post-content').value,
-                tag: document.getElementById('post-tag').value
-            };
-            previewContainer.innerHTML = this.renderPostPreview(livePost);
+
+            // Sync with state
+            if (!this.editingItem) {
+                this.editingItem = { id: null, tags: [] };
+            }
+            
+            this.editingItem.title = document.getElementById('post-title').value;
+            this.editingItem.content = document.getElementById('post-content').value;
+            this.editingItem.tag = document.getElementById('post-tag').value;
+
+            previewContainer.innerHTML = this.renderPostPreview(this.editingItem);
         };
 
         ['post-title', 'post-content', 'post-tag'].forEach(id => {
@@ -651,12 +656,18 @@ const AdminPage = {
 
         const updateLivePreview = () => {
             if (!previewContainer) return;
-            const liveLC = {
-                number: document.getElementById('lc-number').value,
-                name: document.getElementById('lc-name').value,
-                content: document.getElementById('lc-content').value
-            };
-            previewContainer.innerHTML = this.renderLeetCodePreview(liveLC);
+
+             // Sync with state
+             if (!this.editingItem) {
+                this.editingItem = { id: null };
+            }
+
+            this.editingItem.number = document.getElementById('lc-number').value;
+            this.editingItem.name = document.getElementById('lc-name').value;
+            this.editingItem.content = document.getElementById('lc-content').value;
+            this.editingItem.external_link = document.getElementById('lc-link').value;
+
+            previewContainer.innerHTML = this.renderLeetCodePreview(this.editingItem);
         };
 
         ['lc-number', 'lc-name', 'lc-content'].forEach(id => {
@@ -714,14 +725,19 @@ const AdminPage = {
 
         const updateLivePreview = () => {
             if (!previewContainer) return;
-            const liveBook = {
-                title: document.getElementById('book-title').value,
-                image: document.getElementById('book-image').value,
-                status: document.getElementById('book-status').value,
-                md_link: document.getElementById('book-md').value,
-                tags: document.getElementById('book-tags').value.split(',').map(t => t.trim()).filter(Boolean)
-            };
-            previewContainer.innerHTML = this.renderBookPreview(liveBook);
+
+            // Sync with state
+            if (!this.editingItem) {
+                this.editingItem = { id: null, tags: [] };
+            }
+
+            this.editingItem.title = document.getElementById('book-title').value;
+            this.editingItem.image = document.getElementById('book-image').value;
+            this.editingItem.status = document.getElementById('book-status').value;
+            this.editingItem.md_link = document.getElementById('book-md').value;
+            this.editingItem.tags = document.getElementById('book-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+
+            previewContainer.innerHTML = this.renderBookPreview(this.editingItem);
         };
 
         // Add input listeners for live preview
@@ -734,17 +750,22 @@ const AdminPage = {
         });
 
         const uploadInput = document.getElementById('book-upload');
-        if (uploadInput) {
+        const uploadIcon = document.querySelector('label[for="book-upload"] i');
+
+        if (uploadInput && uploadIcon) {
             uploadInput.addEventListener('change', async (e) => {
                 const file = e.target.files[0];
                 if (file) {
                     this.isUploading = true;
-                    pageManager.loadPage('admin');
+                    // Update UI manually for better speed/state preservation
+                    uploadIcon.className = 'fa-solid fa-spinner fa-spin';
+                    
                     try {
-                        await this.uploadImage(file, 'book-image', updateLivePreview);
+                        const url = await this.uploadImage(file, 'book-image', updateLivePreview);
+                        if (this.editingItem) this.editingItem.image = url;
                     } finally {
                         this.isUploading = false;
-                        pageManager.loadPage('admin');
+                        uploadIcon.className = 'fa-solid fa-cloud-arrow-up';
                     }
                 }
             });
@@ -802,12 +823,17 @@ const AdminPage = {
 
         const updateLivePreview = () => {
             if (!previewContainer) return;
-            const livePhoto = {
-                image: document.getElementById('photo-image').value,
-                description: document.getElementById('photo-desc').value,
-                link: document.getElementById('photo-link').value
-            };
-            previewContainer.innerHTML = this.renderPhotoPreview(livePhoto);
+
+            // Sync with state
+            if (!this.editingItem) {
+                this.editingItem = { id: null };
+            }
+
+            this.editingItem.image = document.getElementById('photo-image').value;
+            this.editingItem.description = document.getElementById('photo-desc').value;
+            this.editingItem.link = document.getElementById('photo-link').value;
+
+            previewContainer.innerHTML = this.renderPhotoPreview(this.editingItem);
         };
 
         // Add input listeners for live preview
@@ -817,17 +843,22 @@ const AdminPage = {
         });
 
         const uploadInput = document.getElementById('photo-upload');
-        if (uploadInput) {
+        const uploadIcon = document.querySelector('label[for="photo-upload"] i');
+
+        if (uploadInput && uploadIcon) {
             uploadInput.addEventListener('change', async (e) => {
                 const file = e.target.files[0];
                 if (file) {
                     this.isUploading = true;
-                    pageManager.loadPage('admin');
+                    // Update UI manually
+                    uploadIcon.className = 'fa-solid fa-spinner fa-spin';
+
                     try {
-                        await this.uploadImage(file, 'photo-image', updateLivePreview);
+                        const url = await this.uploadImage(file, 'photo-image', updateLivePreview);
+                        if (this.editingItem) this.editingItem.image = url;
                     } finally {
                         this.isUploading = false;
-                        pageManager.loadPage('admin');
+                        uploadIcon.className = 'fa-solid fa-cloud-arrow-up';
                     }
                 }
             });
