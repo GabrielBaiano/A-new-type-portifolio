@@ -11,7 +11,7 @@ const supabaseHeaders = {
   'apikey': SUPABASE_KEY,
   'Authorization': `Bearer ${SUPABASE_KEY}`,
   'Content-Type': 'application/json',
-  'Prefer': 'return=representation'
+  'Prefer': 'return=representation, resolution=merge-duplicates'
 };
 
 export default async function handler(req, res) {
@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { title, image, status, mdLink, tags, secret } = req.body;
+  const { id: manualId, title, image, status, mdLink, tags, secret, date: manualDate } = req.body;
 
   // Simple security check
   if (secret !== API_SECRET) {
@@ -31,9 +31,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const id = title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    const id = manualId || title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
-    // Insert new book into 'books' table (Assuming the user has or will create this table in Supabase)
+    // UPSERT: Insert or Update book into 'books' table
     const insertRes = await fetch(
       `${SUPABASE_URL}/rest/v1/books`,
       {
@@ -46,7 +46,7 @@ export default async function handler(req, res) {
           status,
           md_link: mdLink,
           tags,
-          date: new Date().toISOString()
+          date: manualDate || new Date().toISOString()
         })
       }
     );

@@ -56,40 +56,25 @@ const DataService = {
     },
 
     /**
-     * Load reviews data from JSON and API
+     * Load reviews data from JSON and API (Supabase)
      */
     async loadReviewsData() {
         if (!this.reviewsData) {
             try {
-                const [jsonRes, apiRes, readingRes] = await Promise.all([
+                const [jsonRes, apiRes] = await Promise.all([
                     fetch('data/reviews.json').then(r => r.json()).catch(() => ({ reviews: [], shelves: [] })),
-                    fetch('/api/get-books').then(r => r.json()).catch(() => ({ data: [] })),
-                    this.getGitHubReadingList().catch(() => null)
+                    fetch('/api/get-books').then(r => r.json()).catch(() => ({ data: [] }))
                 ]);
 
-                // 1. Manual Finished Reviews from Supabase
+                // manual reviews from Supabase
                 const manualReviews = (apiRes.data || []).map(b => ({
                     ...b,
                     _source: 'supabase'
                 }));
 
-                // 2. Automated "Currently Reading" from GitHub
-                let readingBooks = [];
-                if (readingRes && readingRes['Reading']) {
-                    readingBooks = readingRes['Reading'].map(b => ({
-                        id: `reading-${b.title.replace(/\s+/g, '-').toLowerCase()}`,
-                        title: b.title,
-                        image: b.image,
-                        status: 'Reading',
-                        link: b.link,
-                        date: new Date().toISOString().split('T')[0],
-                        _source: 'github-sync'
-                    }));
-                }
-
                 this.reviewsData = {
                     ...jsonRes,
-                    reviews: [...(jsonRes.reviews || []), ...manualReviews, ...readingBooks]
+                    reviews: [...(jsonRes.reviews || []), ...manualReviews]
                 };
             } catch (error) {
                 console.error('Error loading reviews:', error);
@@ -440,60 +425,4 @@ const DataService = {
         return combined.sort((a, b) => new Date(b.date) - new Date(a.date));
     },
 
-    /**
-     * Fetch and parse dynamic reading list from personal-library README
-     */
-    async getGitHubReadingList() {
-        const username = 'GabrielBaiano';
-        const repo = 'personal-library';
-        const rawUrl = `https://raw.githubusercontent.com/${username}/${repo}/main/README.md`;
-
-        try {
-            const response = await fetch(rawUrl);
-            if (!response.ok) throw new Error('Failed to fetch reading list');
-            const markdown = await response.text();
-
-            // Split by headers (e.g., # Reading, ## 2024, ## 2023)
-            const sections = markdown.split(/(?=^#{1,3} )/m);
-            const groupedBooks = {};
-
-            const itemRegex = /<td[^>]*>[\s\S]*?<img src="([^"]+)"[\s\S]*?<span[^>]*>([^<]+)<\/span>[\s\S]*?<a[^>]*>([^<]+)<\/a>[\s\S]*?Status: <strong>([^<]+)<\/strong>[\s\S]*?<\/td>/g;
-
-            sections.forEach(section => {
-                const headerMatch = section.match(/^#{1,3}\s+(.+)$/m);
-                if (!headerMatch) return;
-
-                const sectionTitle = headerMatch[1].trim();
-                // ONLY SYNC THE "Reading" SECTION
-                if (!/Reading/i.test(sectionTitle)) return;
-
-                const booksInTitle = [];
-                let match;
-                while ((match = itemRegex.exec(section)) !== null) {
-                    const status = match[4];
-                    // ONLY KEEP BOOKS THAT ARE STILL BEING READ
-                    if (status.toLowerCase().includes('reading')) {
-                        booksInTitle.push({
-                            image: match[1],
-                            tag: match[2],
-                            title: match[3],
-                            status: status,
-                            link: `https://github.com/${username}/${repo}`,
-                            icon: 'fa-solid fa-book-open',
-                            isBR: match[3].includes('BR')
-                        });
-                    }
-                }
-
-                if (booksInTitle.length > 0) {
-                    groupedBooks['Reading'] = booksInTitle;
-                }
-            });
-
-            return Object.keys(groupedBooks).length > 0 ? groupedBooks : null;
-        } catch (error) {
-            console.error('Error syncing reading list:', error);
-            return null;
-        }
-    }
 };

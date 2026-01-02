@@ -1,23 +1,35 @@
 // Academic Page Component - Renders from JSON configuration
 const AcademicPage = {
-    renderSidebar(readingListData, sidebarData, isMobile = false) {
+    renderSidebar(reviewsData) {
+        // Group manual reviews into categories (Reading section at top, then others)
+        const grouped = {};
+        const reviews = (reviewsData && reviewsData.reviews) ? reviewsData.reviews : [];
+        
+        reviews.forEach(book => {
+            const cat = book.status === 'Reading' ? 'Reading' : (book.tags?.[0] || 'Finished');
+            if (!grouped[cat]) grouped[cat] = [];
+            grouped[cat].push(book);
+        });
+
         return `
             <div class="sidebar-card">
                 <div class="sidebar-section">
                     <span class="sidebar-label">Library Shelf</span>
                     <div id="bookshelf-multi-container" class="bookshelf-multi-container">
-                        ${this.renderIndividualShelves(this.groupBooksByYear(readingListData))}
+                        ${this.renderIndividualShelves(grouped)}
                     </div>
                 </div>
             </div>
         `;
     },
 
-    render() {
+    async render() {
         // Get preloaded data
-        const data = DataService.academicData || { profile: {}, education: [], professionalExperience: [], publications: [], skills: [], readingList: [] };
-        const toolsSidebar = DataService.toolsData?.sidebar || { categories: [], popularContent: [] };
-
+        const [data, reviewsData] = await Promise.all([
+            DataService.loadAcademicData(),
+            DataService.loadReviewsData()
+        ]);
+        
         return `
             <div class="page-layout-grid academic-page-container">
                 <div class="main-content-area">
@@ -102,13 +114,13 @@ const AcademicPage = {
 
                     <!-- Mobile Sidebar Content -->
                     <div class="mobile-only">
-                        ${this.renderSidebar(data.readingList, data, true)}
+                        ${this.renderSidebar(reviewsData)}
                     </div>
                 </div>
 
                 <!-- Sidebar Area (Desktop Only) -->
                 <aside class="sidebar desktop-only">
-                    ${this.renderSidebar(data.readingList, data, false)}
+                    ${this.renderSidebar(reviewsData)}
                 </aside>
             </div>
         `;
@@ -119,9 +131,6 @@ const AcademicPage = {
         
         // Enable wide layout for academic page
         document.body.classList.add('wide-layout');
-
-        // Dynamic Sync: Try to get latest books from GitHub
-        this.syncGitHubBooks();
 
         // Initialize sidebar toggle (only for collapsible sections)
         const toggles = document.querySelectorAll('.sidebar-toggle-btn');
@@ -148,23 +157,7 @@ const AcademicPage = {
         });
     },
 
-    /**
-     * Sync books dynamically from personal-library README
-     */
-    /**
-     * Helper to group books by year for fallback data
-     */
-    groupBooksByYear(books) {
-        if (!books) return {};
-        const groups = {};
-        books.forEach(book => {
-            const year = book.year || 'Reading';
-            const key = year.includes('20') ? `${year} books` : year;
-            if (!groups[key]) groups[key] = [];
-            groups[key].push(book);
-        });
-        return groups;
-    },
+
 
     /**
      * Helper to render multiple shelves based on grouped data
@@ -183,11 +176,10 @@ const AcademicPage = {
             
             const yearA = parseInt(a.match(/\d+/)) || 0;
             const yearB = parseInt(b.match(/\d+/)) || 0;
-            return yearB - yearA; // Recente primeiro
+            return yearB - yearA;
         });
 
         return sortedEntries.map(([year, books]) => {
-            // Chunk books into sets of 5-6 to avoid long wrapping rows without boards
             const booksPerShelf = 6;
             const chunks = [];
             for (let i = 0; i < books.length; i += booksPerShelf) {
@@ -201,7 +193,7 @@ const AcademicPage = {
                         ${chunks.map(chunk => `
                             <div class="bookshelf">
                                 ${chunk.map(book => `
-                                    <a href="${book.link}" target="_blank" class="spine-book" data-tag="${book.tag}" title="${book.title} - ${book.author}">
+                                    <a href="${book.link}" target="_blank" class="spine-book" data-tag="${book.tag}" title="${book.title} - ${book.author || ''}">
                                         <span class="spine-title">${book.title}</span>
                                         ${book.isBR ? '<span class="spine-br">BR</span>' : ''}
                                     </a>
@@ -212,25 +204,6 @@ const AcademicPage = {
                 </div>
             `;
         }).join('');
-    },
-
-    async syncGitHubBooks() {
-        const containers = document.querySelectorAll('#bookshelf-multi-container');
-        if (containers.length === 0) return;
-
-        try {
-            const groupedBooks = await DataService.getGitHubReadingList();
-            if (groupedBooks) {
-                const shelfHtml = this.renderIndividualShelves(groupedBooks);
-                
-                containers.forEach(container => {
-                    container.innerHTML = shelfHtml;
-                });
-                console.log('📚 Multi-year bookshelf synced');
-            }
-        } catch (err) {
-            console.warn('Sync failed, using fallback data:', err);
-        }
     },
 
     onUnmount() {
