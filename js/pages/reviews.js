@@ -11,34 +11,36 @@ const ReviewsPage = {
         try {
             const data = await DataService.loadReviewsData();
             this.allShelves = data.shelves || [];
-            this.flatReviews = (data.reviews || []).filter(b => b.status === 'Reading'); // Show only current reads per user request
+            this.flatReviews = data.reviews || []; // Restoring all reviews
         } catch (error) {
             console.error('[Reviews] Error loading data:', error);
             this.allShelves = [];
             this.flatReviews = [];
         }
 
+        // Group books by category
+        const categorized = this.groupReviews(this.flatReviews);
+        
         // Determine what to show
         let contentHtml = '';
         
-        // 1. If we have synced reviews, show them in a nice grid
-        if (this.flatReviews.length > 0) {
-            contentHtml += `
+        if (Object.keys(categorized).length > 0) {
+            contentHtml += Object.entries(categorized).map(([cat, books]) => `
                 <div class="reviews-section-title">
-                    <i class="fa-solid fa-rotate"></i> Recent Updates (Synced from Library)
+                    <i class="fa-solid ${cat === 'Reading' ? 'fa-glasses' : 'fa-bookmark'}"></i> ${cat}
                 </div>
                 <div class="books-grid">
-                    ${this.flatReviews.map(book => this.renderBookCard(book)).join('')}
+                    ${books.map(book => this.renderBookCard(book)).join('')}
                 </div>
-            `;
+            `).join('');
         } else if (this.allShelves.length === 0) {
-            contentHtml = `<div class="empty-state">No reviews found. Sync your library!</div>`;
+            contentHtml = `<div class="empty-state">No reviews found yet.</div>`;
         }
 
         // 2. Render Legacy/Manual Shelves if they exist
         if (this.allShelves.length > 0) {
             contentHtml += `
-                <div class="reviews-section-title" style="margin-top: 2rem;">
+                <div class="reviews-section-title" style="margin-top: 3rem;">
                     <i class="fa-solid fa-layer-group"></i> Collections
                 </div>
                 <div class="shelves-container">
@@ -56,7 +58,7 @@ const ReviewsPage = {
 
                 <div class="detail-header">
                     <h1 class="detail-title">Full Reviews</h1>
-                    <p class="detail-subtitle">In-depth analysis of books I'm reading or have finished.</p>
+                    <p class="detail-subtitle">In-depth analysis and categorized thoughts on my library.</p>
                 </div>
 
                 <div class="reviews-content-wrapper">
@@ -64,6 +66,24 @@ const ReviewsPage = {
                 </div>
             </div>
         `;
+    },
+
+    groupReviews(reviews) {
+        const categories = {};
+        
+        reviews.forEach(book => {
+            if (book.status === 'Reading') {
+                if (!categories['Reading']) categories['Reading'] = [];
+                categories['Reading'].push(book);
+            } else {
+                // Use first tag as category, or 'Other'
+                const cat = (book.tags && book.tags.length > 0) ? book.tags[0] : 'Reviews';
+                if (!categories[cat]) categories[cat] = [];
+                categories[cat].push(book);
+            }
+        });
+
+        return categories;
     },
 
     renderBookCard(book) {

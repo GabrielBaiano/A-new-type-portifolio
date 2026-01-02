@@ -408,17 +408,20 @@ const DataService = {
             console.error('Feed API Error:', e);
         }
 
-        // 5. Manual Books from Supabase (Filtering for Reading only for now as requested)
+        // 5. Manual Books from Supabase
         const mergedReviews = await this.loadReviewsData();
         const finalReviewsFeed = mergedReviews.reviews
-            .filter(review => review.status === 'Reading') // User requested to hide finished posts/reviews for now
+            // We keep the filter for GitHub sync inside loadReviewsData, 
+            // but here we allow the manual Supabase ones to show 'Finished'.
             .map(review => ({
                 id: review.id,
                 type: 'full-reviews',
                 date: review.date,
                 tag: 'Book Review',
                 title: review.title,
-                description: `Starting reading this book: ${review.title}`,
+                description: review.status === 'Reading' 
+                    ? `Starting reading this book: ${review.title}` 
+                    : `Finished and reviewed: ${review.title}`,
                 link: `#/review-view/${review.id}`,
                 image: review.image,
                 status: review.status,
