@@ -7,6 +7,8 @@ const AdminPage = {
     activeTab: 'overview',
     allBooks: [],
     allPhotos: [],
+    allPosts: [],
+    allLeetCode: [],
     allBalloons: [],
     editingItem: null,
 
@@ -38,6 +40,12 @@ const AdminPage = {
                             </button>
                             <button class="admin-nav-item ${this.activeTab === 'balloons' ? 'active' : ''}" data-tab="balloons">
                                 <i class="fa-solid fa-circle-nodes"></i> Balloons
+                            </button>
+                            <button class="admin-nav-item ${this.activeTab === 'posts' ? 'active' : ''}" data-tab="posts">
+                                <i class="fa-solid fa-pen-nib"></i> Posts
+                            </button>
+                            <button class="admin-nav-item ${this.activeTab === 'leetcode' ? 'active' : ''}" data-tab="leetcode">
+                                <i class="fa-solid fa-code"></i> LeetCode
                             </button>
                         </nav>
                         <button class="admin-logout-btn" id="admin-logout">
@@ -85,6 +93,10 @@ const AdminPage = {
                 return this.renderPhotosModule();
             case 'balloons':
                 return this.renderBalloonsModule();
+            case 'posts':
+                return this.renderFeedModule();
+            case 'leetcode':
+                return this.renderLeetCodeModule();
             default:
                 return this.renderOverview();
         }
@@ -106,8 +118,12 @@ const AdminPage = {
                     <span class="stat-label">Photos in Gallery</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-value">${this.allBalloons.length}</span>
-                    <span class="stat-label">Active Balloons</span>
+                    <span class="stat-value">${this.allPosts.length}</span>
+                    <span class="stat-label">Feed Posts</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">${this.allLeetCode.length}</span>
+                    <span class="stat-label">LeetCode Solved</span>
                 </div>
             </div>
         `;
@@ -206,6 +222,149 @@ const AdminPage = {
         `;
     },
 
+    renderPostPreview(post) {
+        if (!post) return '<p style="color: grey; padding: 20px;">Draft a post to preview.</p>';
+        return `
+            <div class="post-card-preview" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span style="font-size: 0.7rem; color: var(--text-muted);">${new Date().toLocaleDateString()}</span>
+                    <span style="font-size: 0.65rem; background: var(--accent-blue); color: white; padding: 2px 8px; border-radius: 4px;">${post.tag || 'Pensamentos'}</span>
+                </div>
+                <h4 style="margin: 0 0 10px 0; font-family: 'Sora', sans-serif;">${post.title || 'Post Title'}</h4>
+                <div class="markdown-body" style="font-size: 0.85rem; line-height: 1.6; color: var(--text-normal);">
+                    ${post.content ? post.content.substring(0, 300) + (post.content.length > 300 ? '...' : '') : 'Write something to see the preview...'}
+                </div>
+            </div>
+        `;
+    },
+
+    renderLeetCodePreview(lc) {
+        if (!lc) return '<p style="color: grey; padding: 20px;">Draft a resolution to preview.</p>';
+        return `
+            <div class="lc-card-preview" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span style="font-size: 0.7rem; color: var(--text-muted);">#${lc.number || '000'}</span>
+                    <span style="font-size: 0.65rem; background: #FF375F; color: white; padding: 2px 8px; border-radius: 4px;">LeetCode</span>
+                </div>
+                <h4 style="margin: 0 0 10px 0; font-family: 'Sora', sans-serif;">${lc.name || 'Problem Name'}</h4>
+                <div style="font-size: 0.8rem; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; font-family: monospace; white-space: pre-wrap;">
+                    ${lc.content ? lc.content.substring(0, 200) + '...' : '// Solution code here'}
+                </div>
+            </div>
+        `;
+    },
+
+    renderFeedModule() {
+        return `
+            <div class="admin-tab-header">
+                <div class="header-main">
+                    <h1>Feed Posts</h1>
+                    <button class="btn-action" id="btn-new-post">+ New Post</button>
+                </div>
+            </div>
+            <div class="admin-three-panel">
+                <div class="panel-inventory">
+                    <h3>History</h3>
+                    <div class="inventory-list" id="posts-inventory">
+                        ${this.allPosts.length > 0 ? this.allPosts.map(p => `
+                            <div class="inventory-item ${this.editingItem?.id === p.id ? 'active' : ''}" data-id="${p.id}">
+                                <div class="item-info">
+                                    <span class="item-title">${p.title}</span>
+                                    <span class="item-meta">${p.tag} • ${new Date(p.date).toLocaleDateString()}</span>
+                                </div>
+                            </div>
+                        `).join('') : '<p style="padding: 10px; color: grey;">No posts yet.</p>'}
+                    </div>
+                </div>
+                <div class="panel-editor">
+                    <h3>Editor</h3>
+                    <form id="post-form" class="admin-form">
+                        <input type="hidden" id="post-id" value="${this.editingItem?.id || ''}">
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" id="post-title" value="${this.editingItem?.title || ''}" placeholder="What's on your mind?" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Content (Markdown Support)</label>
+                            <textarea id="post-content" style="height: 300px; font-family: monospace;" placeholder="Write your thoughts..." required>${this.editingItem?.content || ''}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Category / Tag</label>
+                            <select id="post-tag">
+                                <option value="Pensamentos" ${this.editingItem?.tag === 'Pensamentos' ? 'selected' : ''}>Pensamentos</option>
+                                <option value="Ideias" ${this.editingItem?.tag === 'Ideias' ? 'selected' : ''}>Ideias</option>
+                                <option value="Release" ${this.editingItem?.tag === 'Release' ? 'selected' : ''}>Release</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-save">Publish to Feed</button>
+                    </form>
+                </div>
+                <div class="panel-preview">
+                    <h3>Preview</h3>
+                    <div id="post-preview-container">
+                        ${this.renderPostPreview(this.editingItem)}
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    renderLeetCodeModule() {
+        return `
+            <div class="admin-tab-header">
+                <div class="header-main">
+                    <h1>LeetCode Resolutions</h1>
+                    <button class="btn-action" id="btn-new-lc">+ Log Solution</button>
+                </div>
+            </div>
+            <div class="admin-three-panel">
+                <div class="panel-inventory">
+                    <h3>Solved Problems</h3>
+                    <div class="inventory-list" id="lc-inventory">
+                        ${this.allLeetCode.length > 0 ? this.allLeetCode.map(l => `
+                            <div class="inventory-item ${this.editingItem?.id === l.id ? 'active' : ''}" data-id="${l.id}">
+                                <div class="item-info">
+                                    <span class="item-title">#${l.number}: ${l.name}</span>
+                                    <span class="item-meta">Streak: ${l.streak} 🔥</span>
+                                </div>
+                            </div>
+                        `).join('') : '<p style="padding: 10px; color: grey;">No solutions yet.</p>'}
+                    </div>
+                </div>
+                <div class="panel-editor">
+                    <h3>Editor</h3>
+                    <form id="lc-form" class="admin-form">
+                        <div class="form-row" style="display: flex; gap: 15px;">
+                            <div class="form-group" style="flex: 0 0 80px;">
+                                <label>Number</label>
+                                <input type="number" id="lc-number" value="${this.editingItem?.number || ''}" required>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>Problem Name</label>
+                                <input type="text" id="lc-name" value="${this.editingItem?.name || ''}" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Solution Code / Content</label>
+                            <textarea id="lc-content" style="height: 250px; font-family: monospace;" placeholder="Paste your solution here..." required>${this.editingItem?.content || ''}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>External Link (LeetCode URL)</label>
+                            <input type="url" id="lc-link" value="${this.editingItem?.external_link || ''}">
+                        </div>
+                        <button type="submit" class="btn-save">Save Resolution</button>
+                    </form>
+                </div>
+                <div class="panel-preview">
+                    <h3>Preview</h3>
+                    <div id="lc-preview-container">
+                        ${this.renderLeetCodePreview(this.editingItem)}
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
     renderPhotosModule() {
         return `
             <div class="admin-tab-header">
@@ -298,10 +457,12 @@ const AdminPage = {
     },
 
     async loadInitialData() {
-        const [books, photos, balloons] = await Promise.all([
+        const [books, photos, balloons, posts, leetcode] = await Promise.all([
             fetch('/api/get-books').then(r => r.json()).catch(() => ({ data: [] })),
             fetch('/api/get-photos').then(r => r.json()).catch(() => ({ data: [] })),
-            fetch('/api/get-balloon-data?context=all').then(r => r.json()).catch(() => ({ data: [] }))
+            fetch('/api/get-balloon-data?context=all').then(r => r.json()).catch(() => ({ data: [] })),
+            fetch('/api/get-posts').then(r => r.json()).catch(() => ({ data: [] })),
+            fetch('/api/get-all-leetcode').then(r => r.json()).catch(() => ({ data: [] }))
         ]);
         
         this.allBooks = books.data || [];
@@ -312,14 +473,18 @@ const AdminPage = {
             link: p.link
         }));
         this.allBalloons = balloons.data || [];
+        this.allPosts = posts.data || [];
+        this.allLeetCode = leetcode.data || [];
 
         // Determine if we need to refresh overview stats if that's the current tab
         if (this.activeTab === 'overview') {
             const stats = document.querySelectorAll('.stat-value');
-            if (stats.length >= 3) {
+            if (stats.length >= 5) {
                 stats[0].innerText = this.allBooks.length;
                 stats[1].innerText = this.allPhotos.length;
                 stats[2].innerText = this.allBalloons.length;
+                stats[3].innerText = this.allPosts.length;
+                stats[4].innerText = this.allLeetCode.length;
             }
         }
 
@@ -393,6 +558,137 @@ const AdminPage = {
     setupModules() {
         if (this.activeTab === 'books') this.setupBooksLogic();
         if (this.activeTab === 'photos') this.setupPhotosLogic();
+        if (this.activeTab === 'posts') this.setupFeedLogic();
+        if (this.activeTab === 'leetcode') this.setupLeetCodeLogic();
+    },
+
+    setupFeedLogic() {
+        const form = document.getElementById('post-form');
+        if (!form) return;
+
+        const listItems = document.querySelectorAll('#posts-inventory .inventory-item');
+        const newBtn = document.getElementById('btn-new-post');
+        const previewContainer = document.getElementById('post-preview-container');
+
+        const updateLivePreview = () => {
+            if (!previewContainer) return;
+            const livePost = {
+                title: document.getElementById('post-title').value,
+                content: document.getElementById('post-content').value,
+                tag: document.getElementById('post-tag').value
+            };
+            previewContainer.innerHTML = this.renderPostPreview(livePost);
+        };
+
+        ['post-title', 'post-content', 'post-tag'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', updateLivePreview);
+                if (el.tagName === 'SELECT') el.addEventListener('change', updateLivePreview);
+            }
+        });
+
+        if (newBtn) {
+            newBtn.addEventListener('click', () => {
+                this.editingItem = null;
+                pageManager.loadPage('admin');
+            });
+        }
+
+        listItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const id = item.dataset.id;
+                this.editingItem = this.allPosts.find(p => p.id === id);
+                pageManager.loadPage('admin');
+            });
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                id: document.getElementById('post-id').value || null,
+                title: document.getElementById('post-title').value,
+                content: document.getElementById('post-content').value,
+                tag: document.getElementById('post-tag').value,
+                secret: sessionStorage.getItem('admin_secret')
+            };
+
+            const res = await fetch('/api/add-post', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                alert('Post published!');
+                this.loadInitialData();
+            } else {
+                alert('Error saving post. Make sure "feed_posts" table exists.');
+            }
+        });
+    },
+
+    setupLeetCodeLogic() {
+        const form = document.getElementById('lc-form');
+        if (!form) return;
+
+        const listItems = document.querySelectorAll('#lc-inventory .inventory-item');
+        const newBtn = document.getElementById('btn-new-lc');
+        const previewContainer = document.getElementById('lc-preview-container');
+
+        const updateLivePreview = () => {
+            if (!previewContainer) return;
+            const liveLC = {
+                number: document.getElementById('lc-number').value,
+                name: document.getElementById('lc-name').value,
+                content: document.getElementById('lc-content').value
+            };
+            previewContainer.innerHTML = this.renderLeetCodePreview(liveLC);
+        };
+
+        ['lc-number', 'lc-name', 'lc-content'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', updateLivePreview);
+        });
+
+        if (newBtn) {
+            newBtn.addEventListener('click', () => {
+                this.editingItem = null;
+                pageManager.loadPage('admin');
+            });
+        }
+
+        listItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const id = item.dataset.id;
+                this.editingItem = this.allLeetCode.find(l => l.id === id);
+                pageManager.loadPage('admin');
+            });
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                number: parseInt(document.getElementById('lc-number').value),
+                name: document.getElementById('lc-name').value,
+                content: document.getElementById('lc-content').value,
+                external_link: document.getElementById('lc-link').value,
+                secret: sessionStorage.getItem('admin_secret')
+            };
+
+            const res = await fetch('/api/add-leetcode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                alert('Solution logged!');
+                this.loadInitialData();
+            } else {
+                alert('Error logging solution.');
+            }
+        });
     },
 
     setupBooksLogic() {

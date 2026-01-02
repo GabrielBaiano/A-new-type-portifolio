@@ -287,14 +287,20 @@ const DataService = {
      * @returns {Promise<Object>} Feed item data
      */
     async getFeedItemById(id) {
-        const data = await this.loadToolsData();
-        const item = data.feed.find(f => f.id === id);
+        // Get all items to search the correct one
+        const allItems = await this.getUnifiedFeed();
+        const item = allItems.find(i => i.id === id);
         
         if (item) {
-            return {
-                ...item,
-                content: `# ${item.title}\n\n${item.description}\n\nPublished on ${item.date}.\n\n[Check it out here](${item.link})`
-            };
+            // If it's a supabase-post, it already has the full content
+            // If it's a static feed item, it might need the markdown generation
+            if (item._source === 'static') {
+                return {
+                    ...item,
+                    content: `# ${item.title}\n\n${item.description}\n\nPublished on ${item.date}.\n\n[Check it out here](${item.link})`
+                };
+            }
+            return item;
         }
         
         throw new Error('Feed item not found');
@@ -451,12 +457,34 @@ const DataService = {
                 _source: review._source || 'reviews'
             }));
 
+        // 6. Manual Feed Posts from Supabase
+        let manualPosts = [];
+        try {
+            const postsRes = await fetch('/api/get-posts');
+            const postsJson = await postsRes.json();
+            if (postsJson.success && postsJson.data) {
+                manualPosts = postsJson.data.map(post => ({
+                    id: post.id,
+                    type: 'feed-post',
+                    date: post.date,
+                    tag: post.tag || 'Pensamentos',
+                    title: post.title,
+                    description: post.content ? post.content.substring(0, 150).replace(/[#*]/g, '') + '...' : '',
+                    content: post.content,
+                    _source: 'supabase-posts'
+                }));
+            }
+        } catch (e) {
+            console.error('Posts API Error:', e);
+        }
+
         // Merge All
         const combined = [
             ...staticFeed,
             ...notesFeed,
             ...finalReviewsFeed,
-            ...apiFeed
+            ...apiFeed,
+            ...manualPosts
         ];
 
         // Sort by Date Descending
