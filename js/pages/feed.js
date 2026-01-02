@@ -93,7 +93,7 @@ const FeedPage = {
                         
                         <div id="article-types-grid" class="projects-grid-cards article-types-grid">
                             ${articleTypes.map(type => `
-                                <div class="project-card type-card ${type.gradient} clickable-card-filter" data-type-id="${type.id}">
+                                <div class="project-card type-card ${type.gradient} clickable-card-filter clickable-category" data-type-id="${type.id}">
                                     <div class="type-card-header">
                                         <i class="${type.icon}"></i>
                                         <h3 class="project-title">${type.title}</h3>
