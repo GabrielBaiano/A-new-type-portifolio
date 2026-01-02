@@ -44,13 +44,20 @@ export default async function handler(req, res) {
     if (!image_url) return res.status(400).json({ error: 'Missing Image URL' });
 
     try {
+      const finalId = id || `photo-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
       const method = id ? 'PATCH' : 'POST';
       const endpoint = id ? `${SUPABASE_URL}/rest/v1/photos?id=eq.${id}` : `${SUPABASE_URL}/rest/v1/photos`;
       
+      const payload = { image_url, description, link };
+      if (method === 'POST') {
+        payload.id = finalId;
+        payload.created_at = new Date().toISOString();
+      }
+
       const response = await fetch(endpoint, {
         method,
         headers: supabaseHeaders,
-        body: JSON.stringify({ image_url, description, link })
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
