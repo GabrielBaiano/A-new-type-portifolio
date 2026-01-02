@@ -23,6 +23,8 @@ function initializeSPA() {
     pageManager.registerPage('detail', DetailPage);
     pageManager.registerPage('leetcode', LeetCode);
     pageManager.registerPage('notes', NotesPage);
+    pageManager.registerPage('reviews', ReviewsPage);
+
 
 
     // Register routes
@@ -63,6 +65,11 @@ function initializeSPA() {
     router.register('notes', () => {
         pageManager.loadPage('notes');
         updateNavigation('notes');
+    });
+
+    router.register('reviews', () => {
+        pageManager.loadPage('reviews');
+        // updateNavigation('reviews'); // No nav item for reviews, accessed via card
     });
 
     router.register('notes/:id', (params) => {

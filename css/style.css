@@ -3748,15 +3748,169 @@ body.detail-mode {
 }
 
 /* Tooltip Arrow */
-.more-tags:hover::before {
+
+/* ===== Full Reviews (Acrylic Bookshelf) ===== */
+.reviews-card-theme {
+    min-height: 80vh;
+}
+
+.shelves-container {
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+    margin-top: 32px;
+}
+
+.shelf-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.shelf-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 4px;
+}
+
+.shelf-category {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.shelf-count {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.shelf-count i {
+    font-size: 0.7rem;
+}
+
+/* Acrylic Shelf styling */
+.acrylic-shelf-wrapper {
+    position: relative;
+    padding-bottom: 24px; /* Space for the barrier below books */
+    overflow: hidden; /* Hide overflow locally if needed, but horizontal scroll on track */
+}
+
+.books-track {
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    padding: 12px 12px 24px 12px;
+    /* Hide scrollbar */
+    scrollbar-width: none;
+    -ms-overflow-style: none; 
+    position: relative;
+    z-index: 1; /* Behind Acrylic */
+}
+
+.books-track::-webkit-scrollbar {
+    display: none;
+}
+
+.book-item {
+    flex: 0 0 auto;
+    width: 140px; /* Adjust size later */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: 5;
+    position: relative;
+}
+
+.book-item:hover {
+    transform: translateY(-16px) scale(1.05); /* Pop up effect */
+    z-index: 10;
+}
+
+.book-cover {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    border-radius: 4px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    /* Reflective Shine */
+    position: relative;
+}
+
+/* Acrylic Barrier */
+.acrylic-barrier {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40%; 
+    border-radius: 12px;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 
+        0 4px 6px rgba(0,0,0,0.1),
+        inset 0 1px 0 rgba(255,255,255,0.2); 
+    z-index: 20; /* In front of books (bottom part) */
+    pointer-events: none; /* Allow clicks through? Actually no, usually barrier blocks */
+}
+
+/* Tint Colors */
+.acrylic-barrier.orange-tint {
+    background: linear-gradient(180deg, rgba(255, 120, 0, 0.05), rgba(255, 100, 0, 0.15));
+    border-top: 2px solid rgba(255, 150, 50, 0.2);
+}
+
+.acrylic-barrier.blue-tint {
+    background: linear-gradient(180deg, rgba(0, 112, 243, 0.05), rgba(0, 90, 200, 0.15));
+    border-top: 2px solid rgba(50, 150, 255, 0.2);
+}
+
+.acrylic-barrier.purple-tint {
+    background: linear-gradient(180deg, rgba(121, 40, 202, 0.05), rgba(100, 30, 180, 0.15));
+    border-top: 2px solid rgba(150, 50, 255, 0.2);
+}
+
+/* Screws */
+.screw-head {
+    width: 12px;
+    height: 12px;
+    background: radial-gradient(circle at 30% 30%, #f0f0f0, #aaa);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    z-index: 21;
+}
+
+.screw-head::after {
     content: '';
     position: absolute;
-    bottom: 100%;
+    top: 50%;
     left: 50%;
-    margin-left: -6px;
-    border-width: 6px;
-    border-style: solid;
-    border-color: rgba(0,0,0,0.9) transparent transparent transparent;
-    z-index: 1000;
-    margin-bottom: -4px; /* Adjust based on gap */
+    width: 80%;
+    height: 2px;
+    background: #888;
+    transform: translate(-50%, -50%) rotate(45deg);
 }
+
+.screw-head::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80%;
+    height: 2px;
+    background: #888;
+    transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.screw-head.left { left: 16px; }
+.screw-head.right { right: 16px; }

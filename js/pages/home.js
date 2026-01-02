@@ -1,4 +1,7 @@
 // Home Page Component
+// Actualy this page is the about page --!
+
+
 const HomePage = {
     render() {
         return `

@@ -7,6 +7,8 @@ const DataService = {
     toolsData: null,
     academicData: null,
     notesData: null,
+    reviewsData: null,
+
 
 
     /**
@@ -52,6 +54,18 @@ const DataService = {
         }
         return this.notesData;
     },
+
+    /**
+     * Load reviews data from JSON
+     */
+    async loadReviewsData() {
+        if (!this.reviewsData) {
+            const response = await fetch('data/reviews.json');
+            this.reviewsData = await response.json();
+        }
+        return this.reviewsData;
+    },
+
 
 
     /**
@@ -258,6 +272,114 @@ const DataService = {
             items: items,
             count: items.length
         };
+    },
+
+    async getUnifiedFeed() {
+        const [toolsData, notesData, reviewsData] = await Promise.all([
+            this.loadToolsData(),
+            this.loadNotesData().catch(() => ({ notes: [] })),
+            this.loadReviewsData().catch(() => ({ shelves: [] }))
+        ]);
+
+        // 1. Static Feed (Manual)
+        const staticFeed = (toolsData.feed || []).map(item => ({
+            ...item,
+            _source: 'static'
+        }));
+
+        // 2. Notes
+        const notesFeed = (notesData.notes || []).map(note => ({
+            id: note.id,
+            type: 'study-notes',
+            date: note.date,
+            tag: 'Study Note',
+            title: note.title,
+            description: note.excerpt,
+            link: `#/detail/video-tutorial/${note.id}`,
+            image: null,
+            _source: 'notes'
+        }));
+
+        // 3. Reviews (Flatten shelves or use reviews array)
+        let reviewsFeed = [];
+        if (reviewsData.reviews) {
+             reviewsFeed = reviewsData.reviews.map(review => ({
+                id: review.id || `review-${review.title.replace(/\s+/g, '-').toLowerCase()}`,
+                type: 'full-reviews',
+                date: review.date || '2024-01-01',
+                tag: 'Book Review',
+                title: review.title,
+                description: `Review of ${review.title}`,
+                link: review.link || '#',
+                image: review.image,
+                _source: 'reviews'
+            }));
+        } else if (reviewsData.shelves) {
+            // Flatten shelves if reviews array is missing
+            reviewsData.shelves.forEach(shelf => {
+                const shelfBooks = shelf.books.map(book => ({
+                    id: `book-${book.title.replace(/\s+/g, '-').toLowerCase()}`,
+                    type: 'full-reviews',
+                    date: '2025-01-01', // Default date for shelf items
+                    tag: 'Book Review',
+                    title: book.title,
+                    description: `Book in ${shelf.category} shelf: ${book.author}`,
+                    link: book.link || '#',
+                    image: book.image,
+                    _source: 'shelf'
+                }));
+                reviewsFeed.push(...shelfBooks);
+            });
+        }
+
+        // 4. Dynamic API (LeetCode)
+        let apiFeed = [];
+        try {
+            const apiRes = await fetch('/api/get-balloon-data?context=all');
+            const apiJson = await apiRes.json();
+            if (apiJson.success && apiJson.data) {
+                apiFeed = apiJson.data.map(item => {
+                    if (item.type === 'leetcode') {
+                        return {
+                            id: item.id,
+                            type: 'leetcode-resolutions',
+                            date: item.date,
+                            tag: 'LeetCode',
+                            title: item.title,
+                            description: `Streak: ${item.badge}. ${item.name}`,
+                            link: item.link,
+                            _source: 'api'
+                        };
+                    } else if (item.type === 'notification' || item.type === 'release') {
+                         return {
+                            id: item.id,
+                            type: 'projects-labs',
+                            date: item.date,
+                            tag: 'Release',
+                            title: item.title,
+                            description: item.message,
+                            link: item.link,
+                            image: item.image,
+                             _source: 'api'
+                        };
+                    }
+                    return null;
+                }).filter(Boolean);
+            }
+        } catch (e) {
+            console.error('Feed API Error:', e);
+        }
+
+        // Merge All
+        const combined = [
+            ...staticFeed,
+            ...notesFeed,
+            ...reviewsFeed,
+            ...apiFeed
+        ];
+
+        // Sort by Date Descending
+        return combined.sort((a, b) => new Date(b.date) - new Date(a.date));
     },
 
     /**

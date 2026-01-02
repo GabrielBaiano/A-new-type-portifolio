@@ -57,35 +57,10 @@ const FeedPage = {
     async render() {
         const toolsData = await DataService.loadToolsData();
         const articleTypes = toolsData?.articleTypes || [];
-        const staticFeed = toolsData?.feed || [];
         const sidebarData = toolsData?.sidebar || { categories: [], popularContent: [] };
 
-        // 1. Fetch Dynamic LeetCode Data
-        let leetcodeFeed = [];
-        try {
-            const response = await fetch('/api/get-balloon-data?context=all');
-            const result = await response.json();
-            if (result.success && result.data) {
-                leetcodeFeed = result.data
-                    .filter(item => item.type === 'leetcode')
-                    .map(item => ({
-                        id: item.id,
-                        type: 'leetcode',
-                        date: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-                        tag: 'LeetCode',
-                        title: item.title,
-                        description: `New algorithm resolution posted! Streak: ${item.badge}. Check out the logic and code for this problem.`,
-                        link: item.link
-                    }));
-            }
-        } catch (e) {
-            console.error('[Feed] Error fetching LeetCode data:', e);
-        }
-
-        // 2. Merge and Sort by Date (descending)
-        const combinedFeed = [...staticFeed, ...leetcodeFeed].sort((a, b) => {
-            return new Date(b.date) - new Date(a.date);
-        });
+        // 1. Fetch Unified Feed (Handles Static, LeetCode, Notes, Reviews)
+        const combinedFeed = await DataService.getUnifiedFeed();
 
         // Store for onMount filtering
         this.combinedFeed = combinedFeed;
@@ -152,6 +127,8 @@ const FeedPage = {
                     router.navigate('leetcode');
                 } else if (typeId === 'study-notes') {
                     router.navigate('notes');
+                } else if (typeId === 'full-projects') {
+                    router.navigate('reviews');
                 } else {
                     router.navigate(`detail/category/${typeId}`);
                 }
