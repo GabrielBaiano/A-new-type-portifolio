@@ -46,14 +46,15 @@ const FeedPage = {
                 </div>
                 
                 ${item.image ? `
-                    <div class="feed-item-image" style="${item.type === 'full-reviews' ? 'background: rgba(0,0,0,0.05); padding: 10px; display: flex; justify-content: center;' : ''}">
-                        <img src="${item.image}" alt="${item.title}" style="${item.type === 'full-reviews' ? 'width: auto; height: 100%; max-height: 180px; object-fit: contain; border-radius: 4px;' : ''}">
+                    <div class="feed-item-image ${item.type === 'full-reviews' ? 'book-feed-container' : ''}">
+                        <img src="${item.image}" alt="${item.title}" class="${item.type === 'full-reviews' ? 'book-feed-img' : ''}">
                     </div>
                 ` : ''}
                 
                 <div class="feed-item-content">
                     <h4 class="feed-title">${item.title}</h4>
                     <p class="feed-description">${item.description}</p>
+                    ${item.status === 'Reading' ? '<span class="status-indicator reading">Currently Reading 📖</span>' : ''}
                 </div>
             </div>
         `).join('');

@@ -4031,3 +4031,43 @@ body.detail-mode {
     flex-shrink: 0;
 }
 
+
+/* Enhanced Book Feed Styles */
+.book-feed-container {
+    background: rgba(0,0,0,0.1) !important;
+    padding: 20px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: 320px !important; /* Larger for better visibility */
+}
+
+.book-feed-img {
+    width: auto !important;
+    height: 100% !important;
+    max-height: 280px !important;
+    object-fit: contain !important;
+    box-shadow: 10px 10px 20px rgba(0,0,0,0.4), -2px -2px 5px rgba(255,255,255,0.05);
+    border-radius: 4px;
+    transition: transform 0.3s ease;
+}
+
+.feed-item:hover .book-feed-img {
+    transform: scale(1.03) translateZ(10px);
+}
+
+.status-indicator {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.status-indicator.reading {
+    background: rgba(234, 179, 8, 0.1);
+    color: #eab308;
+    border: 1px solid rgba(234, 179, 8, 0.2);
+}
+

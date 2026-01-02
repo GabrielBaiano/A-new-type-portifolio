@@ -309,9 +309,14 @@ const DataService = {
                 date: review.date || '2024-01-01',
                 tag: 'Book Review',
                 title: review.title,
-                description: `Review of ${review.title}`,
+                // If status is Reading, show "Starting reading...", otherwise show the review excerpt
+                description: review.status === 'Reading' 
+                    ? `Starting reading this book: ${review.title}` 
+                    : (review.content ? review.content.substring(0, 150).replace(/[#*]/g, '') + '...' : `Review of ${review.title}`),
+                content: review.content || null,
                 link: review.link || '#',
                 image: review.image,
+                status: review.status,
                 _source: 'reviews'
             }));
         } else if (reviewsData.shelves) {
