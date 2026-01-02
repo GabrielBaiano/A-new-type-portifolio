@@ -458,11 +458,11 @@ const AdminPage = {
 
     async loadInitialData() {
         const [books, photos, balloons, posts, leetcode] = await Promise.all([
-            fetch('/api/get-books').then(r => r.json()).catch(() => ({ data: [] })),
-            fetch('/api/get-photos').then(r => r.json()).catch(() => ({ data: [] })),
-            fetch('/api/get-balloon-data?context=all').then(r => r.json()).catch(() => ({ data: [] })),
-            fetch('/api/get-posts').then(r => r.json()).catch(() => ({ data: [] })),
-            fetch('/api/get-all-leetcode').then(r => r.json()).catch(() => ({ data: [] }))
+            fetch('/api/books').then(r => r.json()).catch(() => ({ data: [] })),
+            fetch('/api/photos').then(r => r.json()).catch(() => ({ data: [] })),
+            fetch('/api/balloons?context=all').then(r => r.json()).catch(() => ({ data: [] })),
+            fetch('/api/feed').then(r => r.json()).catch(() => ({ data: [] })),
+            fetch('/api/leetcode').then(r => r.json()).catch(() => ({ data: [] }))
         ]);
         
         this.allBooks = books.data || [];
@@ -613,7 +613,7 @@ const AdminPage = {
                 secret: sessionStorage.getItem('admin_secret')
             };
 
-            const res = await fetch('/api/add-post', {
+            const res = await fetch('/api/feed', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -676,7 +676,7 @@ const AdminPage = {
                 secret: sessionStorage.getItem('admin_secret')
             };
 
-            const res = await fetch('/api/add-leetcode', {
+            const res = await fetch('/api/leetcode', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -747,7 +747,7 @@ const AdminPage = {
                 secret: sessionStorage.getItem('admin_secret')
             };
 
-            const res = await fetch('/api/add-book', {
+            const res = await fetch('/api/books', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -811,7 +811,7 @@ const AdminPage = {
                 secret: sessionStorage.getItem('admin_secret')
             };
 
-            const res = await fetch('/api/add-photo', {
+            const res = await fetch('/api/photos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)

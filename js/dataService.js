@@ -64,7 +64,7 @@ const DataService = {
             try {
                 const [jsonRes, apiRes] = await Promise.all([
                     fetch('data/reviews.json').then(r => r.json()).catch(() => ({ reviews: [], shelves: [] })),
-                    fetch('/api/get-books').then(r => r.json()).catch(() => ({ data: [] }))
+                    fetch('/api/books').then(r => r.json()).catch(() => ({ data: [] }))
                 ]);
 
                 // manual reviews from Supabase
@@ -92,7 +92,7 @@ const DataService = {
         if (!this.photosData) {
             try {
                 // Try fetching from API (Supabase)
-                const response = await fetch('/api/get-photos');
+                const response = await fetch('/api/photos');
                 const result = await response.json();
                 
                 if (result.success) {
@@ -167,7 +167,7 @@ const DataService = {
             // If project has github_repo, fetch README from API
             if (project.github_repo) {
                 try {
-                    const response = await fetch(`/api/get-project-readme?repo=${project.github_repo}`);
+                    const response = await fetch(`/api/projects?repo=${project.github_repo}`);
                     const result = await response.json();
                     
                     if (result.success && result.readme) {
@@ -402,7 +402,7 @@ const DataService = {
         // 4. Dynamic API (LeetCode & Blocks)
         let apiFeed = [];
         try {
-            const apiRes = await fetch('/api/get-balloon-data?context=all');
+            const apiRes = await fetch('/api/balloons?context=all');
             const apiJson = await apiRes.json();
             if (apiJson.success && apiJson.data) {
                 apiFeed = apiJson.data.map(item => {
@@ -460,7 +460,7 @@ const DataService = {
         // 6. Manual Feed Posts from Supabase
         let manualPosts = [];
         try {
-            const postsRes = await fetch('/api/get-posts');
+            const postsRes = await fetch('/api/feed');
             const postsJson = await postsRes.json();
             if (postsJson.success && postsJson.data) {
                 manualPosts = postsJson.data.map(post => ({
