@@ -29,7 +29,18 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     const { id, image_url, description, link, secret } = req.body;
-    if (secret !== API_SECRET) return res.status(401).json({ error: 'Unauthorized' });
+    
+    if (!API_SECRET) {
+      return res.status(500).json({ error: 'Server configuration error: Admin key not found' });
+    }
+
+    if (!secret) {
+      return res.status(401).json({ error: 'Unauthorized: Missing secret key' });
+    }
+
+    if (secret !== API_SECRET) {
+      return res.status(401).json({ error: 'Unauthorized: Invalid secret key' });
+    }
     if (!image_url) return res.status(400).json({ error: 'Missing Image URL' });
 
     try {

@@ -529,18 +529,35 @@ const AdminPage = {
             }
         });
         
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const secret = secretInput.value;
             
             if (secret) {
-                // Store in session
-                sessionStorage.setItem('admin_authenticated', 'true');
-                sessionStorage.setItem('admin_secret', secret);
+                error.innerText = 'Checking credentials...';
                 
-                // Update local state and re-render
-                this.isAuthenticated = true;
-                pageManager.loadPage('admin');
+                try {
+                    const res = await fetch('/api/feed', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ secret, checkOnly: true })
+                    });
+                    
+                    if (res.ok) {
+                        // Store in session
+                        sessionStorage.setItem('admin_authenticated', 'true');
+                        sessionStorage.setItem('admin_secret', secret);
+                        
+                        // Update local state and re-render
+                        this.isAuthenticated = true;
+                        pageManager.loadPage('admin');
+                    } else {
+                        const data = await res.json();
+                        error.innerText = data.error || 'Invalid secret key.';
+                    }
+                } catch (err) {
+                    error.innerText = 'Connection error. Try again.';
+                }
             } else {
                 error.innerText = 'Please enter a secret key.';
             }
@@ -808,7 +825,8 @@ const AdminPage = {
                 alert('Book saved!');
                 this.loadInitialData();
             } else {
-                alert('Error saving book.');
+                const errData = await res.json();
+                alert('Error saving book: ' + (errData.error || 'Unknown error'));
             }
         });
     },
@@ -899,7 +917,8 @@ const AdminPage = {
                 alert('Photo saved!');
                 this.loadInitialData();
             } else {
-                alert('Error saving photo.');
+                const errData = await res.json();
+                alert('Error saving photo: ' + (errData.error || 'Unknown error'));
             }
         });
     },

@@ -28,8 +28,13 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    const { id: manualId, title, content, tag, secret } = req.body;
+    const { id: manualId, title, content, tag, secret, checkOnly } = req.body;
     if (secret !== API_SECRET) return res.status(401).json({ error: 'Unauthorized' });
+    
+    if (checkOnly) {
+      return res.status(200).json({ success: true, message: 'Authenticated' });
+    }
+
     if (!title || !content || !tag) return res.status(400).json({ error: 'Missing fields' });
 
     try {
