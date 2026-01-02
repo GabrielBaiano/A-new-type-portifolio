@@ -14,8 +14,16 @@ export default async function handler(req, res) {
 
   const { fileName, fileData, contentType, secret } = req.body;
 
+  if (!API_SECRET) {
+    return res.status(500).json({ error: 'Server configuration error: Admin key not found' });
+  }
+
+  if (!secret) {
+    return res.status(401).json({ error: 'Unauthorized: Missing secret key' });
+  }
+
   if (secret !== API_SECRET) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).json({ error: 'Unauthorized: Invalid secret key' });
   }
 
   if (!fileName || !fileData) {
