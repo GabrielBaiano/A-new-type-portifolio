@@ -42,6 +42,37 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
         const errData = await response.json();
+        
+        // Auto-create bucket if missing
+        if (errData.message === 'Bucket not found' || errData.error === 'Bucket not found') {
+            console.log('[Upload API] Bucket "images" missing. Attempting to create...');
+            const createBucketRes = await fetch(`${SUPABASE_URL}/storage/v1/bucket`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: 'images', name: 'images', public: true })
+            });
+            
+            if (createBucketRes.ok) {
+                // Retry the upload
+                const retryResponse = await fetch(uploadUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': contentType || 'image/jpeg',
+                        'x-upsert': 'true'
+                    },
+                    body: buffer
+                });
+                if (retryResponse.ok) {
+                    const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/images/${fileName}`;
+                    return res.status(200).json({ success: true, url: publicUrl, message: 'Bucket created and upload successful' });
+                }
+            }
+        }
+        
         throw new Error(errData.message || 'Supabase storage error');
     }
 
