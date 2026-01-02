@@ -302,7 +302,7 @@ body,
 
 .card:hover {
     transform: translateY(-2px);
-    border-color: var(--accent-blue);
+    border-color: var(--border-color); /* Neutral border by default */
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
 }
 
@@ -822,7 +822,7 @@ body,
     color: #3b82f6 !important; 
     border-color: rgba(59, 130, 246, 0.2) !important; 
 }
-.type-card.bg-blue-gradient:hover { border-color: #3b82f6 !important; }
+.type-card.bg-blue-gradient:hover { border-color: #3b82f6 !important; box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
 
 /* Page Specific Accent Themes */
 .reviews-card-theme .detail-title { color: #a855f7; }
@@ -4207,6 +4207,16 @@ body.detail-mode {
 .feed-tag.tag-pink {
     background: rgba(236, 72, 153, 0.1) !important;
     color: #ec4899 !important;
+}
+
+.feed-tag.tag-pink {
+    background: rgba(236, 72, 153, 0.1) !important;
+    color: #ec4899 !important;
+}
+
+.feed-tag.tag-orange {
+    background: rgba(249, 115, 22, 0.1) !important;
+    color: #f97316 !important;
 }
 
 .feed-tag.tag-green {
