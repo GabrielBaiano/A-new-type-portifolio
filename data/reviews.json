@@ -1,76 +1,21 @@
 {
-    "shelves": [
-        {
-            "category": "Design",
-            "color": "orange",
-            "books": [
-                {
-                    "title": "Bauhaus",
-                    "author": "Magdalena Droste",
-                    "image": "https://m.media-amazon.com/images/I/71X8k-N5V7L._AC_UF1000,1000_QL80_.jpg",
-                    "link": "#"
-                },
-                {
-                    "title": "Dieter Rams: As Little Design as Possible",
-                    "author": "Sophie Lovell",
-                    "image": "https://m.media-amazon.com/images/I/71YyM+6XSQL._AC_UF1000,1000_QL80_.jpg",
-                    "link": "#"
-                },
-                {
-                    "title": "The Design of Everyday Things",
-                    "author": "Don Norman",
-                    "image": "https://m.media-amazon.com/images/I/41-sN3TvE5L._AC_UF1000,1000_QL80_.jpg",
-                    "link": "#"
-                },
-                 {
-                    "title": "Solving Product Design Exercises",
-                    "author": "Artiom Dashinsky",
-                    "image": "https://m.media-amazon.com/images/I/61k1bEa-JCL._AC_UF1000,1000_QL80_.jpg",
-                    "link": "#"
-                }
-            ]
-        },
-        {
-            "category": "Psychology",
-            "color": "blue",
-            "books": [
-                {
-                    "title": "Read People Like a Book",
-                    "author": "Patrick King",
-                    "image": "https://m.media-amazon.com/images/I/71X8k-N5V7L._AC_UF1000,1000_QL80_.jpg",
-                    "link": "#"
-                },
-                {
-                    "title": "The Power of Your Subconscious Mind",
-                    "author": "Joseph Murphy",
-                    "image": "https://m.media-amazon.com/images/I/71YyM+6XSQL._AC_UF1000,1000_QL80_.jpg",
-                    "link": "#"
-                },
-                {
-                    "title": "The Body Keeps the Score",
-                    "author": "Bessel van der Kolk",
-                    "image": "https://m.media-amazon.com/images/I/41-sN3TvE5L._AC_UF1000,1000_QL80_.jpg",
-                    "link": "#"
-                }
-            ]
-        },
-         {
-            "category": "Sci-Fi",
-            "color": "purple",
-            "books": [
-                {
-                    "title": "Dune",
-                    "author": "Frank Herbert",
-                    "image": "https://m.media-amazon.com/images/I/91M9Ef-07-L._AC_UF1000,1000_QL80_.jpg",
-                    "link": "#"
-                },
-                {
-                    "title": "Neuromancer",
-                    "author": "William Gibson",
-                    "image": "https://m.media-amazon.com/images/I/91M9Ef-07-L._AC_UF1000,1000_QL80_.jpg",
-                    "link": "#"
-                }
-            ]
-        }
-    ]
+  "reviews": [
+    {
+      "id": "clean-code",
+      "title": "Clean Code",
+      "status": "Reading",
+      "image": "https://m.media-amazon.com/images/I/41xShlnTZTL._SX376_BO1,204,203,200_.jpg",
+      "date": "2024-01-02",
+      "link": "https://github.com/GabrielBaiano/personal-library"
+    },
+    {
+      "id": "the-pragmatic-programmer",
+      "title": "The Pragmatic Programmer",
+      "status": "Finished",
+      "image": "https://m.media-amazon.com/images/I/51A8l+FxX4L._SX329_BO1,204,203,200_.jpg",
+      "date": "2023-12-15",
+      "link": "https://github.com/GabrielBaiano/personal-library"
+    }
+  ],
+  "shelves": []
 }
