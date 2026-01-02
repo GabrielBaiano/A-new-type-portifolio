@@ -322,7 +322,7 @@ class BalloonSystem {
 
     async getAllData() {
         try {
-            const response = await fetch(`/api/get-balloon-data?context=all`);
+            const response = await fetch(`/api/balloons?context=all`);
             const result = await response.json();
             const ad = this.getAd();
             

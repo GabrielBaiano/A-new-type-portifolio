@@ -23,7 +23,7 @@ const LeetCode = {
     async renderList() {
         // Initial fetch to have data ready
         try {
-            const response = await fetch('/api/get-balloon-data?context=all');
+            const response = await fetch('/api/balloons?context=all');
             const result = await response.json();
             
             this.allChallenges = result.data 
@@ -236,7 +236,7 @@ const LeetCode = {
 
     async renderDetail(id) {
         try {
-            const response = await fetch(`/api/get-leetcode-challenge?id=${id}`);
+            const response = await fetch(`/api/leetcode?id=${id}`);
             if (!response.ok) throw new Error('Challenge not found');
             const challenge = await response.json();
             
