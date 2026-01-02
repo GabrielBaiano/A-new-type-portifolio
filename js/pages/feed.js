@@ -68,7 +68,8 @@ const FeedPage = {
                     ${item.status === 'Reading' ? '<span class="status-indicator reading">Currently Reading 📖</span>' : ''}
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
     },
 
     async render() {
