@@ -29,54 +29,7 @@
       "gradient": "bg-cyan-gradient"
     }
   ],
-  "feed": [
-    {
-      "id": "auto-commiter-v2",
-      "type": "projects-labs",
-      "date": "Dec 30, 2024",
-      "tag": "Project",
-      "title": "Auto Commiter v2 Release",
-      "description": "Significant improvements in diff analysis and integration with Claude 3.5 Sonnet.",
-      "image": "assets/images/banner.png",
-      "link": "https://marketplace.visualstudio.com/items?itemName=gabrielbaiano.auto-commiter"
-    },
-    {
-      "id": "personal-library-update",
-      "type": "nerdy-hobbies",
-      "date": "Dec 29, 2024",
-      "tag": "Review",
-      "title": "Reading: Clean Code",
-      "description": "Updating my personal library with thoughts on Robert C. Martin's classic. Essential for any dev.",
-      "link": "https://github.com/GabrielBaiano/personal-library"
-    },
-    {
-      "id": "banered-layout-update",
-      "type": "projects-labs",
-      "date": "Dec 28, 2024",
-      "tag": "Site",
-      "title": "New Banered Layout",
-      "description": "Dark mode implementation and new templates for GitHub banners.",
-      "link": "https://banered.vercel.app/"
-    },
-    {
-      "id": "retro-gaming-find",
-      "type": "nerdy-hobbies",
-      "date": "Dec 27, 2024",
-      "tag": "Retro",
-      "title": "New Gem: GameBoy Color Atomic Purple",
-      "description": "Finally added this classic to my collection. A masterpiece of industrial design.",
-      "link": "#"
-    },
-    {
-      "id": "vostok-os-beta",
-      "type": "projects-labs",
-      "date": "Dec 25, 2024",
-      "tag": "Project",
-      "title": "VOSTOK OS Terminal Beta",
-      "description": "First functional version of the retro Soviet terminal emulator.",
-      "link": "https://github.com/GabrielBaiano/VOSTOK_OS_TERMINAL"
-    }
-  ],
+  "feed": [],
   "categories": [
     {
       "name": "VS Code Extensions",

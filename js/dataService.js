@@ -359,7 +359,7 @@ const DataService = {
                             title: item.title,
                             description: item.message,
                             link: item.link,
-                            image: item.image,
+                            image: null,
                              _source: 'api'
                         };
                     }

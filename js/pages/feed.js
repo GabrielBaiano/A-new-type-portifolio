@@ -36,13 +36,18 @@ const FeedPage = {
         return items.map(item => `
             <div class="feed-item feed-item-btn" data-id="${item.id}">
                 <div class="feed-item-header">
-                    <span class="feed-date">${item.date}</span>
+                    <span class="feed-date">${(() => {
+                        try {
+                            const d = new Date(item.date);
+                            return isNaN(d) ? item.date : d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+                        } catch (e) { return item.date; }
+                    })()}</span>
                     <span class="feed-tag" data-tag="${item.tag}">${item.tag}</span>
                 </div>
                 
                 ${item.image ? `
-                    <div class="feed-item-image">
-                        <img src="${item.image}" alt="${item.title}">
+                    <div class="feed-item-image" style="${item.type === 'full-reviews' ? 'background: rgba(0,0,0,0.05); padding: 10px; display: flex; justify-content: center;' : ''}">
+                        <img src="${item.image}" alt="${item.title}" style="${item.type === 'full-reviews' ? 'width: auto; height: 100%; max-height: 180px; object-fit: contain; border-radius: 4px;' : ''}">
                     </div>
                 ` : ''}
                 
