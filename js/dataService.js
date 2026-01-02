@@ -8,6 +8,7 @@ const DataService = {
     academicData: null,
     notesData: null,
     reviewsData: null,
+    photosData: null,
 
 
 
@@ -84,6 +85,42 @@ const DataService = {
         return this.reviewsData;
     },
 
+    /**
+     * Load photos data from Supabase
+     */
+    async loadPhotosData() {
+        if (!this.photosData) {
+            try {
+                // Try fetching from API (Supabase)
+                const response = await fetch('/api/get-photos');
+                const result = await response.json();
+                
+                if (result.success) {
+                    this.photosData = result.data.map(p => ({
+                        id: p.id,
+                        image: p.image_url,
+                        description: p.description,
+                        link: p.link,
+                        date: p.created_at
+                    }));
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                console.error('Error loading photos:', error);
+                
+                // Fallback to local JSON if it exists and has content
+                try {
+                    const fallback = await fetch('data/photos.json').then(r => r.json());
+                    this.photosData = fallback.length > 0 ? fallback : [];
+                } catch (e) {
+                    this.photosData = [];
+                }
+            }
+        }
+        return this.photosData;
+    },
+
 
 
     /**
@@ -95,7 +132,8 @@ const DataService = {
             await Promise.all([
                 this.loadProjectsData(),
                 this.loadToolsData(),
-                this.loadAcademicData()
+                this.loadAcademicData(),
+                this.loadPhotosData()
             ]);
             console.log('✅ All data preloaded successfully');
         } catch (error) {

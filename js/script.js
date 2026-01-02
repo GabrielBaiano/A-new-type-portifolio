@@ -24,6 +24,7 @@ function initializeSPA() {
     pageManager.registerPage('leetcode', LeetCode);
     pageManager.registerPage('notes', NotesPage);
     pageManager.registerPage('reviews', ReviewsPage);
+    pageManager.registerPage('admin', AdminPage);
     pageManager.registerPage('book-admin', BookAdmin);
     pageManager.registerPage('review-view', ReviewView);
 
@@ -79,6 +80,10 @@ function initializeSPA() {
 
     router.register('review-view/:id', (params) => {
         pageManager.loadPage('review-view', params);
+    });
+
+    router.register('admin', () => {
+        pageManager.loadPage('admin');
     });
 
     router.register('notes/:id', (params) => {

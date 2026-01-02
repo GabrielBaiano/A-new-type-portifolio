@@ -26,52 +26,15 @@ const PhotosPage = {
         if (!container) return;
 
         try {
-            // Using a public CORS proxy to fetch RSS directly from client-side
-            // This works locally without needing to run a backend server
-            const feedUrl = "https://br.pinterest.com/gabrielngama/portif%C3%B3lio_photos.rss";
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`;
+            const photos = await DataService.loadPhotosData();
             
-            const response = await fetch(proxyUrl);
-            const data = await response.json();
-            
-            if (!data.contents) throw new Error('No content received from proxy');
-
-            // Parse XML in the browser
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(data.contents, "text/xml");
-            const items = Array.from(xmlDoc.querySelectorAll("item"));
-
-            if (items.length > 0) {
-                const parsedItems = items.map(item => {
-                    const title = item.querySelector("title")?.textContent || "No Title";
-                    const description = item.querySelector("description")?.textContent || "";
-                    const link = item.querySelector("link")?.textContent || "#";
-                    
-                    // Extract image from description
-                    const imgMatch = description.match(/src="([^"]+)"/);
-                    let imageUrl = imgMatch ? imgMatch[1] : null;
-                    
-                    // Try to get higher quality image
-                    if (imageUrl) {
-                        // Pinterest image URLs often follow a pattern like:
-                        // https://i.pinimg.com/236x/path/to/image.jpg
-                        // We want to replace '236x' with 'originals' or '736x'
-                        
-                        // First try to replace the size segment with 'originals' (highest quality)
-                        // Note: Sometiomes 'originals' might be a different file type, so '736x' is safer for general use 
-                        // matching the feed's original file type.
-                        imageUrl = imageUrl.replace(/\/236x\//, '/736x/');
-                    }
-
-                    return { title, image: imageUrl, link };
-                }).filter(i => i.image); // Only keep items with images
-
-                this.renderPhotos(container, parsedItems);
+            if (photos && photos.length > 0) {
+                this.renderPhotos(container, photos);
             } else {
                 container.innerHTML = `
-                    <div class="error-state">
-                        <i class="fa-regular fa-image"></i>
-                        <p>No photos found at the moment.</p>
+                    <div class="empty-state" style="grid-column: 1/-1; text-align: center; padding: 4rem;">
+                        <i class="fa-regular fa-image" style="font-size: 3rem; color: var(--text-muted); opacity: 0.3;"></i>
+                        <p style="margin-top: 1rem; color: var(--text-muted);">No photos found. Add some via the admin panel!</p>
                     </div>
                 `;
             }
@@ -97,10 +60,29 @@ const PhotosPage = {
             const photoEl = document.createElement('div');
             photoEl.className = 'photo-item fade-in';
             
-            // Layout: Image only, pure waterfall
-            photoEl.innerHTML = `
-                <img src="${item.image}" alt="${item.title}" loading="lazy">
+            const hasLink = item.link && item.link !== '#';
+            const displayHtml = `
+                <div class="photo-wrapper">
+                    <img src="${item.image}" alt="${item.description || 'Photo'}" loading="lazy">
+                    ${item.description ? `
+                        <div class="photo-overlay">
+                            <p class="photo-desc">${item.description}</p>
+                            ${hasLink ? `<a href="${item.link}" target="_blank" class="photo-link-icon"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : ''}
+                        </div>
+                    ` : (hasLink ? `
+                        <div class="photo-overlay simple">
+                            <a href="${item.link}" target="_blank" class="photo-link-icon"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                        </div>
+                    ` : '')}
+                </div>
             `;
+
+            if (hasLink && !item.description) {
+                // If just a link, wrap the whole thing
+                photoEl.innerHTML = `<a href="${item.link}" target="_blank">${displayHtml}</a>`;
+            } else {
+                photoEl.innerHTML = displayHtml;
+            }
             
             container.appendChild(photoEl);
         });
