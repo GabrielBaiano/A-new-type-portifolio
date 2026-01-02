@@ -133,7 +133,11 @@ const DataService = {
                 this.loadProjectsData(),
                 this.loadToolsData(),
                 this.loadAcademicData(),
-                this.loadPhotosData()
+                this.loadPhotosData(),
+                this.loadNotesData(),
+                this.loadReviewsData(),
+                // Pre-warm the unified feed cache by triggering a load if needed
+                this.getUnifiedFeed(true) 
             ]);
             console.log('✅ All data preloaded successfully');
         } catch (error) {
@@ -336,12 +340,17 @@ const DataService = {
         };
     },
 
-    async getUnifiedFeed() {
-        const [toolsData, notesData, reviewsData] = await Promise.all([
+    async getUnifiedFeed(isPreload = false) {
+        // Parallel fetch for everything needed for the feed
+        const [toolsData, notesData, reviewsData, apiRes, postsRes] = await Promise.all([
             this.loadToolsData(),
             this.loadNotesData().catch(() => ({ notes: [] })),
-            this.loadReviewsData().catch(() => ({ shelves: [] }))
+            this.loadReviewsData().catch(() => ({ reviews: [], shelves: [] })),
+            fetch('/api/balloons?context=all').then(r => r.json()).catch(() => ({ success: false })),
+            fetch('/api/feed').then(r => r.json()).catch(() => ({ success: false }))
         ]);
+
+        if (isPreload) return; // Just warm the cache
 
         // 1. Static Feed (Manual)
         const staticFeed = (toolsData.feed || []).map(item => ({
@@ -362,121 +371,63 @@ const DataService = {
             _source: 'notes'
         }));
 
-        // 3. Reviews (Flatten shelves or use reviews array)
-        let reviewsFeed = [];
-        if (reviewsData.reviews) {
-             reviewsFeed = reviewsData.reviews.map(review => ({
-                id: review.id || `review-${review.title.replace(/\s+/g, '-').toLowerCase()}`,
-                type: 'full-reviews',
-                date: review.date || '2024-01-01',
-                tag: 'Book Review',
-                title: review.title,
-                // If status is Reading, show "Starting reading...", otherwise show the review excerpt
-                description: review.status === 'Reading' 
-                    ? `Starting reading this book: ${review.title}` 
-                    : (review.content ? review.content.substring(0, 150).replace(/[#*]/g, '') + '...' : `Review of ${review.title}`),
-                content: review.content || null,
-                link: review.link || '#',
-                image: review.image,
-                status: review.status,
-                _source: 'reviews'
-            }));
-        } else if (reviewsData.shelves) {
-            // Flatten shelves if reviews array is missing
-            reviewsData.shelves.forEach(shelf => {
-                const shelfBooks = shelf.books.map(book => ({
-                    id: `book-${book.title.replace(/\s+/g, '-').toLowerCase()}`,
-                    type: 'full-reviews',
-                    date: '2025-01-01', // Default date for shelf items
-                    tag: 'Book Review',
-                    title: book.title,
-                    description: `Book in ${shelf.category} shelf: ${book.author}`,
-                    link: book.link || '#',
-                    image: book.image,
-                    _source: 'shelf'
-                }));
-                reviewsFeed.push(...shelfBooks);
-            });
-        }
+        // 3. Reviews (Combined from JSON and Supabase)
+        const finalReviewsFeed = (reviewsData.reviews || []).map(review => ({
+            id: review.id || `review-${(review.title || 'untitled').replace(/\s+/g, '-').toLowerCase()}`,
+            type: 'full-reviews',
+            date: review.date || '2024-01-01',
+            tag: 'Book Review',
+            title: review.title,
+            description: review.status === 'Reading' 
+                ? `Starting reading this book: ${review.title}` 
+                : (review.content ? review.content.substring(0, 150).replace(/[#*]/g, '') + '...' : `Finished and reviewed: ${review.title}`),
+            content: review.content || null,
+            link: review.id ? `#/review-view/${review.id}` : (review.link || '#'),
+            image: review.image,
+            status: review.status,
+            _source: review._source || 'reviews'
+        }));
 
-        // 4. Dynamic API (LeetCode & Blocks)
-        let apiFeed = [];
-        try {
-            const apiRes = await fetch('/api/balloons?context=all');
-            const apiJson = await apiRes.json();
-            if (apiJson.success && apiJson.data) {
-                apiFeed = apiJson.data.map(item => {
-                    if (item.type === 'leetcode') {
-                        return {
-                            id: item.id,
-                            type: 'leetcode-resolutions',
-                            date: item.date || item.created_at,
-                            tag: 'LeetCode',
-                            title: item.title,
-                            description: `Streak: ${item.badge}. ${item.name}`,
-                            link: item.link,
-                            _source: 'api'
-                        };
-                    } else if (item.type === 'notification' || item.type === 'release') {
-                         return {
-                            id: item.id,
-                            type: 'projects-labs',
-                            date: item.date || item.created_at,
-                            tag: 'Release',
-                            title: item.title,
-                            description: item.message,
-                            link: item.link,
-                            image: null,
-                             _source: 'api'
-                        };
-                    }
-                    return null;
-                }).filter(Boolean);
+        // 4. Dynamic API (LeetCode & Releases)
+        const apiFeed = (apiRes.success && apiRes.data) ? apiRes.data.map(item => {
+            if (item.type === 'leetcode') {
+                return {
+                    id: item.id,
+                    type: 'leetcode-resolutions',
+                    date: item.date || item.created_at,
+                    tag: 'LeetCode',
+                    title: item.title,
+                    description: `Streak: ${item.badge}. ${item.name}`,
+                    link: item.link,
+                    _source: 'api'
+                };
+            } else if (item.type === 'notification' || item.type === 'release') {
+                 return {
+                    id: item.id,
+                    type: 'projects-labs',
+                    date: item.date || item.created_at,
+                    tag: 'Release',
+                    title: item.title,
+                    description: item.message,
+                    link: item.link,
+                    image: null,
+                     _source: 'api'
+                };
             }
-        } catch (e) {
-            console.error('Feed API Error:', e);
-        }
-
-        // 5. Manual Books from Supabase
-        const mergedReviews = await this.loadReviewsData();
-        const finalReviewsFeed = mergedReviews.reviews
-            // We keep the filter for GitHub sync inside loadReviewsData, 
-            // but here we allow the manual Supabase ones to show 'Finished'.
-            .map(review => ({
-                id: review.id,
-                type: 'full-reviews',
-                date: review.date,
-                tag: 'Book Review',
-                title: review.title,
-                description: review.status === 'Reading' 
-                    ? `Starting reading this book: ${review.title}` 
-                    : `Finished and reviewed: ${review.title}`,
-                link: `#/review-view/${review.id}`,
-                image: review.image,
-                status: review.status,
-                _source: review._source || 'reviews'
-            }));
+            return null;
+        }).filter(Boolean) : [];
 
         // 6. Manual Feed Posts from Supabase
-        let manualPosts = [];
-        try {
-            const postsRes = await fetch('/api/feed');
-            const postsJson = await postsRes.json();
-            if (postsJson.success && postsJson.data) {
-                manualPosts = postsJson.data.map(post => ({
-                    id: post.id,
-                    type: 'feed-post',
-                    date: post.date,
-                    tag: post.tag || 'Pensamentos',
-                    title: post.title,
-                    description: post.content ? post.content.substring(0, 150).replace(/[#*]/g, '') + '...' : '',
-                    content: post.content,
-                    _source: 'supabase-posts'
-                }));
-            }
-        } catch (e) {
-            console.error('Posts API Error:', e);
-        }
+        const manualPosts = (postsRes.success && postsRes.data) ? postsRes.data.map(post => ({
+            id: post.id,
+            type: 'feed-post',
+            date: post.date,
+            tag: post.tag || 'Pensamentos',
+            title: post.title,
+            description: post.content ? post.content.substring(0, 150).replace(/[#*]/g, '') + '...' : '',
+            content: post.content,
+            _source: 'supabase-posts'
+        })) : [];
 
         // Merge All
         const combined = [
