@@ -39,7 +39,8 @@ const DataService = {
                     id: item.id,
                     title: item.title,
                     type: item.type,
-                    date: item.date
+                    date: item.date,
+                    link: item.link
                 }));
         }
         return this.toolsData;
@@ -442,6 +443,7 @@ const DataService = {
             show_in_feed: post.show_in_feed,
             is_popular: post.is_popular,
             show_toc: post.show_toc,
+            link: `#/detail/feed/${post.id}`,
             _source: 'supabase-posts'
         })) : [];
 
