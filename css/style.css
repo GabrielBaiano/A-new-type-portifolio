@@ -476,6 +476,13 @@ body,
     height: 2.5rem;
     border-radius: calc(var(--radius) - 4px);
     flex-shrink: 0;
+    background-size: cover;
+    background-position: center;
+}
+
+.logo-yellowhood {
+    background-image: url('../assets/images/yellowhood.app.png');
+    background-color: #fff; /* White background for the logo */
 }
 
 /* Cores específicas para simular os logos */
@@ -551,6 +558,14 @@ body,
     white-space: nowrap;
     min-width: auto;
     text-align: center;
+}
+
+.job-date.present {
+    background-color: #FBFF00;
+    border-color: #FBFF00;
+    color: #000;
+    font-weight: 800;
+    text-transform: uppercase;
 }
 
 /* Responsividade */
