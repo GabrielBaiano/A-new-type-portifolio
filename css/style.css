@@ -2967,6 +2967,12 @@ body.detail-mode .main-container {
 .sidebar-tag[data-tag="Node.js"] { --hover-color: #339933; }
 .sidebar-tag[data-tag="TypeScript"] { --hover-color: #3178c6; }
 .sidebar-tag[data-tag="LeetCode"] { --hover-color: #ff2d55; }
+.sidebar-tag[data-tag="Study Notes"] { --hover-color: #06b6d4; }
+.sidebar-tag[data-tag="Book Review"] { --hover-color: #a855f7; }
+.sidebar-tag[data-tag="Guides"] { --hover-color: #f97316; }
+.sidebar-tag[data-tag="Fotos"] { --hover-color: #22c55e; }
+.sidebar-tag[data-tag="Atualizações"] { --hover-color: #3b82f6; }
+.sidebar-tag[data-tag="Pensamentos"] { --hover-color: #3b82f6; }
 .sidebar-tag[data-category="Full Reviews"]:hover { --hover-color: #a855f7 !important; }
 .sidebar-tag[data-category="Mastery & Guides"]:hover { --hover-color: #f97316 !important; }
 .sidebar-tag[data-category="Book Review"]:hover { --hover-color: #a855f7 !important; }

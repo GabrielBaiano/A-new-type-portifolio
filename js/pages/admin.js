@@ -299,7 +299,11 @@ const AdminPage = {
                             <label>Category / Tag</label>
                             <select id="post-tag">
                                 <option value="Pensamentos" ${this.editingItem?.tag === 'Pensamentos' ? 'selected' : ''}>Pensamentos</option>
-                                <option value="Ideias" ${this.editingItem?.tag === 'Ideias' ? 'selected' : ''}>Ideias</option>
+                                <option value="Atualizações" ${this.editingItem?.tag === 'Atualizações' ? 'selected' : ''}>Atualizações</option>
+                                <option value="Guides" ${this.editingItem?.tag === 'Guides' ? 'selected' : ''}>Guides</option>
+                                <option value="Study Notes" ${this.editingItem?.tag === 'Study Notes' ? 'selected' : ''}>Study Notes</option>
+                                <option value="LeetCode" ${this.editingItem?.tag === 'LeetCode' ? 'selected' : ''}>LeetCode</option>
+                                <option value="Book Review" ${this.editingItem?.tag === 'Book Review' ? 'selected' : ''}>Book Review</option>
                                 <option value="Release" ${this.editingItem?.tag === 'Release' ? 'selected' : ''}>Release</option>
                             </select>
                         </div>

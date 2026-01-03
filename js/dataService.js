@@ -429,13 +429,28 @@ const DataService = {
             _source: 'supabase-posts'
         })) : [];
 
+        // 7. Photos
+        const photosData = await this.loadPhotosData().catch(() => []);
+        const photosFeed = photosData.map(p => ({
+            id: p.id,
+            type: 'feed-photo',
+            date: p.date, // already created_at from loadPhotosData
+            tag: 'Fotos',
+            title: 'Nova Foto',
+            description: p.description,
+            link: `#/photos`,
+            image: p.image,
+            _source: 'photos'
+        }));
+
         // Merge All
         const combined = [
             ...staticFeed,
             ...notesFeed,
             ...finalReviewsFeed,
             ...apiFeed,
-            ...manualPosts
+            ...manualPosts,
+            ...photosFeed
         ];
 
         // Sort by Date Descending

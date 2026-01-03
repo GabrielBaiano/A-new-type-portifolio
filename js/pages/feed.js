@@ -43,6 +43,8 @@ const FeedPage = {
             else if (type === 'deep-tutorials' || tag.includes('tutorial') || tag.includes('mastery') || tag.includes('guide')) tagClass = 'tag-orange';
             else if (type === 'study-notes' || tag.includes('note')) tagClass = 'tag-cyan';
             else if (type === 'projects-labs' || tag.includes('project') || tag.includes('release')) tagClass = 'tag-green';
+            else if (tag === 'fotos' || tag === 'gallery') tagClass = 'tag-green';
+            else if (tag === 'atualizações' || tag === 'pensamentos' || tag === 'feed-post') tagClass = 'tag-blue';
             else tagClass = 'tag-blue';
 
             return `
