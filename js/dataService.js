@@ -433,7 +433,7 @@ const DataService = {
         // 6. Manual Feed Posts from Supabase
         const manualPosts = (postsRes.success && postsRes.data) ? postsRes.data.map(post => ({
             id: post.id,
-            type: 'feed-post',
+            type: post.tag === 'Guides' ? 'deep-tutorials' : 'feed-post',
             date: post.date,
             tag: post.tag || 'Thoughts',
             title: post.title,
@@ -441,6 +441,7 @@ const DataService = {
             content: post.content,
             show_in_feed: post.show_in_feed,
             is_popular: post.is_popular,
+            show_toc: post.show_toc,
             _source: 'supabase-posts'
         })) : [];
 

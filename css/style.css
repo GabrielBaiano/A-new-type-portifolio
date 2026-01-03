@@ -1408,8 +1408,79 @@ body,
 
 /* Detail Card - Standard width for all detail views */
 .detail-card {
-    max-width: 1000px;
+    max-width: 1100px;
     margin: 0 auto;
+    position: relative;
+}
+
+/* TOC Styles */
+.toc-container {
+    position: absolute;
+    top: 150px;
+    right: -240px;
+    width: 220px;
+}
+
+.toc-sticky {
+    position: sticky;
+    top: 40px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+}
+
+.toc-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    color: var(--accent-blue);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.toc-item {
+    margin-bottom: 8px;
+}
+
+.toc-h2 {
+    font-weight: 500;
+}
+
+.toc-h3 {
+    padding-left: 15px;
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+.toc-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    display: block;
+    line-height: 1.4;
+}
+
+.toc-link:hover {
+    color: var(--accent-blue);
+    transform: translateX(3px);
+}
+
+/* Responsive TOC */
+@media (max-width: 1400px) {
+    .toc-container {
+        display: none; /* Hide TOC on smaller screens for now */
+    }
 }
 
 /* Back Button */

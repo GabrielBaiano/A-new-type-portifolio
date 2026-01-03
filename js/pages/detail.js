@@ -153,7 +153,14 @@ const DetailPage = {
                         </div>
                     ` : htmlContent}
                 </div>
+
+                ${data.show_toc || data.tag === 'Guides' ? this.renderTOC() : ''}
             `;
+
+            // If TOC is needed, generate it
+            if (data.show_toc || data.tag === 'Guides') {
+                this.generateTOC();
+            }
 
             // Add syntax highlighting to code blocks if needed
             this.enhanceCodeBlocks();
@@ -201,6 +208,70 @@ const DetailPage = {
             pre.style.position = 'relative';
             pre.appendChild(copyButton);
         });
+    },
+
+    /**
+     * Generate TOC from headers
+     */
+    generateTOC() {
+        const contentArea = document.querySelector('.markdown-content');
+        const tocList = document.getElementById('toc-list');
+        if (!contentArea || !tocList) return;
+
+        const headers = contentArea.querySelectorAll('h2, h3');
+        if (headers.length === 0) {
+            const container = document.querySelector('.toc-container');
+            if (container) container.style.display = 'none';
+            return;
+        }
+
+        let tocHTML = '';
+        headers.forEach((header, index) => {
+            const text = header.textContent;
+            const id = text.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') + '-' + index;
+            header.id = id;
+
+            const level = header.tagName.toLowerCase();
+            tocHTML += `
+                <li class="toc-item toc-${level}">
+                    <a href="#${id}" class="toc-link">${text}</a>
+                </li>
+            `;
+        });
+
+        tocList.innerHTML = tocHTML;
+
+        // Smooth scroll handling
+        const links = tocList.querySelectorAll('.toc-link');
+        links.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').slice(1);
+                const targetEl = document.getElementById(targetId);
+                if (targetEl) {
+                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    },
+
+    /**
+     * Render TOC container HTML
+     */
+    renderTOC() {
+        return `
+            <div class="toc-container">
+                <div class="toc-sticky">
+                    <div class="toc-header">
+                        <i class="fa-solid fa-list-ul"></i>
+                        <span>Summary</span>
+                    </div>
+                    <ul id="toc-list" class="toc-list">
+                        <!-- Dynamically populated -->
+                    </ul>
+                </div>
+            </div>
+        `;
     },
 
     /**

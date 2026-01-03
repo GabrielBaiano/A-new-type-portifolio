@@ -28,7 +28,7 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    const { id: manualId, title, content, tag, show_in_feed, is_popular, secret, checkOnly } = req.body;
+    const { id: manualId, title, content, tag, show_in_feed, is_popular, show_toc, secret, checkOnly } = req.body;
     if (secret !== API_SECRET) return res.status(401).json({ error: 'Unauthorized' });
     
     if (checkOnly) {
@@ -48,7 +48,8 @@ export default async function handler(req, res) {
       const payload = { 
         id, title, content, tag, 
         show_in_feed: show_in_feed !== false ? true : false,
-        is_popular: is_popular === true ? true : false
+        is_popular: is_popular === true ? true : false,
+        show_toc: show_toc === true ? true : false
       };
       
       // Only set date on new posts if we can detect it, but for a simple API 

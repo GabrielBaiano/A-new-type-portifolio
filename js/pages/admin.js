@@ -45,6 +45,9 @@ const AdminPage = {
                             <button class="admin-nav-item ${this.activeTab === 'posts' ? 'active' : ''}" data-tab="posts">
                                 <i class="fa-solid fa-pen-nib"></i> Posts
                             </button>
+                            <button class="admin-nav-item ${this.activeTab === 'guides' ? 'active' : ''}" data-tab="guides">
+                                <i class="fa-solid fa-chalkboard-user"></i> Guides
+                            </button>
                             <button class="admin-nav-item ${this.activeTab === 'leetcode' ? 'active' : ''}" data-tab="leetcode">
                                 <i class="fa-solid fa-code"></i> LeetCode
                             </button>
@@ -96,6 +99,8 @@ const AdminPage = {
                 return this.renderBalloonsModule();
             case 'posts':
                 return this.renderFeedModule();
+            case 'guides':
+                return this.renderGuidesModule();
             case 'leetcode':
                 return this.renderLeetCodeModule();
             default:
@@ -315,9 +320,13 @@ const AdminPage = {
                             <input type="checkbox" id="post-show-in-feed" ${this.editingItem?.show_in_feed !== false ? 'checked' : ''} style="width: auto;">
                             <label for="post-show-in-feed" style="margin-bottom: 0;">Show in Public Feed</label>
                         </div>
-                        <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                        <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
                             <input type="checkbox" id="post-is-popular" ${this.editingItem?.is_popular === true ? 'checked' : ''} style="width: auto;">
                             <label for="post-is-popular" style="margin-bottom: 0;">Mark as Popular Content (Sidebar)</label>
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="post-show-toc" ${this.editingItem?.show_toc === true ? 'checked' : ''} style="width: auto;">
+                            <label for="post-show-toc" style="margin-bottom: 0;">Show Table of Contents (TOC)</label>
                         </div>
                         <button type="submit" class="btn-save">Publish to Feed</button>
                     </form>
@@ -440,6 +449,68 @@ const AdminPage = {
                     <h3>Preview</h3>
                     <div id="photo-preview-container">
                         ${this.renderPhotoPreview(this.editingItem)}
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    renderGuidesModule() {
+        // Only show guides (tag: Guides)
+        const guides = this.allPosts.filter(p => p.tag === 'Guides');
+
+        return `
+            <div class="admin-tab-header">
+                <div class="header-main">
+                    <h1>Mastery & Guides</h1>
+                    <button class="btn-action" id="btn-new-guide">+ New Guide</button>
+                </div>
+            </div>
+            <div class="admin-three-panel">
+                <div class="panel-inventory">
+                    <h3>Available Guides</h3>
+                    <div class="inventory-list" id="guides-inventory">
+                        ${guides.length > 0 ? guides.map(p => `
+                            <div class="inventory-item ${this.editingItem?.id === p.id ? 'active' : ''}" data-id="${p.id}">
+                                <div class="item-info">
+                                    <span class="item-title">${p.title}</span>
+                                    <span class="item-meta">${p.date ? new Date(p.date).toLocaleDateString() : 'No date'}</span>
+                                </div>
+                            </div>
+                        `).join('') : '<p style="padding: 10px; color: grey;">No guides yet.</p>'}
+                    </div>
+                </div>
+                <div class="panel-editor">
+                    <h3>Guide Editor</h3>
+                    <form id="guide-form" class="admin-form">
+                        <input type="hidden" id="guide-id" value="${this.editingItem?.id || ''}">
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" id="guide-title" value="${this.editingItem?.title || ''}" placeholder="Deep dive into..." required>
+                        </div>
+                        <div class="form-group">
+                            <label>Content (Markdown Support)</label>
+                            <textarea id="guide-content" style="height: 400px; font-family: monospace;" placeholder="Write your technical guide..." required>${this.editingItem?.content || ''}</textarea>
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                            <input type="checkbox" id="guide-show-in-feed" ${this.editingItem?.show_in_feed !== false ? 'checked' : ''} style="width: auto;">
+                            <label for="guide-show-in-feed" style="margin-bottom: 0;">Show in Public Feed</label>
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                            <input type="checkbox" id="guide-is-popular" ${this.editingItem?.is_popular === true ? 'checked' : ''} style="width: auto;">
+                            <label for="guide-is-popular" style="margin-bottom: 0;">Mark as Popular</label>
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="guide-show-toc" ${this.editingItem?.show_toc !== false ? 'checked' : ''} style="width: auto;">
+                            <label for="guide-show-toc" style="margin-bottom: 0;">Auto-generate Table of Contents (TOC)</label>
+                        </div>
+                        <button type="submit" class="btn-save">Save Guide</button>
+                    </form>
+                </div>
+                <div class="panel-preview">
+                    <h3>Preview</h3>
+                    <div id="guide-preview-container">
+                        ${this.renderPostPreview(this.editingItem)}
                     </div>
                 </div>
             </div>
@@ -667,6 +738,7 @@ const AdminPage = {
                 tag: document.getElementById('post-tag').value,
                 show_in_feed: document.getElementById('post-show-in-feed').checked,
                 is_popular: document.getElementById('post-is-popular').checked,
+                show_toc: document.getElementById('post-show-toc').checked,
                 secret: sessionStorage.getItem('admin_secret')
             };
 
@@ -851,6 +923,70 @@ const AdminPage = {
             } else {
                 const errData = await res.json();
                 alert('Error saving book: ' + (errData.error || 'Unknown error'));
+            }
+        });
+    },
+
+    setupGuidesLogic() {
+        const form = document.getElementById('guide-form');
+        if (!form) return;
+
+        const listItems = document.querySelectorAll('#guides-inventory .inventory-item');
+        const newBtn = document.getElementById('btn-new-guide');
+        const previewContainer = document.getElementById('guide-preview-container');
+
+        const updateLivePreview = () => {
+            if (!previewContainer) return;
+            const content = document.getElementById('guide-content').value;
+            const title = document.getElementById('guide-title').value;
+            previewContainer.innerHTML = this.renderPostPreview({ title, content });
+        };
+
+        ['guide-title', 'guide-content'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', updateLivePreview);
+        });
+
+        if (newBtn) {
+            newBtn.addEventListener('click', () => {
+                this.editingItem = null;
+                pageManager.loadPage('admin');
+            });
+        }
+
+        listItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const id = item.dataset.id;
+                this.editingItem = this.allPosts.find(p => p.id === id);
+                pageManager.loadPage('admin');
+            });
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                id: document.getElementById('guide-id').value || null,
+                title: document.getElementById('guide-title').value,
+                content: document.getElementById('guide-content').value,
+                tag: 'Guides', // Force Guides tag
+                show_in_feed: document.getElementById('guide-show-in-feed').checked,
+                is_popular: document.getElementById('guide-is-popular').checked,
+                show_toc: document.getElementById('guide-show-toc').checked,
+                secret: sessionStorage.getItem('admin_secret')
+            };
+
+            const res = await fetch('/api/feed', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                alert('Guide saved!');
+                this.loadInitialData();
+            } else {
+                const errData = await res.json();
+                alert('Error saving guide: ' + (errData.error || 'Unknown error'));
             }
         });
     },
