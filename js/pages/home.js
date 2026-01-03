@@ -66,7 +66,7 @@ Welcome, i'm a Brazilian Full-Stack Developer with over 3 years of experience, a
                             <div class="company-logo logo-yellowhood"></div>
                             <div class="job-details">
                                 <h3>Yellowhood</h3>
-                                <span>Part of the Agency</span>
+                                <span>Founder & Lead Developer</span>
                             </div>
                         </div>
                         <div class="job-date">2025 - present</div>
