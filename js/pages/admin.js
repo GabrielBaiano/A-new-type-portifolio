@@ -311,9 +311,13 @@ const AdminPage = {
                                 <option value="Release" ${this.editingItem?.tag === 'Release' ? 'selected' : ''}>Release</option>
                             </select>
                         </div>
-                        <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                        <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
                             <input type="checkbox" id="post-show-in-feed" ${this.editingItem?.show_in_feed !== false ? 'checked' : ''} style="width: auto;">
                             <label for="post-show-in-feed" style="margin-bottom: 0;">Show in Public Feed</label>
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="post-is-popular" ${this.editingItem?.is_popular === true ? 'checked' : ''} style="width: auto;">
+                            <label for="post-is-popular" style="margin-bottom: 0;">Mark as Popular Content (Sidebar)</label>
                         </div>
                         <button type="submit" class="btn-save">Publish to Feed</button>
                     </form>
@@ -662,6 +666,7 @@ const AdminPage = {
                 content: document.getElementById('post-content').value,
                 tag: document.getElementById('post-tag').value,
                 show_in_feed: document.getElementById('post-show-in-feed').checked,
+                is_popular: document.getElementById('post-is-popular').checked,
                 secret: sessionStorage.getItem('admin_secret')
             };
 
@@ -675,7 +680,8 @@ const AdminPage = {
                 alert('Post published!');
                 this.loadInitialData();
             } else {
-                alert('Error saving post. Make sure "feed_posts" table exists.');
+                const errData = await res.json();
+                alert('Error saving post: ' + (errData.error || 'Unknown error'));
             }
         });
     },

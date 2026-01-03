@@ -30,6 +30,17 @@ const DataService = {
         if (!this.toolsData) {
             const response = await fetch('data/tools.json');
             this.toolsData = await response.json();
+            // Dynamically populate popular content from unified feed
+            const fullFeed = await this.getUnifiedFeed();
+            this.toolsData.sidebar.popularContent = fullFeed
+                .filter(item => item.is_popular === true)
+                .slice(0, 5)
+                .map(item => ({
+                    id: item.id,
+                    title: item.title,
+                    type: item.type,
+                    date: item.date
+                }));
         }
         return this.toolsData;
     },

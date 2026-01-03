@@ -16,7 +16,7 @@ const DetailPage = {
         // Show loading state initially
         return `
             <div class="card detail-card">
-                <a href="#/feed" class="back-button">
+                <a href="javascript:history.back()" class="back-button" id="detail-back-btn">
                     <i class="fa-solid fa-arrow-left"></i>
                     <span>Back</span>
                 </a>
@@ -42,6 +42,23 @@ const DetailPage = {
         
         const statusEl = document.getElementById('loading-status');
         const updateStatus = (msg) => { if (statusEl) statusEl.textContent = msg; };
+
+        // Better back button fallback
+        const backBtn = document.getElementById('detail-back-btn');
+        if (backBtn) {
+            const fallbackMap = {
+                'project': '#/projects',
+                'academic': '#/academic',
+                'tool': '#/projects',
+                'category': '#/academic'
+            };
+            const fallback = fallbackMap[this.currentType] || '#/feed';
+            
+            // If they land directly (no history), clicking back goes to fallback
+            if (window.history.length <= 1) {
+                backBtn.href = fallback;
+            }
+        }
 
         // Safety timeout
         const timeout = setTimeout(() => {
