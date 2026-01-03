@@ -459,7 +459,8 @@ body,
 }
 
 .job-item.highlighted-job {
-    background-color: rgba(251, 255, 0, 0.08); /* Very light yellow */
+    background-color: rgba(251, 255, 0, 0.12); /* Increased opacity for better contrast */
+    border: 1px solid rgba(251, 255, 0, 0.3); /* Subtle yellow border */
     margin-bottom: 8px; /* Subtle spacing */
 }
 
