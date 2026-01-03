@@ -460,7 +460,7 @@ body,
 
 .job-item.highlighted-job {
     background-color: rgba(251, 255, 0, 0.15); /* More contrast */
-    border: 2px solid #FBFF00; /* Strong, solid yellow border */
+    border: 2px solid #ff9100; /* Vibrant orange border */
     margin-bottom: 8px;
 }
 
