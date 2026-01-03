@@ -69,7 +69,7 @@ Welcome, i'm a Brazilian Full-Stack Developer with over 3 years of experience, a
                                 <span>Part of the Agency</span>
                             </div>
                         </div>
-                        <div class="job-date">2025 – present</div>
+                        <div class="job-date">2025 - present</div>
                     </div>
 
                     <!-- Item 1 -->

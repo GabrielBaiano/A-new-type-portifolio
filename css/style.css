@@ -455,14 +455,12 @@ body,
     justify-content: space-between;
     transition: all 0.2s;
     border-radius: 8px;
+    padding: 10px 12px; /* Consistent padding for all items */
 }
 
 .job-item.highlighted-job {
     background-color: rgba(251, 255, 0, 0.08); /* Very light yellow */
-    border: 1px solid rgba(251, 255, 0, 0.2);
-    padding: 12px 16px;
-    border-radius: 8px; /* Squared to match others */
-    margin-bottom: 12px;
+    margin-bottom: 8px; /* Subtle spacing */
 }
 
 .job-item.highlighted-job:hover {
