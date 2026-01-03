@@ -397,6 +397,7 @@ const DataService = {
             link: review.id ? `#/review-view/${review.id}` : (review.link || '#'),
             image: review.image,
             status: review.status,
+            show_in_feed: review.show_in_feed,
             _source: review._source || 'reviews'
         }));
 
@@ -438,6 +439,8 @@ const DataService = {
             title: post.title,
             description: post.content ? post.content.substring(0, 150).replace(/[#*]/g, '') + '...' : '',
             content: post.content,
+            show_in_feed: post.show_in_feed,
+            is_popular: post.is_popular,
             _source: 'supabase-posts'
         })) : [];
 
@@ -452,6 +455,7 @@ const DataService = {
             description: p.description,
             link: `#/photos`,
             image: p.image,
+            show_in_feed: p.show_in_feed,
             _source: 'photos'
         }));
 
