@@ -28,7 +28,7 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    const { id, image_url, description, link, secret } = req.body;
+    const { id, image_url, description, link, show_in_feed, secret } = req.body;
     
     if (!API_SECRET) {
       return res.status(500).json({ error: 'Server configuration error: Admin key not found' });
@@ -48,7 +48,7 @@ export default async function handler(req, res) {
       const method = id ? 'PATCH' : 'POST';
       const endpoint = id ? `${SUPABASE_URL}/rest/v1/photos?id=eq.${id}` : `${SUPABASE_URL}/rest/v1/photos`;
       
-      const payload = { image_url, description, link };
+      const payload = { image_url, description, link, show_in_feed: show_in_feed !== false ? true : false };
       if (method === 'POST') {
         payload.id = finalId;
         payload.created_at = new Date().toISOString();

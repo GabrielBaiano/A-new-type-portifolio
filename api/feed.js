@@ -28,7 +28,7 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    const { id: manualId, title, content, tag, secret, checkOnly } = req.body;
+    const { id: manualId, title, content, tag, show_in_feed, secret, checkOnly } = req.body;
     if (secret !== API_SECRET) return res.status(401).json({ error: 'Unauthorized' });
     
     if (checkOnly) {
@@ -39,13 +39,37 @@ export default async function handler(req, res) {
 
     try {
       const id = manualId || title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now().toString().slice(-4);
-      const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/feed_posts`, {
+      
+      const upsertHeaders = {
+        ...supabaseHeaders,
+        'Prefer': 'return=representation, resolution=merge-duplicates'
+      };
+
+      const payload = { 
+        id, title, content, tag, 
+        show_in_feed: show_in_feed !== false ? true : false
+      };
+      
+      // Only set date on new posts if we can detect it, but for a simple API 
+      // we'll just keep the existing date if possible. 
+      // In Supabase REST/PostgREST, we can use UPSERT logic.
+      if (!manualId) {
+        payload.date = new Date().toISOString();
+      }
+
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/feed_posts`, {
         method: 'POST',
-        headers: supabaseHeaders,
-        body: JSON.stringify({ id, title, content, tag, date: new Date().toISOString() })
+        headers: upsertHeaders,
+        body: JSON.stringify(payload)
       });
-      const result = await insertRes.json();
-      return res.status(200).json({ success: true, message: `Post "${title}" saved!`, data: result[0] });
+      
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || 'Supabase error');
+      }
+
+      const result = await response.json();
+      return res.status(200).json({ success: true, message: `Post saved!`, data: result[0] });
     } catch (error) {
       return res.status(500).json({ success: false, error: error.message });
     }

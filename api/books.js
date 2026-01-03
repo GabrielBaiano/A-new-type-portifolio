@@ -28,26 +28,39 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    const { id: manualId, title, image, status, mdLink, tags, secret, date: manualDate } = req.body;
+    const { id: manualId, title, image, status, mdLink, tags, show_in_feed, secret, date: manualDate } = req.body;
     if (secret !== API_SECRET) return res.status(401).json({ error: 'Unauthorized' });
     if (!title || !image || !status) return res.status(400).json({ error: 'Missing required fields' });
 
     try {
       const id = manualId || title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/books`, {
-        method: 'POST',
-        headers: supabaseHeaders,
-        body: JSON.stringify({
-          id, title, image, status, md_link: mdLink, tags,
-          date: manualDate || new Date().toISOString()
-        })
-      });
-      if (!insertRes.ok) {
-        const error = await insertRes.json();
-        throw new Error(error.message || 'Failed to insert book');
+      
+      const upsertHeaders = {
+        ...supabaseHeaders,
+        'Prefer': 'return=representation, resolution=merge-duplicates'
+      };
+
+      const payload = {
+        id, title, image, status, md_link: mdLink, tags,
+        show_in_feed: show_in_feed !== false ? true : false
+      };
+
+      if (!manualId) {
+        payload.date = manualDate || new Date().toISOString();
       }
-      const result = await insertRes.json();
-      return res.status(200).json({ success: true, message: `Book "${title}" saved!`, data: result[0] });
+
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/books`, {
+        method: 'POST',
+        headers: upsertHeaders,
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to save book');
+      }
+      const result = await response.json();
+      return res.status(200).json({ success: true, message: `Book saved!`, data: result[0] });
     } catch (error) {
       return res.status(500).json({ success: false, error: error.message });
     }
