@@ -453,8 +453,21 @@ body,
     display: flex;
     align-items: center;
     justify-content: space-between;
-    transition: background 0.2s;
+    transition: all 0.2s;
     border-radius: 8px;
+}
+
+.job-item.highlighted-job {
+    background-color: rgba(251, 255, 0, 0.08); /* Very light yellow */
+    border: 1px solid rgba(251, 255, 0, 0.2);
+    padding: 12px 16px;
+    border-radius: 50px; /* Pill shape */
+    margin-bottom: 12px;
+}
+
+.job-item.highlighted-job:hover {
+    background-color: rgba(251, 255, 0, 0.12);
+    transform: translateY(-2px);
 }
 
 .job-left {

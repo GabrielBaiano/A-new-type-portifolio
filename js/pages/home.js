@@ -61,7 +61,7 @@ Welcome, i'm a Brazilian Full-Stack Developer with over 3 years of experience, a
                 <div class="experience-list">
 
                     <!-- Item 0: Yellowhood -->
-                    <div class="job-item">
+                    <div class="job-item highlighted-job">
                         <div class="job-left">
                             <div class="company-logo logo-yellowhood"></div>
                             <div class="job-details">
