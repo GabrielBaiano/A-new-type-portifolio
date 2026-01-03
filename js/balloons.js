@@ -352,7 +352,7 @@ class BalloonSystem {
 
     getFallbackData() {
         return [
-            { id: "p1", name: "Shii App", message: "v2.1 Available!", badge: "Release", color: "green", contexts: ['projects', 'home'] }
+            { id: "p1", name: "Shii App", message: "v2.1 Available!", badge: "Updates", color: "green", contexts: ['projects', 'home'] }
         ];
     }
 

@@ -296,13 +296,14 @@ const DataService = {
         const item = allItems.find(i => i.id === id);
         
         if (item) {
-            // If it's a supabase-post, it already has the full content
-            // If it's a static feed item, it might need the markdown generation
-            if (item._source === 'static') {
-                return {
-                    ...item,
-                    content: `# ${item.title}\n\n${item.description}\n\nPublished on ${item.date}.\n\n[Check it out here](${item.link})`
-                };
+            // Generate content for items that don't have it (static, api)
+            if (!item.content) {
+                if (item._source === 'static' || item._source === 'api') {
+                    return {
+                        ...item,
+                        content: `# ${item.title}\n\n${item.description || ''}\n\nPublished on ${item.date}.\n\n${item.link ? `[Check it out here](${item.link})` : ''}`
+                    };
+                }
             }
             return item;
         }
@@ -422,7 +423,7 @@ const DataService = {
             id: post.id,
             type: 'feed-post',
             date: post.date,
-            tag: post.tag || 'Pensamentos',
+            tag: post.tag || 'Thoughts',
             title: post.title,
             description: post.content ? post.content.substring(0, 150).replace(/[#*]/g, '') + '...' : '',
             content: post.content,
@@ -434,9 +435,9 @@ const DataService = {
         const photosFeed = photosData.map(p => ({
             id: p.id,
             type: 'feed-photo',
-            date: p.date, // already created_at from loadPhotosData
-            tag: 'Fotos',
-            title: 'Nova Foto',
+            date: p.date,
+            tag: 'Photos',
+            title: 'New Photo',
             description: p.description,
             link: `#/photos`,
             image: p.image,
@@ -454,7 +455,9 @@ const DataService = {
         ];
 
         // Sort by Date Descending
-        return combined.sort((a, b) => new Date(b.date) - new Date(a.date));
+        return combined
+            .filter(item => item.show_in_feed !== false)
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
     },
 
 };

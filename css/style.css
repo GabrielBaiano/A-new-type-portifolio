@@ -2970,9 +2970,9 @@ body.detail-mode .main-container {
 .sidebar-tag[data-tag="Study Notes"] { --hover-color: #06b6d4; }
 .sidebar-tag[data-tag="Book Review"] { --hover-color: #a855f7; }
 .sidebar-tag[data-tag="Guides"] { --hover-color: #f97316; }
-.sidebar-tag[data-tag="Fotos"] { --hover-color: #22c55e; }
-.sidebar-tag[data-tag="Atualizações"] { --hover-color: #3b82f6; }
-.sidebar-tag[data-tag="Pensamentos"] { --hover-color: #3b82f6; }
+.sidebar-tag[data-tag="Photos"] { --hover-color: #22c55e; }
+.sidebar-tag[data-tag="Updates"] { --hover-color: #3b82f6; }
+.sidebar-tag[data-tag="Thoughts"] { --hover-color: #3b82f6; }
 .sidebar-tag[data-category="Full Reviews"]:hover { --hover-color: #a855f7 !important; }
 .sidebar-tag[data-category="Mastery & Guides"]:hover { --hover-color: #f97316 !important; }
 .sidebar-tag[data-category="Book Review"]:hover { --hover-color: #a855f7 !important; }

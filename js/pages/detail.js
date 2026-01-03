@@ -108,9 +108,20 @@ const DetailPage = {
                 <div class="detail-header">
                     <h1 class="detail-title">${data.title}</h1>
                     ${data.subtitle ? `<p class="detail-subtitle">${data.subtitle}</p>` : ''}
-                    ${data.date ? `<div class="detail-date">${data.date}</div>` : ''}
+                    ${data.date ? `<div class="detail-date">${(() => {
+                        try {
+                            const d = new Date(data.date);
+                            return isNaN(d) ? data.date : d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+                        } catch (e) { return data.date; }
+                    })()}</div>` : ''}
                     ${data.count !== undefined ? `<div class="detail-date">${data.count} Articles</div>` : ''}
                 </div>
+
+                ${data.image ? `
+                    <div class="detail-image-container" style="margin-bottom: 2rem; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); background: rgba(0,0,0,0.2);">
+                        <img src="${data.image}" alt="${data.title}" style="width: 100%; height: auto; display: block; object-fit: contain; max-height: 70vh;">
+                    </div>
+                ` : ''}
                 
                 <div class="markdown-content">
                     ${data.items ? `

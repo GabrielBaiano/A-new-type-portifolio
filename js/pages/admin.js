@@ -214,9 +214,13 @@ const AdminPage = {
                         </div>
                         <div class="form-group">
                             <label>Tags (Comma separated)</label>
-                            <input type="text" id="book-tags" value="${(this.editingItem?.tags || []).join(', ')}">
+                            <input type="text" id="book-tags" value="${(this.editingItem?.tags || []).join(', ')}" placeholder="AI, Math, SC-FI">
                         </div>
-                        <button type="submit" class="btn-save">Save Content</button>
+                        <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="book-show-in-feed" ${this.editingItem?.show_in_feed !== false ? 'checked' : ''} style="width: auto;">
+                            <label for="book-show-in-feed" style="margin-bottom: 0;">Show in Public Feed</label>
+                        </div>
+                        <button type="submit" class="btn-save">Save Book</button>
                     </form>
                 </div>
                 <div class="panel-preview">
@@ -298,14 +302,18 @@ const AdminPage = {
                         <div class="form-group">
                             <label>Category / Tag</label>
                             <select id="post-tag">
-                                <option value="Pensamentos" ${this.editingItem?.tag === 'Pensamentos' ? 'selected' : ''}>Pensamentos</option>
-                                <option value="Atualizações" ${this.editingItem?.tag === 'Atualizações' ? 'selected' : ''}>Atualizações</option>
+                                <option value="Thoughts" ${this.editingItem?.tag === 'Thoughts' ? 'selected' : ''}>Thoughts</option>
+                                <option value="Updates" ${this.editingItem?.tag === 'Updates' ? 'selected' : ''}>Updates</option>
                                 <option value="Guides" ${this.editingItem?.tag === 'Guides' ? 'selected' : ''}>Guides</option>
                                 <option value="Study Notes" ${this.editingItem?.tag === 'Study Notes' ? 'selected' : ''}>Study Notes</option>
                                 <option value="LeetCode" ${this.editingItem?.tag === 'LeetCode' ? 'selected' : ''}>LeetCode</option>
                                 <option value="Book Review" ${this.editingItem?.tag === 'Book Review' ? 'selected' : ''}>Book Review</option>
                                 <option value="Release" ${this.editingItem?.tag === 'Release' ? 'selected' : ''}>Release</option>
                             </select>
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="post-show-in-feed" ${this.editingItem?.show_in_feed !== false ? 'checked' : ''} style="width: auto;">
+                            <label for="post-show-in-feed" style="margin-bottom: 0;">Show in Public Feed</label>
                         </div>
                         <button type="submit" class="btn-save">Publish to Feed</button>
                     </form>
@@ -415,7 +423,11 @@ const AdminPage = {
                         </div>
                         <div class="form-group">
                             <label>Link (Optional)</label>
-                            <input type="url" id="photo-link" value="${this.editingItem?.link || ''}">
+                            <input type="url" id="photo-link" value="${this.editingItem?.link || ''}" placeholder="External link?">
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="photo-show-in-feed" ${this.editingItem?.show_in_feed !== false ? 'checked' : ''} style="width: auto;">
+                            <label for="photo-show-in-feed" style="margin-bottom: 0;">Show in Public Feed</label>
                         </div>
                         <button type="submit" class="btn-save">Save Photo</button>
                     </form>
@@ -649,6 +661,7 @@ const AdminPage = {
                 title: document.getElementById('post-title').value,
                 content: document.getElementById('post-content').value,
                 tag: document.getElementById('post-tag').value,
+                show_in_feed: document.getElementById('post-show-in-feed').checked,
                 secret: sessionStorage.getItem('admin_secret')
             };
 
@@ -816,6 +829,7 @@ const AdminPage = {
                 status: document.getElementById('book-status').value,
                 mdLink: document.getElementById('book-md').value,
                 tags: document.getElementById('book-tags').value.split(',').map(t => t.trim()).filter(Boolean),
+                show_in_feed: document.getElementById('book-show-in-feed').checked,
                 secret: sessionStorage.getItem('admin_secret')
             };
 
@@ -908,6 +922,7 @@ const AdminPage = {
                 image_url: document.getElementById('photo-image').value,
                 description: document.getElementById('photo-desc').value,
                 link: document.getElementById('photo-link').value,
+                show_in_feed: document.getElementById('photo-show-in-feed').checked,
                 secret: sessionStorage.getItem('admin_secret')
             };
 
