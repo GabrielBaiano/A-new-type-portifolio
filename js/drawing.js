@@ -77,6 +77,13 @@ class DrawingSystem {
             });
         });
 
+        // Initialize panel state for the default tool
+        if (optionsPanel && this.tool) {
+            optionsPanel.classList.add('active');
+            const toolLabel = document.getElementById('active-tool-name');
+            if (toolLabel) toolLabel.textContent = this.tool.charAt(0).toUpperCase() + this.tool.slice(1);
+        }
+
         // Close panel when clicking outside sidebar
         document.addEventListener('click', (e) => {
             if (!e.target.closest('#drawing-sidebar') && optionsPanel) {
