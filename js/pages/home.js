@@ -105,7 +105,7 @@ Welcome, i'm a Brazilian<svg class="bio-location-pin" xmlns="http://www.w3.org/2
                     </div>
 
                     <!-- Hidden Items Container -->
-                    <div id="extra-experience" class="expandable-content collapsed">
+                    <div id="extra-experience">
                         <!-- Item 3 -->
                         <div class="job-item">
                             <div class="job-left">
@@ -262,11 +262,6 @@ Welcome, i'm a Brazilian<svg class="bio-location-pin" xmlns="http://www.w3.org/2
                 
                 if (isHidden) {
                     extraExp.style.display = 'block';
-                    // Optional: Simple fade in if desired, but prioritize functionality
-                    extraExp.style.opacity = 0;
-                    setTimeout(() => extraExp.style.opacity = 1, 10);
-                    extraExp.style.transition = 'opacity 0.3s ease';
-                    
                     toggleBtn.innerHTML = 'Show less <i class="fa-solid fa-chevron-up"></i>';
                 } else {
                     extraExp.style.display = 'none';
