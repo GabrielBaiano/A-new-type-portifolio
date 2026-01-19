@@ -5027,7 +5027,8 @@ body.detail-mode {
     overflow: hidden;
     position: relative;
     border: 1px solid var(--border-color);
-    height: 400px; /* Increased height */
+    height: 400px;
+    border-radius: 2rem !important; /* Matches profile card better */
 }
 
 .map-wrapper {
@@ -5048,18 +5049,20 @@ body.detail-mode {
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 30px 32px;
-    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+    padding: 40px 32px 30px 32px;
+    background: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 40%, rgba(0,0,0,0.4) 70%, transparent 100%);
     z-index: 2;
     pointer-events: none;
     text-align: center;
 }
 
 .location-details p {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     color: #fff;
-    margin: 0 0 4px 0;
-    font-weight: 500;
+    margin: 0;
+    font-weight: 600;
+    line-height: 1.4;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
 .highlight-dist {
