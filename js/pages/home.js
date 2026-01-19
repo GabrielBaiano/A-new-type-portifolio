@@ -282,11 +282,11 @@ Welcome, i'm a Brazilian <i class="fas fa-map-marker-alt bio-location-pin" title
         L.marker([myLocation.lat, myLocation.lon], { icon: myIcon }).addTo(this.map);
 
         try {
-            // 4. Get Visitor Location (IP-based)
-            const response = await fetch('https://ipapi.co/json/');
+            // 4. Get Visitor Location (IP-based) - Switched to ipwho.is for better CORS support
+            const response = await fetch('https://ipwho.is/');
             const data = await response.json();
 
-            if (data.latitude && data.longitude) {
+            if (data.success !== false) { // ipwho.is returns success: true/false
                 const visitorLoc = { lat: data.latitude, lon: data.longitude };
 
                 // 5. Calculate Distance (Haversine Formula)
