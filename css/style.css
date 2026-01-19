@@ -5053,11 +5053,15 @@ body.detail-mode {
     background: #050505;
     border-radius: 0.5rem; /* Calculated: 2rem (32px) - 24px padding = 8px */
     overflow: hidden;
-    border: 2px solid var(--accent-blue);
+    border: 2px solid rgba(255,255,255,0.1); /* Gray border for dark mode */
     /* Fix for Safari/Chrome isolation issues causing lines */
     transform: translate3d(0, 0, 0); 
     -webkit-mask-image: -webkit-radial-gradient(white, black); /* Force clipping */
-    mask-image: radial-gradient(white, black); /* Standard property */
+    mask-image: radial-gradient(white, black);
+}
+
+:root[data-theme="light"] .map-wrapper {
+    border-color: var(--accent-blue); /* Keep blue for light mode */
 }
 
 /* Fix Leaflet tile rendering artifacts (grid lines) */
