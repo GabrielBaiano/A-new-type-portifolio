@@ -105,7 +105,7 @@ Welcome, i'm a Brazilian<svg class="bio-location-pin" xmlns="http://www.w3.org/2
                     </div>
 
                     <!-- Hidden Items Container -->
-                    <div id="extra-experience" style="display: none;">
+                    <div id="extra-experience" class="expandable-content collapsed">
                         <!-- Item 3 -->
                         <div class="job-item">
                             <div class="job-left">
@@ -252,25 +252,18 @@ Welcome, i'm a Brazilian<svg class="bio-location-pin" xmlns="http://www.w3.org/2
         
         if (toggleBtn && extraExp) {
             toggleBtn.addEventListener('click', () => {
-                const isHidden = extraExp.style.display === 'none';
+                const isCollapsed = extraExp.classList.contains('collapsed');
                 
-                if (isHidden) {
-                    extraExp.style.display = 'block';
-                    // Trigger reflow for animation if we add it later
-                    extraExp.style.opacity = 0;
-                    setTimeout(() => {
-                        extraExp.style.transition = 'opacity 0.5s ease';
-                        extraExp.style.opacity = 1;
-                    }, 10);
-                    
+                if (isCollapsed) {
+                    // Expand
+                    extraExp.classList.remove('collapsed');
+                    extraExp.classList.add('expanded');
                     toggleBtn.innerHTML = 'Show less <i class="fa-solid fa-chevron-up"></i>';
                 } else {
-                    extraExp.style.display = 'none';
+                    // Collapse
+                    extraExp.classList.remove('expanded');
+                    extraExp.classList.add('collapsed');
                     toggleBtn.innerHTML = 'Show more <i class="fa-solid fa-chevron-down"></i>';
-                    
-                    // Smooth scroll back to top of list if needed, or just let it collapse
-                    // const list = document.querySelector('.experience-list');
-                    // if(list) list.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             });
         }
