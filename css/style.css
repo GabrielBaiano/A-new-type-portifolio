@@ -5020,3 +5020,114 @@ body.detail-mode {
 .btn-action.secondary:hover {
     background: rgba(255,255,255,0.1);
 }
+
+/* ===== Location Card & Map ===== */
+.location-card {
+    padding: 0 !important;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--border-color);
+}
+
+.location-card .section-title {
+    padding: 24px 32px 10px 32px;
+    margin: 0;
+}
+
+.map-wrapper {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    background: #050505;
+}
+
+#home-map {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.map-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 24px 32px;
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 70%, transparent 100%);
+    z-index: 2;
+    pointer-events: none;
+}
+
+.location-details p {
+    font-size: 1.1rem;
+    color: #fff;
+    margin: 0 0 4px 0;
+    font-weight: 500;
+}
+
+.highlight-dist {
+    color: #ff2d55;
+    font-weight: 800;
+    font-style: italic;
+}
+
+.footnote {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.4);
+    display: block;
+}
+
+/* Custom Marker Pulse */
+.custom-pulse-marker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.custom-pulse-marker .pulse {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 45, 85, 0.4);
+    border-radius: 50%;
+    position: absolute;
+    animation: marker-pulse 2s infinite;
+}
+
+.custom-pulse-marker .dot {
+    width: 12px;
+    height: 12px;
+    background: #ff2d55;
+    border: 2px solid white;
+    border-radius: 50%;
+    z-index: 2;
+}
+
+@keyframes marker-pulse {
+    0% { transform: scale(0.5); opacity: 0.8; }
+    100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* Connection Line Animation */
+.map-connection-line {
+    animation: dash-flow 2s linear infinite;
+    stroke-dasharray: 8, 12;
+}
+
+@keyframes dash-flow {
+    to { stroke-dashoffset: -20; }
+}
+
+/* Map Dark Theme Overrides */
+.leaflet-container {
+    background: #050505 !important;
+}
+
+/* Responsive Map */
+@media (max-width: 600px) {
+    .map-wrapper {
+        height: 250px;
+    }
+    .location-details p {
+        font-size: 0.95rem;
+    }
+}

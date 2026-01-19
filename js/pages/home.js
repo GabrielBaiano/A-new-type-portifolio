@@ -163,6 +163,20 @@ Welcome, i'm a Brazilian Full-Stack Developer with over 3 years of experience, a
 
                 </div>
             </div>
+
+            <!-- Card 3: Location Map -->
+            <div class="card location-card">
+                <h2 class="section-title">Where am I?</h2>
+                <div id="location-map-container" class="map-wrapper">
+                    <div id="home-map"></div>
+                    <div class="map-overlay">
+                        <div class="location-details">
+                            <p id="distance-text">Calculating distance to you...</p>
+                            <span class="footnote">According to your IP address • Itanhaém, SP</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         `;
     },
 
@@ -206,6 +220,100 @@ Welcome, i'm a Brazilian Full-Stack Developer with over 3 years of experience, a
                 });
             });
         }
+
+        // Initialize Location Map
+        this.initLocationMap();
+    },
+
+    async initLocationMap() {
+        const mapContainer = document.getElementById('home-map');
+        if (!mapContainer) return;
+
+        // Coordinates for Itanhaém, SP, Brazil
+        const myLocation = { lat: -24.183, lon: -46.791 };
+
+        // 1. Initialize Leaflet Map
+        const map = L.map('home-map', {
+            zoomControl: false,
+            attributionControl: false,
+            scrollWheelZoom: false,
+            dragging: false
+        }).setView([myLocation.lat, myLocation.lon], 4);
+
+        // 2. Add Dark Theme Tiles (CartoDB Dark Matter)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            maxZoom: 19
+        }).addTo(map);
+
+        // 3. Add Pulse Marker for Me
+        const myIcon = L.divIcon({
+            className: 'custom-pulse-marker',
+            html: '<div class="pulse"></div><div class="dot"></div>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+        });
+        L.marker([myLocation.lat, myLocation.lon], { icon: myIcon }).addTo(map);
+
+        try {
+            // 4. Get Visitor Location (IP-based)
+            const response = await fetch('https://ipapi.co/json/');
+            const data = await response.json();
+
+            if (data.latitude && data.longitude) {
+                const visitorLoc = { lat: data.latitude, lon: data.longitude };
+
+                // 5. Calculate Distance (Haversine Formula)
+                const distance = this.calculateDistance(
+                    myLocation.lat, myLocation.lon,
+                    visitorLoc.lat, visitorLoc.lon
+                );
+
+                // 6. Update UI
+                const distText = document.getElementById('distance-text');
+                if (distText) {
+                    const visitorPlace = data.city ? `${data.city}, ${data.country_name}` : data.country_name;
+                    distText.innerHTML = `I'm from <strong>Itanhaém, Brazil</strong>, roughly <span class="highlight-dist">${distance.toLocaleString('pt-BR')}km</span> away from <strong>${visitorPlace}</strong>.`;
+                }
+
+                // 7. Draw Connection Line (Dashed Arc)
+                const visitorMarker = L.circleMarker([visitorLoc.lat, visitorLoc.lon], {
+                    radius: 5,
+                    color: '#fff',
+                    fillOpacity: 1
+                }).addTo(map);
+
+                const lineCoords = [
+                    [myLocation.lat, myLocation.lon],
+                    [visitorLoc.lat, visitorLoc.lon]
+                ];
+                
+                const polyline = L.polyline(lineCoords, {
+                    color: '#ff2d55',
+                    weight: 2,
+                    dashArray: '5, 10',
+                    className: 'map-connection-line'
+                }).addTo(map);
+
+                // 8. Adjust view to fit both
+                map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+            }
+        } catch (error) {
+            console.error('Error fetching visitor location:', error);
+            const distText = document.getElementById('distance-text');
+            if (distText) distText.innerText = "Somewhere on Earth, and I'm here in Itanhaém, Brazil.";
+        }
+    },
+
+    calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Earth's radius in km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return Math.round(R * c);
     },
 
     onUnmount() {
