@@ -45,6 +45,25 @@ document.addEventListener('DOMContentLoaded', () => {
     
     window.addEventListener('resize', checkLooKee);
     setTimeout(checkLooKee, 1000); // Check on init
+
+    // 4. HUD Toggle Logic
+    const hudToggle = document.getElementById('hud-toggle');
+    if (hudToggle) {
+        hudToggle.addEventListener('click', () => {
+            document.body.classList.toggle('hud-hidden');
+            hudToggle.classList.toggle('active');
+            
+            // Toggle icon eye/eye-slash
+            const icon = hudToggle.querySelector('i');
+            if (icon) {
+                if (document.body.classList.contains('hud-hidden')) {
+                    icon.className = 'fa-solid fa-eye';
+                } else {
+                    icon.className = 'fa-solid fa-eye-slash';
+                }
+            }
+        });
+    }
 });
 
 /**

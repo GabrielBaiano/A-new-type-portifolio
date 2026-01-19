@@ -64,6 +64,9 @@
 </head>
 
 <body>
+    <!-- Background Drawing Canvas -->
+    <canvas id="bg-drawing-canvas"></canvas>
+
     <!-- Premium Site Loader -->
     <div id="site-loader" class="site-loader">
         <div class="loader-content">
@@ -122,6 +125,9 @@
         <div class="nav-divider"></div>
 
         <div class="nav-group controls-nav">
+            <button id="hud-toggle" class="nav-item icon-only" title="Toggle HUD visibility">
+                <i class="fa-solid fa-eye-slash"></i>
+            </button>
             <button id="theme-toggle" class="nav-item icon-only">
                 <i class="fa-regular fa-sun"></i>
             </button>
@@ -165,6 +171,7 @@
     <img id="loo-kee" src="assets/images/loo-kee.jpg" alt="Loo-Kee"
         style="display: none; position: fixed; bottom: 20px; left: 20px; width: 150px; height: auto; z-index: 9999; pointer-events: none;">
 
+    <script src="js/drawing.js"></script>
     <script src="js/script.js"></script>
     <script src="js/router.js"></script>
 </body>
