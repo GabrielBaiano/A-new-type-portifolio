@@ -80,7 +80,7 @@ export default async function handler(req, res) {
       const { context, project } = req.query;
       const [projectDataRes, leetcodeRes] = await Promise.all([
         fetch(`${SUPABASE_URL}/rest/v1/github_project_data?select=*&order=created_at.desc&limit=100${project ? `&project_context=eq.${project}` : ''}`, { headers: supabaseHeaders }),
-        fetch(`${SUPABASE_URL}/rest/v1/leetcode_challenges?select=*&order=created_at.desc&limit=1`, { headers: supabaseHeaders })
+        fetch(`${SUPABASE_URL}/rest/v1/leetcode_challenges?select=*&order=created_at.desc&limit=50`, { headers: supabaseHeaders })
       ]);
       const projectData = await projectDataRes.json();
       const leetcodeData = await leetcodeRes.json();

@@ -1,7 +1,20 @@
-// Script.js - Main application initialization
-document.addEventListener('DOMContentLoaded', () => {
-    // Preload all data first for instant navigation
-    DataService.preloadAllData();
+document.addEventListener('DOMContentLoaded', async () => {
+    const loader = document.getElementById('site-loader');
+    const startTime = Date.now();
+    const MIN_LOAD_TIME = 800; // ms
+
+    // Preload all data first
+    await DataService.preloadAllData();
+    
+    // Calculate how much longer we should wait for a smooth animation
+    const elapsedTime = Date.now() - startTime;
+    const remainingTime = Math.max(0, MIN_LOAD_TIME - elapsedTime);
+
+    setTimeout(() => {
+        if (loader) {
+            loader.classList.add('hidden');
+        }
+    }, remainingTime);
     
     // Initialize SPA System
     initializeSPA();

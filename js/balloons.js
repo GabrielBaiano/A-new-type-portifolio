@@ -328,9 +328,22 @@ class BalloonSystem {
             
             if (result.success && result.data) {
                 // Filter to show green releases and pink leetcode challenges
-                const dynamicBalloons = result.data.filter(item => 
+                let dynamicBalloons = result.data.filter(item => 
                     item.color === 'green' || item.color === 'pink'
                 );
+
+                // Dedup filters: Only keep the LATEST of each type (color) to avoid clutter
+                // as per user request: "only show the LAST daily challenge"
+                const seenColors = new Set();
+                dynamicBalloons = dynamicBalloons.filter(item => {
+                    if (item.color === 'pink') {
+                        if (seenColors.has('pink')) return false;
+                        seenColors.add('pink');
+                        return true;
+                    }
+                    return true;
+                });
+
                 return [ad, ...dynamicBalloons];
             }
         } catch (error) { }
