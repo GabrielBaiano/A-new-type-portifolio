@@ -99,26 +99,44 @@ class BalloonSystem {
     async initialFill() {
         this.clearBalloons();
         
-        // 1. Immediately place static/important balloons
-        const ad = this.getAd();
-        const newsletter = this.getNewsletter();
-        
-        [ad, newsletter].forEach(item => {
-            if (this.isContextValid(item)) {
-                this.tryPlaceBalloon(item);
-            }
-        });
-
-        // 2. Fetch dynamic ones in background
+        // 1. Get all available data
         const dataSet = await this.getAvailableData();
         if (!dataSet || dataSet.length === 0) return;
 
-        // Skip items we already placed (ad and newsletter)
-        const dynamicOnly = dataSet.filter(item => item.id !== ad.id && item.id !== newsletter.id);
-        const shuffled = [...dynamicOnly].sort(() => Math.random() - 0.5);
-        
-        for (const item of shuffled) {
-            this.tryPlaceBalloon(item);
+        // 2. Prioritize by color diversity
+        const groupedByColor = {};
+        dataSet.forEach(item => {
+            const color = item.color || 'blue';
+            if (!groupedByColor[color]) groupedByColor[color] = [];
+            groupedByColor[color].push(item);
+        });
+
+        const colors = Object.keys(groupedByColor);
+        const priorityQueue = [];
+        let hasMore = true;
+        let index = 0;
+
+        // Round-robin selection to ensure color diversity
+        while (hasMore) {
+            hasMore = false;
+            for (const color of colors) {
+                if (groupedByColor[color].length > index) {
+                    priorityQueue.push(groupedByColor[color][index]);
+                    hasMore = true;
+                }
+            }
+            index++;
+        }
+
+        // 3. Rapid spawn sequence
+        let delay = 0;
+        const spawnInterval = 80; // Rapid fire!
+
+        for (const item of priorityQueue) {
+            setTimeout(() => {
+                if (this.isRunning) this.tryPlaceBalloon(item);
+            }, delay);
+            delay += spawnInterval;
         }
     }
 

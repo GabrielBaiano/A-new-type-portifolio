@@ -2320,22 +2320,18 @@ body,
 @keyframes balloon-slide-left {
     from {
         transform: scale(1) rotate(var(--balloon-rotation, 0deg));
-        opacity: 1;
     }
     to {
         transform: translateX(-150%) scale(0.9) rotate(-20deg);
-        opacity: 0;
     }
 }
 
 @keyframes balloon-slide-right {
     from {
         transform: scale(1) rotate(var(--balloon-rotation, 0deg));
-        opacity: 1;
     }
     to {
         transform: translateX(150%) scale(0.9) rotate(20deg);
-        opacity: 0;
     }
 }
 
