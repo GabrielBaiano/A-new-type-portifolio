@@ -111,8 +111,8 @@
 
 /* 6. HUD Toggle Styles */
 .hud-hidden .main-container,
-.hud-hidden .nav-group.main-nav,
-.hud-hidden .nav-divider {
+.hud-hidden #balloon-container,
+.hud-hidden #loo-kee {
     opacity: 0 !important;
     pointer-events: none !important;
     transition: opacity 0.4s ease;
