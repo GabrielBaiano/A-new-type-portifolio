@@ -1,47 +1,4 @@
 {
   "shelves": [],
-  "reviews": [
-    {
-      "image": "https://books.google.com/books/content?id=x8quCgAAQBAJ&printsec=frontcover&img=1&zoom=1",
-      "title": "Fundação",
-      "status": "Reading",
-      "id": "fundacao",
-      "link": "https://github.com/GabrielBaiano/personal-library",
-      "date": "2026-01-19"
-    },
-    {
-      "image": "https://books.google.com/books/content?id=ldPIxgRaEuoC&printsec=frontcover&img=1&zoom=1",
-      "title": "Os Bórgias",
-      "status": "Reading",
-      "id": "os-borgias",
-      "link": "https://github.com/GabrielBaiano/personal-library",
-      "date": "2026-01-19"
-    },
-    {
-      "image": "https://books.google.com/books/content?id=HWewDgAAQBAJ&printsec=frontcover&img=1&zoom=1",
-      "title": "Entendendo Algoritmos",
-      "status": "Reading",
-      "id": "entendendo-algoritmos",
-      "link": "https://github.com/GabrielBaiano/personal-library",
-      "date": "2026-01-19"
-    },
-    {
-      "id": "dune",
-      "title": "Dune",
-      "status": "Finished",
-      "image": "https://via.placeholder.com/300x450?text=dune",
-      "link": "https://github.com/GabrielBaiano/personal-library",
-      "date": "2026-01-19",
-      "content": "# Dune\n![Genre: Sci-Fi](https://img.shields.io/badge/Sci--Fi-blue)\n\n**Author:** Frank Herbert\n\n**Rating:** ⭐⭐⭐⭐⭐\n**Status:** Finished ✅\n**Date Read:** 2024 (Example)\n\n## Review\n\nDune is a masterpiece of science fiction. The depth of world-building is unparalleled, creating a universe that feels ancient and lived-in. Frank Herbert's exploration of politics, religion, and ecology is as relevant today as it was when the book was written.\n\nThe story follows Paul Atreides as his family navigates the treacherous politics of the Padishah Empire. Arrakis, the desert planet, is a character in itself—harsh, unforgiving, yet beautiful.\n\n*This is a placeholder review to demonstrate the structure.*\n"
-    },
-    {
-      "id": "quotes",
-      "title": "Quotes",
-      "status": "Finished",
-      "image": "https://via.placeholder.com/300x450?text=quotes",
-      "link": "https://github.com/GabrielBaiano/personal-library",
-      "date": "2026-01-19",
-      "content": "# 📜 Sentences That Never Left (English)\n\n## Dune\n\n> \"I must not fear. Fear is the mind-killer. Fear is the little-death that brings total obliteration. I will face my fear. I will permit it to pass over me and through me. And when it has gone past I will turn the inner eye to see its path. Where the fear has gone there will be nothing. Only I will remain.\"\n> <br>— **Bene Gesserit Litany Against Fear** (*Dune*)\n\n> \"The mystery of life isn't a problem to solve, but a reality to experience.\"\n> <br>— **Reverend Mother Gaius Helen Mohiam** (*Dune*)\n"
-    }
-  ]
+  "reviews": []
 }
