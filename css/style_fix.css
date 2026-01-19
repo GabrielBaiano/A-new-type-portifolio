@@ -93,3 +93,19 @@
 .balloon-card {
     margin-bottom: 10px;
 }
+
+/* 5. Experience List Spacing Fix */
+.experience-list {
+    gap: 32px !important;
+}
+
+#extra-experience {
+    display: flex;
+    flex-direction: column;
+    gap: 32px; /* Ensures items inside 'Show More' have the same spacing */
+    margin-top: 32px; /* Space between the last visible item and the extra section */
+}
+
+.job-item {
+    padding: 12px 12px !important; /* Increased vertical breathing room */
+}
