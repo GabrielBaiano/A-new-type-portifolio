@@ -71,7 +71,7 @@ Welcome, i'm a Brazilian<svg class="bio-location-pin" xmlns="http://www.w3.org/2
                     <!-- Item 0: Yellowhood (Standardized) -->
                     <div class="job-item">
                         <div class="job-left">
-                            <div class="company-logo bg-yellowhood-std"></div>
+                            <div class="company-logo" style="background-color: #ffd700;"></div>
                             <div class="job-details">
                                 <h3>Yellowhood</h3>
                                 <span>Founder & Lead Developer</span>
@@ -250,19 +250,26 @@ Welcome, i'm a Brazilian<svg class="bio-location-pin" xmlns="http://www.w3.org/2
         const toggleBtn = document.getElementById('toggle-experience-btn');
         const extraExp = document.getElementById('extra-experience');
         
+        // Initial State: Hidden
+        if (extraExp) extraExp.style.display = 'none';
+
         if (toggleBtn && extraExp) {
+            // Apply inline styles to force Right Align + Tech Font (User Request)
+            toggleBtn.style.cssText = "display: flex; justify-content: flex-end; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; font-size: 0.8rem; width: 100%; border: none; background: transparent; color: var(--text-muted); cursor: pointer; margin-top: 8px;";
+            
             toggleBtn.addEventListener('click', () => {
-                const isCollapsed = extraExp.classList.contains('collapsed');
+                const isHidden = extraExp.style.display === 'none';
                 
-                if (isCollapsed) {
-                    // Expand
-                    extraExp.classList.remove('collapsed');
-                    extraExp.classList.add('expanded');
+                if (isHidden) {
+                    extraExp.style.display = 'block';
+                    // Optional: Simple fade in if desired, but prioritize functionality
+                    extraExp.style.opacity = 0;
+                    setTimeout(() => extraExp.style.opacity = 1, 10);
+                    extraExp.style.transition = 'opacity 0.3s ease';
+                    
                     toggleBtn.innerHTML = 'Show less <i class="fa-solid fa-chevron-up"></i>';
                 } else {
-                    // Collapse
-                    extraExp.classList.remove('expanded');
-                    extraExp.classList.add('collapsed');
+                    extraExp.style.display = 'none';
                     toggleBtn.innerHTML = 'Show more <i class="fa-solid fa-chevron-down"></i>';
                 }
             });
