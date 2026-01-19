@@ -433,12 +433,20 @@ class BalloonSystem {
         ];
     }
 
+    async spawnRandom() {
+        const pool = await this.getAllData();
+        if (pool.length > 0) {
+            const item = pool[Math.floor(Math.random() * pool.length)];
+            this.tryPlaceBalloon(item);
+        }
+    }
+
     async updateContext() {
         // Context detection from hash
         const hash = window.location.hash;
         if (hash === '#/projects') this.currentContext = 'projects';
         else if (hash === '#/academic') this.currentContext = 'academic';
-        else if (hash === '#/home') this.currentContext = 'home';
+        else if (hash === '#/home' || hash === '#/tools') this.currentContext = 'home';
         else this.currentContext = 'home';
         
         // Instead of refreshing everything, we just reposition existing ones

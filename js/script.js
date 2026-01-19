@@ -39,6 +39,7 @@ function initializeSPA() {
     pageManager.registerPage('notes', NotesPage);
     pageManager.registerPage('reviews', ReviewsPage);
     pageManager.registerPage('admin', AdminPage);
+    pageManager.registerPage('tools', ToolsPage);
     pageManager.registerPage('review-view', ReviewView);
 
     // Register routes
@@ -91,6 +92,10 @@ function initializeSPA() {
 
     router.register('admin', () => {
         pageManager.loadPage('admin');
+    });
+
+    router.register('tools', () => {
+        pageManager.loadPage('tools');
     });
 
     router.register('notes/:id', (params) => {
