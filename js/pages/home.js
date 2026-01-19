@@ -282,13 +282,36 @@ Welcome, i'm a Brazilian <svg class="bio-location-pin" xmlns="http://www.w3.org/
         L.marker([myLocation.lat, myLocation.lon], { icon: myIcon }).addTo(this.map);
 
         try {
-            // 4. Get Visitor Location (IP-based) - Switched to ipwho.is for better CORS support
-            const response = await fetch('https://ipwho.is/');
-            const data = await response.json();
+            // 4. Get Visitor Location (Cache First Strategy)
+            let visitorLoc = null;
+            const CACHE_KEY = 'visitor_location';
+            const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
-            if (data.success !== false) { // ipwho.is returns success: true/false
-                const visitorLoc = { lat: data.latitude, lon: data.longitude };
+            const cachedData = localStorage.getItem(CACHE_KEY);
+            if (cachedData) {
+                const { timestamp, loc } = JSON.parse(cachedData);
+                if (Date.now() - timestamp < CACHE_DURATION) {
+                    console.log('📍 Using cached location');
+                    visitorLoc = loc;
+                }
+            }
 
+            if (!visitorLoc) {
+                // Fetch from API if no cache or expired
+                const response = await fetch('https://ipwho.is/');
+                const data = await response.json();
+
+                if (data.success !== false) {
+                    visitorLoc = { lat: data.latitude, lon: data.longitude };
+                    // Save to cache
+                    localStorage.setItem(CACHE_KEY, JSON.stringify({
+                        timestamp: Date.now(),
+                        loc: visitorLoc
+                    }));
+                }
+            }
+
+            if (visitorLoc) {
                 // 5. Calculate Distance (Haversine Formula)
                 const distance = this.calculateDistance(
                     myLocation.lat, myLocation.lon,
