@@ -21,9 +21,17 @@ const HomePage = {
                             <p>Full Stack Dev</p>
                         </div>
                     </div>
-                    <!-- Ícone similar ao da imagem original -->
-                    <div class="brand-logo">
-                        <i class="fa-solid fa-shapes"></i>
+                    <!-- Colorized 3-symbol logo -->
+                    <div class="brand-logo-container">
+                        <div class="brand-logo-top">
+                            <svg viewBox="0 0 100 86.6" class="symbol-yellow">
+                                <polygon points="50,0 100,86.6 0,86.6"/>
+                            </svg>
+                        </div>
+                        <div class="brand-logo-bottom">
+                            <span class="symbol-pink"></span>
+                            <span class="symbol-green"></span>
+                        </div>
                     </div>
                 </div>
 

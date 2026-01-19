@@ -128,7 +128,7 @@ class BalloonSystem {
 
     startReplenishment() {
         this.stopReplenishment();
-        const nextTime = 8000 + Math.random() * 12000; // 8-20s
+        const nextTime = 5000 + Math.random() * 7000; // 5-12s
         this.replenishmentTimer = setTimeout(async () => {
             await this.replenish();
             this.startReplenishment();

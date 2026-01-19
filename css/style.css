@@ -1374,48 +1374,98 @@ body,
 
 .loader-orbit {
     position: relative;
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
 
 .loader-item {
     position: absolute;
-    width: 20px;
-    height: 20px;
+    width: 14px;
+    height: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
-    color: var(--accent-blue);
-    /* Individual animations with delays for spacing */
-    animation: planetaryOrbit 3s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+    animation: planetaryOrbit 2.5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
 .orbit-triangle { animation-delay: 0s; }
-.orbit-circle   { animation-delay: -1s; }
-.orbit-square   { animation-delay: -2s; }
+.orbit-circle   { animation-delay: -0.833s; }
+.orbit-square   { animation-delay: -1.666s; }
+
+/* Symbol Definitions */
+.symbol-pink {
+    width: 12px;
+    height: 12px;
+    background: #ff4d94;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(255, 77, 148, 0.4);
+}
+
+.symbol-yellow {
+    width: 14px;
+    height: 14px;
+    fill: #ffcc00;
+    filter: drop-shadow(0 0 5px rgba(255, 204, 0, 0.4));
+}
+
+.symbol-green {
+    width: 11px;
+    height: 11px;
+    background: #00cc66;
+    border-radius: 2px;
+    box-shadow: 0 0 10px rgba(0, 204, 102, 0.4);
+}
 
 @keyframes planetaryOrbit {
     0% {
-        transform: rotate(0deg) translateY(-25px) rotate(0deg);
+        transform: rotate(0deg) translateY(-22px) rotate(0deg);
     }
     100% {
-        transform: rotate(360deg) translateY(-25px) rotate(-360deg);
+        transform: rotate(360deg) translateY(-22px) rotate(-360deg);
     }
 }
 
 .loader-text {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.3rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.4rem;
     color: var(--text-muted);
-    opacity: 0.8;
+    opacity: 0.6;
+    margin-top: 5px;
 }
 
+/* Secondary Logo (on Home/About page) */
+.brand-logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 40px;
+}
+
+.brand-logo-top {
+    width: 14px;
+    height: 12px;
+    display: flex;
+    justify-content: center;
+}
+
+.brand-logo-bottom {
+    display: flex;
+    gap: 4px;
+}
+
+.brand-logo-container .symbol-pink,
+.brand-logo-container .symbol-yellow,
+.brand-logo-container .symbol-green {
+    box-shadow: none; /* Cleaner for the static logo */
+}
+
+/* Base styles for the loader overlay */
 .site-loader {
     position: fixed;
     inset: 0;
