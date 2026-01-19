@@ -271,8 +271,8 @@
 }
 
 [data-theme="light"] .drawing-sidebar button {
-    background: rgba(0, 0, 0, 0.02);
-    border-color: rgba(0, 0, 0, 0.05);
+    background: transparent;
+    border: none;
     color: #666;
 }
 
@@ -382,7 +382,7 @@
     left: 100%;
     top: 0;
     margin-left: 12px;
-    width: 200px; /* Increased from 140px for better control */
+    width: 240px; /* Increased from 200px for even better control */
     background: rgba(28, 28, 30, 0.95);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -452,14 +452,33 @@
 .range-with-val {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+}
+
+.range-with-val input[type="range"] {
+    flex: 1;
+    height: 8px; /* Thicker track */
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+}
+
+.range-with-val input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
 }
 
 .range-with-val span {
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     font-weight: 700;
     color: #fff;
-    min-width: 20px;
+    min-width: 25px;
+    text-align: right;
 }
 
 [data-theme="light"] .range-with-val span {
