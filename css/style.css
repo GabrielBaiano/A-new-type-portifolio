@@ -1330,8 +1330,18 @@ body,
     flex-direction: column;
     justify-content: flex-end;
     gap: 4px;
-    pointer-events: none;
+    pointer-events: none; /* Keep none for the overlay itself so clicks go through if needed, but... */
     border-radius: 12px;
+}
+
+.photo-item:hover .photo-overlay {
+    opacity: 1;
+}
+
+/* Enable pointer events for interactive elements inside the overlay */
+.photo-overlay a, 
+.photo-overlay button {
+    pointer-events: auto;
 }
 
 .photo-title-display {
@@ -2625,12 +2635,14 @@ body.wide-layout .photos-masonry {
     aspect-ratio: auto !important;
     height: auto !important;
     background: transparent !important;
-    margin: -12px -12px 12px -12px; /* Bleed to parent edges */
-    border-radius: 0;
+    margin: 12px 0; /* Add vertical spacing instead of bleeding */
+    border-radius: 8px; /* Restore rounded corners */
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.05);
 }
 
 .feed-photo-img {
-    object-fit: initial !important;
+    object-fit: initial !important; /* Keep original aspect ratio (contain/cover logic not needed if height is auto) */
     width: 100% !important;
     height: auto !important;
     max-height: none !important;
@@ -5039,9 +5051,18 @@ body.detail-mode {
     width: 100%;
     height: 350px;
     background: #050505;
-    border-radius: 1.5rem; /* Map corners rounded */
-    overflow: hidden; /* Force map to clip to radius */
-    border: 1px solid rgba(255,255,255,0.05); /* Subtle inner border */
+    border-radius: 1.5rem;
+    overflow: hidden;
+    border: 2px solid var(--accent-blue);
+    /* Fix for Safari/Chrome isolation issues causing lines */
+    transform: translate3d(0, 0, 0); 
+    -webkit-mask-image: -webkit-radial-gradient(white, black); /* Force clipping */
+}
+
+/* Fix Leaflet tile rendering artifacts (grid lines) */
+.leaflet-tile-container img {
+    box-shadow: 0 0 1px rgba(0,0,0,0);
+    transform: translate3d(0, 0, 0);
 }
 
 #home-map {
@@ -5051,22 +5072,20 @@ body.detail-mode {
 }
 
 .location-footer {
-    padding: 24px 32px;
-    background: #fff;
-    border-top: 1px solid rgba(0,0,0,0.05);
+    padding: 24px 0 0 0; /* Remove side/bottom padding, keep top */
+    background: transparent; /* Remove background color */
+    border-top: none; /* Remove border */
     text-align: center;
 }
 
-[data-theme="light"] .location-footer {
-    background: #fff;
+/* Fix theme selectors to use :root or html since theme.js uses html attribute */
+:root[data-theme="light"] .location-footer {
     color: #000;
 }
 
-[data-theme="dark"] .location-footer,
-body:not([data-theme="light"]) .location-footer {
-    background: #0a0a0a;
+:root[data-theme="dark"] .location-footer,
+:root:not([data-theme="light"]) .location-footer {
     color: #fff;
-    border-top-color: var(--border-color);
 }
 
 .location-details p {
@@ -5081,9 +5100,9 @@ body:not([data-theme="light"]) .location-footer {
 }
 
 .highlight-dist {
-    color: #ff2d55;
+    color: var(--accent-blue); /* Blue text as requested */
     font-weight: 800;
-    font-style: italic;
+    font-size: 1.25rem;
 }
 
 .footnote {
