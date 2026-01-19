@@ -68,10 +68,10 @@ Welcome, i'm a Brazilian <svg class="bio-location-pin" xmlns="http://www.w3.org/
                 <!-- Lista de Experiência -->
                 <div class="experience-list">
 
-                    <!-- Item 0: Yellowhood -->
-                    <div class="job-item highlighted-job">
+                    <!-- Item 0: Yellowhood (Standardized) -->
+                    <div class="job-item">
                         <div class="job-left">
-                            <div class="company-logo logo-yellowhood"></div>
+                            <div class="company-logo bg-yellowhood-std"></div>
                             <div class="job-details">
                                 <h3>Yellowhood</h3>
                                 <span>Founder & Lead Developer</span>
@@ -98,35 +98,43 @@ Welcome, i'm a Brazilian <svg class="bio-location-pin" xmlns="http://www.w3.org/
                             <div class="company-logo bg-lime"></div>
                             <div class="job-details">
                                 <h3>Techsolutions</h3>
-                                <span>Full Stack</span>
+                                <span>Full Stack Developer</span>
                             </div>
                         </div>
                         <div class="job-date">2023 – 2024</div>
                     </div>
 
-                    <!-- Item 3 -->
-                    <div class="job-item">
-                        <div class="job-left">
-                            <div class="company-logo bg-orange"></div>
-                            <div class="job-details">
-                                <h3>Emporio 24h</h3>
-                                <span>Web Developer</span>
+                    <!-- Hidden Items Container -->
+                    <div id="extra-experience" style="display: none;">
+                        <!-- Item 3 -->
+                        <div class="job-item">
+                            <div class="job-left">
+                                <div class="company-logo bg-orange"></div>
+                                <div class="job-details">
+                                    <h3>Emporio 24h</h3>
+                                    <span>Web Developer</span>
+                                </div>
                             </div>
+                            <div class="job-date">2022 – 2023</div>
                         </div>
-                        <div class="job-date">2022 – 2023</div>
-                    </div>
 
-                    <!-- Item 4 -->
-                    <div class="job-item">
-                        <div class="job-left">
-                            <div class="company-logo bg-green"></div>
-                            <div class="job-details">
-                                <h3>Shultz</h3>
-                                <span>Full Stack Developer</span>
+                        <!-- Item 4 -->
+                        <div class="job-item">
+                            <div class="job-left">
+                                <div class="company-logo bg-green"></div>
+                                <div class="job-details">
+                                    <h3>Shultz</h3>
+                                    <span>Full Stack Developer</span>
+                                </div>
                             </div>
+                            <div class="job-date">2022</div>
                         </div>
-                        <div class="job-date">2022</div>
                     </div>
+                    
+                    <!-- Toggle Button -->
+                    <button id="toggle-experience-btn" class="btn-show-more">
+                        Show more <i class="fa-solid fa-chevron-down"></i>
+                    </button>
 
                 </div>
             </div>
@@ -235,6 +243,35 @@ Welcome, i'm a Brazilian <svg class="bio-location-pin" xmlns="http://www.w3.org/
                         emailBtn.style.backgroundColor = '';
                     }, 2000);
                 });
+            });
+        }
+
+        // Feature: Expand/Collapse Experience
+        const toggleBtn = document.getElementById('toggle-experience-btn');
+        const extraExp = document.getElementById('extra-experience');
+        
+        if (toggleBtn && extraExp) {
+            toggleBtn.addEventListener('click', () => {
+                const isHidden = extraExp.style.display === 'none';
+                
+                if (isHidden) {
+                    extraExp.style.display = 'block';
+                    // Trigger reflow for animation if we add it later
+                    extraExp.style.opacity = 0;
+                    setTimeout(() => {
+                        extraExp.style.transition = 'opacity 0.5s ease';
+                        extraExp.style.opacity = 1;
+                    }, 10);
+                    
+                    toggleBtn.innerHTML = 'Show less <i class="fa-solid fa-chevron-up"></i>';
+                } else {
+                    extraExp.style.display = 'none';
+                    toggleBtn.innerHTML = 'Show more <i class="fa-solid fa-chevron-down"></i>';
+                    
+                    // Smooth scroll back to top of list if needed, or just let it collapse
+                    // const list = document.querySelector('.experience-list');
+                    // if(list) list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
             });
         }
 

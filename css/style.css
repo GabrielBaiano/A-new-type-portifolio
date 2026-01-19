@@ -5201,6 +5201,33 @@ body.detail-mode {
     filter: drop-shadow(0 4px 6px rgba(255, 45, 85, 0.4));
 }
 
+/* Experience Toggle Button */
+.btn-show-more {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 12px 0;
+    width: 100%;
+    margin-top: 8px;
+    transition: color 0.2s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-show-more:hover {
+    color: var(--accent-blue);
+    transform: translateY(2px);
+}
+
+.btn-show-more i {
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+}
+
 /* Responsive Map */
 @media (max-width: 600px) {
     .map-wrapper {
