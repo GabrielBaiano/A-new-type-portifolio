@@ -108,19 +108,21 @@ const DataService = {
                 const result = await response.json();
                 
                 if (result.success) {
+                    console.log('📸 Photos loaded:', result.data.length);
                     this.photosData = result.data.map(p => ({
                         id: p.id,
                         image: p.image_url,
-                        title: p.title,
+                        title: p.title || 'New Photo',
                         description: p.description,
                         link: p.link,
                         date: p.created_at
                     }));
                 } else {
+                    console.error('❌ Failed to load photos:', result.error);
                     throw new Error(result.error);
                 }
             } catch (error) {
-                console.error('Error loading photos:', error);
+                console.error('⚠️ API Error (Photos):', error);
                 
                 // Fallback to local JSON if it exists and has content
                 try {

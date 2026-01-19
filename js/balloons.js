@@ -113,8 +113,8 @@ class BalloonSystem {
         const dataSet = await this.getAvailableData();
         if (!dataSet || dataSet.length === 0) return;
 
-        // Skip items we already placed
-        const dynamicOnly = dataSet.filter(item => item.id !== ad.id);
+        // Skip items we already placed (ad and newsletter)
+        const dynamicOnly = dataSet.filter(item => item.id !== ad.id && item.id !== newsletter.id);
         const shuffled = [...dynamicOnly].sort(() => Math.random() - 0.5);
         
         for (const item of shuffled) {
@@ -148,6 +148,7 @@ class BalloonSystem {
         
         const dataSet = await this.getAvailableData();
         const unused = dataSet.filter(item => {
+            if (item.id === 'ad-yellowhood-standard' || item.id === 'newsletter-orange') return false;
             for (let balloonContext of this.activeBalloons.values()) {
                 if (balloonContext.data.id === item.id) return false;
             }
@@ -372,6 +373,7 @@ class BalloonSystem {
             const response = await fetch(`/api/balloons?context=all`);
             const result = await response.json();
             const ad = this.getAd();
+            const newsletter = this.getNewsletter();
             
             if (result.success && result.data) {
                 // Filter to show green releases and pink leetcode challenges
@@ -393,7 +395,9 @@ class BalloonSystem {
 
                 return [ad, newsletter, ...dynamicBalloons];
             }
-        } catch (error) { }
+        } catch (error) {
+            console.error('🎈 Balloon System Error:', error);
+        }
         return [this.getAd(), this.getNewsletter(), ...this.getFallbackData()];
     }
 

@@ -19,7 +19,10 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       const response = await fetch(`${SUPABASE_URL}/rest/v1/photos?select=*&order=created_at.desc`, { headers: supabaseHeaders });
-      if (!response.ok) return res.status(200).json({ success: true, data: [] });
+      if (!response.ok) {
+        const errorText = await response.text();
+        return res.status(500).json({ success: false, error: `Supabase Error: ${response.status} ${errorText}` });
+      }
       const data = await response.json();
       return res.status(200).json({ success: true, count: data.length, data: data });
     } catch (error) {
