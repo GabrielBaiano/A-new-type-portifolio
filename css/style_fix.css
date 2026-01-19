@@ -119,7 +119,15 @@
 }
 
 #hud-toggle.active i {
-    color: var(--accent-blue);
+    color: var(--accent-blue) !important;
+}
+
+[data-theme="light"] #hud-toggle i {
+    color: #1976d2 !important;
+}
+
+[data-theme="light"] .hud-hidden #hud-toggle i {
+    color: #1976d2 !important;
 }
 
 #bg-drawing-canvas {
