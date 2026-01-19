@@ -86,10 +86,28 @@ class DrawingSystem {
 
     addPoint(e) {
         const rect = this.canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        // Generate a cluster of points (density) based on size
+        const points = [];
+        const radius = this.size * 1.5;
+        const density = Math.max(1, Math.floor(this.size * 0.8));
+
+        for (let i = 0; i < density; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const r = Math.sqrt(Math.random()) * radius;
+            points.push({
+                dx: Math.cos(angle) * r,
+                dy: Math.sin(angle) * r,
+                offset: Math.random() * Math.PI * 2
+            });
+        }
+
         this.currentStroke.points.push({
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top,
-            offset: Math.random() * Math.PI * 2 // Random starting phase for wiggle
+            x, y,
+            cluster: points,
+            mainOffset: Math.random() * Math.PI * 2
         });
     }
 
@@ -101,58 +119,34 @@ class DrawingSystem {
     render() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         const time = Date.now();
-        const pixelSize = Math.max(2, this.size / 2); // Dynamic pixel size based on brush
+        const pixelSize = 2; // Fixed pixel size for that retro look
 
         this.strokes.forEach(stroke => {
             if (stroke.points.length < 1) return;
 
             this.ctx.fillStyle = stroke.color;
 
-            for (let i = 0; i < stroke.points.length; i++) {
-                const pt = stroke.points[i];
-                
-                // Apply wiggle distortion
-                const wiggleX = Math.sin(time * this.wiggleSpeed + pt.offset) * this.wiggleAmount;
-                const wiggleY = Math.cos(time * this.wiggleSpeed + pt.offset) * this.wiggleAmount;
+            stroke.points.forEach(pt => {
+                // Main wiggle for the whole cluster
+                const mainWiggleX = Math.sin(time * this.wiggleSpeed + pt.mainOffset) * this.wiggleAmount;
+                const mainWiggleY = Math.cos(time * this.wiggleSpeed + pt.mainOffset) * this.wiggleAmount;
 
-                // Pixelate coordinates
-                const px = Math.floor((pt.x + wiggleX) / pixelSize) * pixelSize;
-                const py = Math.floor((pt.y + wiggleY) / pixelSize) * pixelSize;
+                pt.cluster.forEach(dot => {
+                    // Internal wiggle for each pixel in the cluster
+                    const dotWiggleX = Math.sin(time * this.wiggleSpeed * 2 + dot.offset) * (this.wiggleAmount * 0.5);
+                    const dotWiggleY = Math.cos(time * this.wiggleSpeed * 2 + dot.offset) * (this.wiggleAmount * 0.5);
 
-                // Draw a square instead of a line segment for that 'pixel' look
-                // If it's the first point, just draw a square. 
-                // To fill gaps between points, we can draw a 'pixelated' line
-                if (i > 0) {
-                    const prevPt = stroke.points[i - 1];
-                    const prevWiggleX = Math.sin(time * this.wiggleSpeed + prevPt.offset) * this.wiggleAmount;
-                    const prevWiggleY = Math.cos(time * this.wiggleSpeed + prevPt.offset) * this.wiggleAmount;
-                    const ppx = Math.floor((prevPt.x + prevWiggleX) / pixelSize) * pixelSize;
-                    const ppy = Math.floor((prevPt.y + prevWiggleY) / pixelSize) * pixelSize;
-                    
-                    this.drawPixelLine(ppx, ppy, px, py, pixelSize, stroke.size);
-                } else {
-                    this.ctx.fillRect(px - stroke.size/2, py - stroke.size/2, stroke.size, stroke.size);
-                }
-            }
+                    const finalX = pt.x + dot.dx + mainWiggleX + dotWiggleX;
+                    const finalY = pt.y + dot.dy + mainWiggleY + dotWiggleY;
+
+                    // Pixelate
+                    const px = Math.floor(finalX / pixelSize) * pixelSize;
+                    const py = Math.floor(finalY / pixelSize) * pixelSize;
+
+                    this.ctx.fillRect(px, py, pixelSize, pixelSize);
+                });
+            });
         });
-    }
-
-    // Bresenham-like pixel line drawing
-    drawPixelLine(x1, y1, x2, y2, pixelSize, brushSize) {
-        const dx = Math.abs(x2 - x1);
-        const dy = Math.abs(y2 - y1);
-        const sx = (x1 < x2) ? pixelSize : -pixelSize;
-        const sy = (y1 < y2) ? pixelSize : -pixelSize;
-        let err = dx - dy;
-
-        while (true) {
-            this.ctx.fillRect(x1 - brushSize/2, y1 - brushSize/2, brushSize, brushSize);
-
-            if (Math.abs(x1 - x2) < pixelSize && Math.abs(y1 - y2) < pixelSize) break;
-            const e2 = 2 * err;
-            if (e2 > -dy) { err -= dy; x1 += sx; }
-            if (e2 < dx) { err += dx; y1 += sy; }
-        }
     }
 
     clear() {
