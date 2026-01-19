@@ -1372,6 +1372,73 @@ body,
     background: rgba(255, 255, 255, 0.4);
 }
 
+.loader-orbit {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    animation: loaderOrbit 3s linear infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.loader-item {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: var(--accent-blue);
+}
+
+/* Positioning the symbols around the orbit */
+.orbit-triangle {
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.orbit-circle {
+    bottom: -10px;
+    left: -10px;
+}
+
+.orbit-square {
+    bottom: -10px;
+    right: -10px;
+}
+
+.loader-item i {
+    animation: loaderCounterOrbit 3s linear infinite;
+    display: inline-block;
+}
+
+/* Ensure the triangle icon also keeps its specific offset if rotated in HTML */
+.orbit-triangle i {
+    transform-origin: center;
+}
+
+@keyframes loaderOrbit {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes loaderCounterOrbit {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(-360deg); }
+}
+
+.loader-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.2rem;
+    color: var(--text-muted);
+    opacity: 0.8;
+}
+
 .site-loader {
     position: fixed;
     inset: 0;
