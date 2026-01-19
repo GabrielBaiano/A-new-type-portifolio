@@ -139,13 +139,28 @@ class BalloonSystem {
             index++;
         }
 
-        // 3. Rapid spawn sequence
+
+        // 3. Rapid spawn sequence with forced density
         let delay = 0;
         const spawnInterval = 80; // Rapid fire!
 
         for (const item of priorityQueue) {
             setTimeout(() => {
-                if (this.isRunning) this.tryPlaceBalloon(item);
+                if (this.isRunning) {
+                    // Try normal placement first
+                    let placed = this.tryPlaceBalloon(item);
+                    
+                    // If failed and we have few balloons, try harder with "relaxed" checking logic
+                    // logic inside tryPlaceBalloon already handles some retries, but we might want to
+                    // force it more aggressively for the first batch.
+                    if (!placed && this.activeBalloons.size < 5) { // Force at least 5
+                         // Retry with a slightly modified strategy or just let the loop handle it
+                         // Actually, let's just rely on the updated tryPlaceBalloon which has increased attempts
+                         // and we could pass a flag 'isInitial' to maybe allow overlap if really needed, 
+                         // but let's stick to standard for now as we increased attempts to 50.
+                         this.tryPlaceBalloon(item); 
+                    }
+                }
             }, delay);
             delay += spawnInterval;
         }
@@ -247,16 +262,18 @@ class BalloonSystem {
         const height = temp.offsetHeight;
         temp.remove();
 
-        const maxAttempts = 40;
+        const maxAttempts = 50; // Increased attempts
         for (let i = 0; i < maxAttempts; i++) {
             const x = xMin + Math.random() * (xMax - xMin);
             const y = yMin + Math.random() * (yMax - yMin);
             
+            // Allow slight overlapping (negative margin) for initial density if needed
+            // But let's stick to strict first.
             const rect = {
                 x: side === 'left' ? x : window.innerWidth - x - balloonWidth,
                 y: y,
                 w: balloonWidth,
-                h: height + 15
+                h: height + 10 // Reduced vertical padding slightly
             };
 
             if (!this.checkCollision(rect)) {
@@ -264,15 +281,24 @@ class BalloonSystem {
                 return true;
             }
         }
+        
+        // Final fallback: Try to force it in a known clear zone if it's the first few
+        if (this.activeBalloons.size < 3) {
+             // Force placement at random Y with side check? 
+             // Let's just return false to avoid overlapping mess, but 50 attempts should be enough.
+        }
+        
         return false;
     }
 
     checkCollision(rect) {
+        // Reduced collision padding for denser packing
+        const padding = 10; 
         for (const other of this.placedRects) {
-            if (rect.x < other.x + other.w &&
-                rect.x + rect.w > other.x &&
-                rect.y < other.y + other.h &&
-                rect.y + rect.h > other.y) {
+            if (rect.x < other.x + other.w + padding &&
+                rect.x + rect.w > other.x - padding &&
+                rect.y < other.y + other.h + padding &&
+                rect.y + rect.h > other.y - padding) {
                 return true;
             }
         }

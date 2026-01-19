@@ -88,3 +88,8 @@
     60% { transform: translateY(-10%) rotate(5deg); opacity: 1; }
     100% { transform: translateY(0) rotate(0deg); opacity: 1; }
 }
+
+/* Optimization: Allow balloons to be slightly closer */
+.balloon-card {
+    margin-bottom: 10px;
+}
