@@ -9,12 +9,12 @@ class DrawingSystem {
         if (!this.canvas) return;
         this.ctx = this.canvas.getContext('2d');
         this.isDrawing = false;
-        this.strokes = []; // Array of { points: [], color, size }
+        this.strokes = [];
         this.currentStroke = null;
         
-        this.color = '#3b82f6';
+        this.color = '#0000FE'; // Default blue (matches card)
         this.size = 4;
-        this.tool = 'pencil'; // 'pencil' or 'spray'
+        this.tool = 'pencil';
         this.wiggleSpeed = 0.005;
         this.wiggleAmount = 2;
 
@@ -44,31 +44,44 @@ class DrawingSystem {
         }, { passive: false });
         this.canvas.addEventListener('touchend', () => this.stopDrawing());
 
-        // Toolbar Controls (Now Sidebar)
-        const colorInput = document.getElementById('draw-color');
-        const sizeInput = document.getElementById('draw-size');
-        const clearBtn = document.getElementById('draw-clear');
-        const wiggleBtn = document.getElementById('draw-wiggle-toggle');
-        const pencilTool = document.getElementById('tool-pencil');
-        const sprayTool = document.getElementById('tool-spray');
+        // Tools
+        const tools = ['pencil', 'spray', 'eraser', 'bucket', 'rect', 'circle'];
+        tools.forEach(t => {
+            const btn = document.getElementById(`tool-${t}`);
+            if (btn) btn.addEventListener('click', () => {
+                this.tool = t;
+                tools.forEach(other => document.getElementById(`tool-${other}`)?.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
 
-        if (colorInput) colorInput.addEventListener('input', (e) => this.color = e.target.value);
+        // Palette
+        document.querySelectorAll('.color-swatch').forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                this.color = swatch.dataset.color;
+                document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+                swatch.classList.add('active');
+            });
+        });
+
+        const colorInput = document.getElementById('draw-color');
+        if (colorInput) {
+            colorInput.addEventListener('input', (e) => {
+                this.color = e.target.value;
+                document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+            });
+        }
+
+        const sizeInput = document.getElementById('draw-size');
         if (sizeInput) sizeInput.addEventListener('input', (e) => this.size = parseInt(e.target.value));
+
+        const clearBtn = document.getElementById('draw-clear');
         if (clearBtn) clearBtn.addEventListener('click', () => this.clear());
+
+        const wiggleBtn = document.getElementById('draw-wiggle-toggle');
         if (wiggleBtn) wiggleBtn.addEventListener('click', () => {
             wiggleBtn.classList.toggle('active');
             this.wiggleAmount = wiggleBtn.classList.contains('active') ? 2 : 0;
-        });
-
-        if (pencilTool) pencilTool.addEventListener('click', () => {
-            this.tool = 'pencil';
-            pencilTool.classList.add('active');
-            if (sprayTool) sprayTool.classList.remove('active');
-        });
-        if (sprayTool) sprayTool.addEventListener('click', () => {
-            this.tool = 'spray';
-            sprayTool.classList.add('active');
-            if (pencilTool) pencilTool.classList.remove('active');
         });
     }
 
@@ -81,8 +94,9 @@ class DrawingSystem {
         let startX, startY, initialX, initialY;
 
         handle.addEventListener('mousedown', (e) => {
+            if (e.target.closest('button')) return; // Don't drag if clicking buttons
             isDragging = true;
-            sidebar.style.transition = 'none'; // Disable transition during drag
+            sidebar.style.transition = 'none';
             startX = e.clientX;
             startY = e.clientY;
             initialX = sidebar.offsetLeft;
@@ -101,7 +115,7 @@ class DrawingSystem {
         window.addEventListener('mouseup', () => {
             if (!isDragging) return;
             isDragging = false;
-            sidebar.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s'; 
+            sidebar.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s, background 0.3s, width 0.3s'; 
             document.body.style.cursor = 'default';
         });
     }
@@ -112,21 +126,44 @@ class DrawingSystem {
     }
 
     startDrawing(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        if (this.tool === 'bucket') {
+            this.handleBucket(x, y);
+            return;
+        }
+
         this.isDrawing = true;
         this.currentStroke = {
             points: [],
             color: this.color,
             size: this.size,
-            tool: this.tool, // Store tool at start of stroke
-            startTime: Date.now()
+            tool: this.tool,
+            startTime: Date.now(),
+            startPos: { x, y },
+            endPos: { x, y }
         };
-        this.addPoint(e);
+        
+        if (this.tool !== 'rect' && this.tool !== 'circle') {
+            this.addPoint(e);
+        }
+        
         this.strokes.push(this.currentStroke);
     }
 
     draw(e) {
         if (!this.isDrawing) return;
-        this.addPoint(e);
+        const rect = this.canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        if (this.tool === 'rect' || this.tool === 'circle') {
+            this.currentStroke.endPos = { x, y };
+        } else {
+            this.addPoint(e);
+        }
     }
 
     stopDrawing() {
@@ -147,23 +184,42 @@ class DrawingSystem {
             for (let i = 0; i < density; i++) {
                 const angle = Math.random() * Math.PI * 2;
                 const r = Math.sqrt(Math.random()) * radius;
-                points.push({
-                    dx: Math.cos(angle) * r,
-                    dy: Math.sin(angle) * r,
-                    offset: Math.random() * Math.PI * 2
-                });
+                points.push({ dx: Math.cos(angle) * r, dy: Math.sin(angle) * r, offset: Math.random() * Math.PI * 2 });
             }
 
-            this.currentStroke.points.push({
-                x, y,
-                cluster: points,
-                mainOffset: Math.random() * Math.PI * 2
-            });
+            this.currentStroke.points.push({ x, y, cluster: points, mainOffset: Math.random() * Math.PI * 2 });
         } else {
-            this.currentStroke.points.push({
-                x, y,
-                offset: Math.random() * Math.PI * 2
-            });
+            this.currentStroke.points.push({ x, y, offset: Math.random() * Math.PI * 2 });
+        }
+    }
+
+    handleBucket(x, y) {
+        // Find stroke closest to the click point
+        let closestStroke = null;
+        let minDistance = 30; // Threshold
+
+        this.strokes.forEach(stroke => {
+            if (stroke.tool === 'rect' || stroke.tool === 'circle') {
+                // Check if inside or near border? For now simple distance to start/end points
+                const dStart = Math.hypot(stroke.startPos.x - x, stroke.startPos.y - y);
+                const dEnd = Math.hypot(stroke.endPos.x - x, stroke.endPos.y - y);
+                if (dStart < minDistance || dEnd < minDistance) {
+                    closestStroke = stroke;
+                    minDistance = Math.min(dStart, dEnd);
+                }
+            } else {
+                stroke.points.forEach(pt => {
+                    const dist = Math.hypot(pt.x - x, pt.y - y);
+                    if (dist < minDistance) {
+                        minDistance = dist;
+                        closestStroke = stroke;
+                    }
+                });
+            }
+        });
+
+        if (closestStroke) {
+            closestStroke.color = this.color;
         }
     }
 
@@ -175,28 +231,41 @@ class DrawingSystem {
     render() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         const time = Date.now();
-        const pixelSize = 2; // Fixed retro pixel size
+        const pixelSize = 2;
 
         this.strokes.forEach(stroke => {
-            if (stroke.points.length < 1) return;
+            this.ctx.globalCompositeOperation = stroke.tool === 'eraser' ? 'destination-out' : 'source-over';
             this.ctx.fillStyle = stroke.color;
+            this.ctx.strokeStyle = stroke.color;
+            this.ctx.lineWidth = stroke.size;
 
-            if (stroke.tool === 'spray') {
+            if (stroke.tool === 'rect' || stroke.tool === 'circle') {
+                const wiggleX = Math.sin(time * 0.005) * this.wiggleAmount;
+                const wiggleY = Math.cos(time * 0.005) * this.wiggleAmount;
+                const x = Math.floor((stroke.startPos.x + wiggleX) / pixelSize) * pixelSize;
+                const y = Math.floor((stroke.startPos.y + wiggleY) / pixelSize) * pixelSize;
+                const w = Math.floor((stroke.endPos.x - stroke.startPos.x) / pixelSize) * pixelSize;
+                const h = Math.floor((stroke.endPos.y - stroke.startPos.y) / pixelSize) * pixelSize;
+
+                if (stroke.tool === 'rect') {
+                    this.drawPixelRect(x, y, w, h, pixelSize, stroke.size);
+                } else {
+                    this.drawPixelCircle(x + w / 2, y + h / 2, Math.abs(w / 2), pixelSize, stroke.size);
+                }
+            } else if (stroke.tool === 'spray') {
                 stroke.points.forEach(pt => {
                     const mainWiggleX = Math.sin(time * this.wiggleSpeed + pt.mainOffset) * this.wiggleAmount;
                     const mainWiggleY = Math.cos(time * this.wiggleSpeed + pt.mainOffset) * this.wiggleAmount;
-
                     pt.cluster.forEach(dot => {
                         const dotWiggleX = Math.sin(time * this.wiggleSpeed * 2 + dot.offset) * (this.wiggleAmount * 0.5);
                         const dotWiggleY = Math.cos(time * this.wiggleSpeed * 2 + dot.offset) * (this.wiggleAmount * 0.5);
-                        const finalX = pt.x + dot.dx + mainWiggleX + dotWiggleX;
-                        const finalY = pt.y + dot.dy + mainWiggleY + dotWiggleY;
-                        const px = Math.floor(finalX / pixelSize) * pixelSize;
-                        const py = Math.floor(finalY / pixelSize) * pixelSize;
+                        const px = Math.floor((pt.x + dot.dx + mainWiggleX + dotWiggleX) / pixelSize) * pixelSize;
+                        const py = Math.floor((pt.y + dot.dy + mainWiggleY + dotWiggleY) / pixelSize) * pixelSize;
                         this.ctx.fillRect(px, py, pixelSize, pixelSize);
                     });
                 });
-            } else {
+            } else if (stroke.points.length > 0) {
+                // Pencil or Eraser
                 for (let i = 0; i < stroke.points.length; i++) {
                     const pt = stroke.points[i];
                     const wiggleX = Math.sin(time * this.wiggleSpeed + pt.offset) * this.wiggleAmount;
@@ -212,11 +281,12 @@ class DrawingSystem {
                         const ppy = Math.floor((prevPt.y + prevWiggleY) / pixelSize) * pixelSize;
                         this.drawPixelLine(ppx, ppy, px, py, pixelSize, stroke.size);
                     } else {
-                        this.ctx.fillRect(px - stroke.size/2, py - stroke.size/2, stroke.size, stroke.size);
+                        this.ctx.fillRect(px - stroke.size / 2, py - stroke.size / 2, stroke.size, stroke.size);
                     }
                 }
             }
         });
+        this.ctx.globalCompositeOperation = 'source-over';
     }
 
     drawPixelLine(x1, y1, x2, y2, pixelSize, brushSize) {
@@ -225,9 +295,8 @@ class DrawingSystem {
         const sx = (x1 < x2) ? pixelSize : -pixelSize;
         const sy = (y1 < y2) ? pixelSize : -pixelSize;
         let err = dx - dy;
-
         while (true) {
-            this.ctx.fillRect(x1 - brushSize/2, y1 - brushSize/2, brushSize, brushSize);
+            this.ctx.fillRect(x1 - brushSize / 2, y1 - brushSize / 2, brushSize, brushSize);
             if (Math.abs(x1 - x2) < pixelSize && Math.abs(y1 - y2) < pixelSize) break;
             const e2 = 2 * err;
             if (e2 > -dy) { err -= dy; x1 += sx; }
@@ -235,12 +304,48 @@ class DrawingSystem {
         }
     }
 
+    drawPixelRect(x, y, w, h, pixelSize, brushSize) {
+        this.drawPixelLine(x, y, x + w, y, pixelSize, brushSize);
+        this.drawPixelLine(x + w, y, x + w, y + h, pixelSize, brushSize);
+        this.drawPixelLine(x + w, y + h, x, y + h, pixelSize, brushSize);
+        this.drawPixelLine(x, y + h, x, y, pixelSize, brushSize);
+    }
+
+    drawPixelCircle(xc, yc, r, pixelSize, brushSize) {
+        let x = 0;
+        let y = r;
+        let d = 3 - 2 * r;
+        this.drawCirclePoints(xc, yc, x, y, brushSize);
+        while (y >= x) {
+            x += pixelSize;
+            if (d > 0) {
+                y -= pixelSize;
+                d = d + 4 * (x - y) + 10;
+            } else {
+                d = d + 4 * x + 6;
+            }
+            this.drawCirclePoints(xc, yc, x, y, brushSize);
+        }
+    }
+
+    drawCirclePoints(xc, yc, x, y, brushSize) {
+        this.ctx.fillRect(xc + x, yc + y, brushSize, brushSize);
+        this.ctx.fillRect(xc - x, yc + y, brushSize, brushSize);
+        this.ctx.fillRect(xc + x, yc - y, brushSize, brushSize);
+        this.ctx.fillRect(xc - x, yc - y, brushSize, brushSize);
+        this.ctx.fillRect(xc + y, yc + x, brushSize, brushSize);
+        this.ctx.fillRect(xc - y, yc + x, brushSize, brushSize);
+        this.ctx.fillRect(xc + y, yc - x, brushSize, brushSize);
+        this.ctx.fillRect(xc - y, yc - x, brushSize, brushSize);
+    }
+
     clear() {
-        this.strokes = [];
+        if (window.confirm("Você quer mesmo apagar todo o desenho?")) {
+            this.strokes = [];
+        }
     }
 }
 
-// Initialize on load
 document.addEventListener('DOMContentLoaded', () => {
     window.drawingSystem = new DrawingSystem('bg-drawing-canvas');
 });
