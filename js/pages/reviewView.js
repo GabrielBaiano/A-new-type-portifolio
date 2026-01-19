@@ -28,32 +28,44 @@ const ReviewView = {
         const bookId = params ? params.id : null;
         if (!bookId) return;
 
-        // 1. Fetch data to find the mdLink
+        // 1. Fetch data to find the mdLink or content
         const data = await DataService.loadReviewsData();
         const book = data.reviews.find(r => r.id === bookId);
 
         const contentDiv = document.getElementById('review-content');
 
-        if (!book || !book.mdLink) {
+        if (!book) {
             contentDiv.innerHTML = `
                 <div style="padding: 40px; text-align: center; border: 1px dashed #444; border-radius: 12px;">
                     <h2>Review Not Found</h2>
-                    <p style="color: #888;">This book might not have a manual review linked yet.</p>
                 </div>
             `;
             return;
         }
 
-        // 2. Fetch the Markdown content
+        // 2. Use internal content or fetch external Markdown
         try {
-            // If it's a GitHub link, ensure we are using the raw URL
-            let url = book.mdLink;
-            if (url.includes('github.com') && !url.includes('raw.githubusercontent.com')) {
-                url = url.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
+            let markdown = '';
+            
+            if (book.content) {
+                markdown = book.content;
+            } else if (book.mdLink) {
+                // Legacy fallback: Fetch from GitHub
+                let url = book.mdLink;
+                if (url.includes('github.com') && !url.includes('raw.githubusercontent.com')) {
+                    url = url.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
+                }
+                const response = await fetch(url);
+                markdown = await response.text();
+            } else {
+                contentDiv.innerHTML = `
+                    <div style="padding: 40px; text-align: center; border: 1px dashed #444; border-radius: 12px;">
+                        <h2>No Review Content</h2>
+                        <p style="color: #888;">This book might not have a review written yet.</p>
+                    </div>
+                `;
+                return;
             }
-
-            const response = await fetch(url);
-            const markdown = await response.text();
 
             // 3. Render Markdown
             contentDiv.innerHTML = this.parseMarkdown(markdown, book);

@@ -160,7 +160,7 @@
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--border);
             border-radius: 10px;
-            color: white;
+            color: var(--text);
             font-size: 0.95rem;
             transition: all 0.3s;
         }
@@ -281,8 +281,18 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Markdown URL (Review Content)</label>
+                    <label>Markdown URL (Legacy Sync)</label>
                     <input type="url" id="mdLink" placeholder="https://raw.githubusercontent.com/.../review.md">
+                </div>
+
+                <div class="form-group">
+                    <label>Review Content (Markdown)</label>
+                    <textarea id="content" placeholder="Write your review here..."></textarea>
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="is_special" style="width: auto;">
+                    <label style="margin-bottom: 0;">Special Recommendation</label>
                 </div>
 
                 <div class="form-group">
@@ -295,7 +305,11 @@
                     <input type="password" id="secret" required placeholder="••••••••••••">
                 </div>
 
-                <button type="submit" id="submit-btn" class="btn-post">SALVAR LIVRO 🚀</button>
+                <div class="form-group" style="display: flex; gap: 10px;">
+                    <button type="submit" id="submit-btn" class="btn-post">SALVAR LIVRO 🚀</button>
+                    <button type="button" id="delete-btn" class="btn-post" style="background: #ef4444; display: none;"
+                        onclick="deleteBook()">DELETAR 🗑️</button>
+                </div>
             </form>
             <div id="status-msg"></div>
         </div>
@@ -305,15 +319,18 @@
             <h1>👀 Preview</h1>
             <div class="preview-card">
                 <img id="prev-img" src="https://via.placeholder.com/150x225?text=Cover" alt="Cover">
+                <div id="prev-special" style="display: none; color: #fbbf24; font-size: 0.8rem; margin-bottom: 5px;">
+                    <i class="fa-solid fa-star"></i> SPECIAL RECOMMENDATION
+                </div>
                 <h3 id="prev-title" style="margin: 10px 0;">Book Title</h3>
                 <div id="prev-status" class="status-badge status-reading">READING</div>
                 <p id="prev-tags" style="color: grey; font-size: 0.8rem; margin-top: 10px;">Tags: --</p>
             </div>
 
-            <p style="color: grey; font-size: 0.8rem; text-transform: uppercase; font-weight: 700;">Live Feed
-                Description</p>
+            <p style="color: grey; font-size: 0.8rem; text-transform: uppercase; font-weight: 700;">Review Sneak Peek
+            </p>
             <div id="prev-desc"
-                style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 8px; font-size: 0.9rem; color: #aaa;">
+                style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 8px; font-size: 0.9rem; color: #aaa; min-height: 100px; white-space: pre-wrap;">
                 Currently reading this book...
             </div>
         </div>
@@ -355,6 +372,7 @@
                     <div class="inventory-item-info">
                         <p class="inventory-item-title">${book.title}</p>
                         <span class="inventory-item-status" style="color: ${book.status === 'Reading' ? '#22c55e' : '#a855f7'}">${book.status}</span>
+                        ${book.is_special ? ' <span style="color:#fbbf24">★</span>' : ''}
                     </div>
                 </div>
             `).join('');
@@ -370,8 +388,11 @@
             statusInput.value = book.status;
             mdInput.value = book.md_link || '';
             tagsInput.value = (book.tags || []).join(', ');
+            document.getElementById('content').value = book.content || '';
+            document.getElementById('is_special').checked = book.is_special || false;
 
             document.getElementById('submit-btn').innerText = 'ATUALIZAR LIVRO 💾';
+            document.getElementById('delete-btn').style.display = 'block';
             updatePreview();
             renderInventory();
         }
@@ -379,9 +400,57 @@
         function createNew() {
             idInput.value = '';
             form.reset();
+            document.getElementById('content').value = '';
+            document.getElementById('is_special').checked = false;
             document.getElementById('submit-btn').innerText = 'SALVAR NOVO LIVRO 🚀';
+            document.getElementById('delete-btn').style.display = 'none';
             updatePreview();
             renderInventory();
+        }
+
+        async function deleteBook() {
+            const id = idInput.value;
+            const secret = document.getElementById('secret').value;
+            if (!id || !secret) {
+                alert('Missing ID or Secret Key');
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to delete "${titleInput.value}"? This will also cleanup GitHub assets.`)) {
+                return;
+            }
+
+            const statusMsg = document.getElementById('status-msg');
+            const deleteBtn = document.getElementById('delete-btn');
+
+            statusMsg.style.display = 'none';
+            deleteBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/books', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, secret })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    statusMsg.className = 'status-badge success';
+                    statusMsg.innerText = 'Livro deletado com sucesso! Iniciando limpeza no GitHub...';
+                    statusMsg.style.display = 'block';
+                    await fetchInventory();
+                    createNew();
+                } else {
+                    throw new Error(result.error || 'Failed to delete');
+                }
+            } catch (err) {
+                statusMsg.className = 'status-badge error';
+                statusMsg.innerText = 'Erro: ' + err.message;
+                statusMsg.style.display = 'block';
+            } finally {
+                deleteBtn.disabled = false;
+            }
         }
 
         function updatePreview() {
@@ -395,14 +464,19 @@
 
             document.getElementById('prev-tags').innerText = 'Tags: ' + (tagsInput.value || '--');
 
+            const isSpecial = document.getElementById('is_special').checked;
+            document.getElementById('prev-special').style.display = isSpecial ? 'block' : 'none';
+
             const desc = document.getElementById('prev-desc');
-            desc.innerText = status === 'Reading'
+            const content = document.getElementById('content').value;
+            desc.innerText = content || (status === 'Reading'
                 ? `Starting reading this book: ${titleInput.value || '...'}`
-                : `Finished and reviewed: ${titleInput.value || '...'}`;
+                : `Finished and reviewed: ${titleInput.value || '...'}`);
         }
 
-        [titleInput, imageInput, statusInput, tagsInput].forEach(el => {
+        [titleInput, imageInput, statusInput, tagsInput, document.getElementById('content'), document.getElementById('is_special')].forEach(el => {
             el.addEventListener('input', updatePreview);
+            if (el.type === 'checkbox') el.addEventListener('change', updatePreview);
         });
 
         form.addEventListener('submit', async (e) => {
@@ -420,11 +494,13 @@
                 status: statusInput.value,
                 mdLink: mdInput.value,
                 tags: tagsInput.value.split(',').map(t => t.trim()).filter(t => t),
+                content: document.getElementById('content').value,
+                is_special: document.getElementById('is_special').checked,
                 secret: document.getElementById('secret').value
             };
 
             try {
-                const response = await fetch('/api/add-book', {
+                const response = await fetch('/api/books', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -434,7 +510,7 @@
 
                 if (response.ok) {
                     statusMsg.className = 'status-badge success';
-                    statusMsg.innerText = 'Salvo com sucesso! 🎉';
+                    statusMsg.innerText = 'Salvo com sucesso! 🎉 Sincronizando com GitHub...';
                     statusMsg.style.display = 'block';
 
                     fetchInventory(); // Reload list
