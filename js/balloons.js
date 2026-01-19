@@ -48,6 +48,11 @@ class BalloonSystem {
                 if (safe) {
                     if (this.container) this.container.style.opacity = '1';
                     this.repositionBalloons();
+                    
+                    // User Request: If returning to valid size, spawn immediately
+                    if (this.activeBalloons.size === 0) {
+                        this.initialFill();
+                    }
                 } else {
                     if (this.container) this.container.style.opacity = '0';
                     this.clearBalloons();
@@ -65,10 +70,16 @@ class BalloonSystem {
             resizeObserver.observe(mainContainer);
         }
 
-        // Tab Visibility
+        // Tab Visibility - Fixes Alt-Tab Pause
         document.addEventListener("visibilitychange", () => {
             if (document.visibilityState === "visible") {
-                if (!this.isRunning) this.start();
+                // Force restart loop if it was running before
+                if (this.isRunning) {
+                   this.replenish(); // Immediate spawn
+                   this.startReplenishment(); // Restart loop
+                } else {
+                    this.start();
+                }
             } else {
                 this.stopReplenishment();
             }

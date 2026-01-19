@@ -102,6 +102,7 @@ class Router {
 
         if (match) {
             this.currentRoute = path;
+            window.scrollTo(0, 0); // Reset scroll position on nav
             match.handler(match.params);
         } else {
             // Rota não encontrada, redireciona para home
