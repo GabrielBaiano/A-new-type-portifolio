@@ -93,16 +93,16 @@
             <div class="tool-section">
                 <span class="section-label">Colors</span>
                 <div class="color-palette-grid">
-                    <div class="color-swatch swatch-blue active" data-color="#0000FE" title="Blue"></div>
-                    <div class="color-swatch swatch-green" data-color="#16B900" title="Green"></div>
-                    <div class="color-swatch swatch-orange" data-color="#FF5900" title="Orange"></div>
-                    <div class="color-swatch swatch-pink" data-color="#FF0084" title="Pink"></div>
-                    <div class="color-swatch swatch-red" data-color="#FF3B30" title="Red"></div>
-                    <div class="color-swatch swatch-yellow" data-color="#FFCC00" title="Yellow"></div>
+                    <div class="color-swatch swatch-blue active" data-color="#3b82f6" title="Feed Blue"></div>
+                    <div class="color-swatch swatch-green" data-color="#22c55e" title="Green"></div>
+                    <div class="color-swatch swatch-orange" data-color="#f97316" title="Orange"></div>
+                    <div class="color-swatch swatch-pink" data-color="#ec4899" title="Pink"></div>
+                    <div class="color-swatch swatch-yellow" data-color="#eab308" title="Yellow"></div>
+                    <div class="color-swatch swatch-purple" data-color="#a855f7" title="Purple"></div>
                     <div class="color-swatch swatch-grey" data-color="#333333" title="Grey"></div>
                     <div class="color-custom-btn" id="custom-color-trigger" title="Custom Color">
                         <i class="fa-solid fa-palette"></i>
-                        <input type="color" id="draw-color" value="#0000FE">
+                        <input type="color" id="draw-color" value="#3b82f6">
                     </div>
                 </div>
             </div>
@@ -110,9 +110,14 @@
             <div class="sidebar-divider"></div>
 
             <div class="tool-section">
-                <button id="draw-clear" title="Clear Canvas" class="clear-btn-full">
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
+                <div class="options-grid">
+                    <button id="draw-undo" title="Undo (Desfazer)" class="undo-btn">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
+                    <button id="draw-clear" title="Clear Canvas" class="clear-btn">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
             </div>
         </div>
 

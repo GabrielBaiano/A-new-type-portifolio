@@ -142,6 +142,13 @@
 }
 
 /* 7. Drawing Sidebar Styles */
+/* Disable selection when drawing (HUD Hidden) */
+body.hud-hidden #app, 
+body.hud-hidden .bottom-nav {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+}
+
 .drawing-sidebar {
     position: fixed;
     top: 100px;
@@ -335,12 +342,12 @@
     border-color: #000;
 }
 
-.swatch-blue   { background-color: #0000FE; }
-.swatch-green  { background-color: #16B900; }
-.swatch-orange { background-color: #FF5900; }
-.swatch-pink   { background-color: #FF0084; }
-.swatch-red    { background-color: #FF3B30; }
-.swatch-yellow { background-color: #FFCC00; }
+.swatch-blue   { background-color: #3b82f6; }
+.swatch-green  { background-color: #22c55e; }
+.swatch-orange { background-color: #f97316; }
+.swatch-pink   { background-color: #ec4899; }
+.swatch-yellow { background-color: #eab308; }
+.swatch-purple { background-color: #a855f7; }
 .swatch-grey   { background-color: #333333; }
 
 .color-custom-btn {
@@ -364,15 +371,24 @@
 }
 
 /* Options & Panels */
-.clear-btn-full {
-    width: 38px !important;
-    height: 38px !important;
-    border-radius: 50% !important; /* Circle for clear button */
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 0 12px;
+}
+
+.undo-btn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #fff !important;
+}
+
+.clear-btn {
     color: #ff6b6b !important;
 }
 
-.clear-btn-full:hover {
-    background: rgba(255, 107, 107, 0.2) !important;
+.clear-btn:hover {
+    background: rgba(255, 107, 107, 0.15) !important;
     color: #ff5252 !important;
 }
 

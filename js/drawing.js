@@ -123,11 +123,18 @@ class DrawingSystem {
         const clearBtn = document.getElementById('draw-clear');
         if (clearBtn) clearBtn.addEventListener('click', () => this.clear());
 
+        const undoBtn = document.getElementById('draw-undo');
+        if (undoBtn) undoBtn.addEventListener('click', () => this.undo());
+
         const wiggleBtn = document.getElementById('draw-wiggle-toggle');
         if (wiggleBtn) wiggleBtn.addEventListener('click', () => {
             wiggleBtn.classList.toggle('active');
             this.wiggleAmount = wiggleBtn.classList.contains('active') ? 2 : 0;
         });
+    }
+
+    undo() {
+        this.strokes.pop();
     }
 
     initDragging() {
