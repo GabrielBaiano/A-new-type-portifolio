@@ -63,17 +63,12 @@ const PhotosPage = {
             const hasLink = item.link && item.link !== '#';
             const displayHtml = `
                 <div class="photo-wrapper">
-                    <img src="${item.image}" alt="${item.description || 'Photo'}" loading="lazy">
-                    ${item.description ? `
-                        <div class="photo-overlay">
-                            <p class="photo-desc">${item.description}</p>
-                            ${hasLink ? `<a href="${item.link}" target="_blank" class="photo-link-icon"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : ''}
-                        </div>
-                    ` : (hasLink ? `
-                        <div class="photo-overlay simple">
-                            <a href="${item.link}" target="_blank" class="photo-link-icon"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
-                        </div>
-                    ` : '')}
+                    <img src="${item.image}" alt="${item.title || item.description || 'Photo'}" loading="lazy">
+                    <div class="photo-overlay">
+                        ${item.title ? `<h3 class="photo-title-display">${item.title}</h3>` : ''}
+                        ${item.description ? `<p class="photo-desc">${item.description}</p>` : ''}
+                        ${hasLink ? `<a href="${item.link}" target="_blank" class="photo-link-icon"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : ''}
+                    </div>
                 </div>
             `;
 

@@ -155,10 +155,11 @@ const AdminPage = {
     renderPhotoPreview(photo) {
         if (!photo) return '<p style="color: grey; padding: 20px;">Select a photo to preview.</p>';
         return `
-            <div class="photo-card-preview" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden;">
-                <img src="${photo.image || ''}" style="width: 100%; aspect-ratio: 16/10; object-fit: cover;">
+            <div class="photo-card-preview" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;">
+                <img src="${photo.image || ''}" style="width: 100%; object-fit: contain; max-height: 400px; background: rgba(0,0,0,0.2);">
                 <div style="padding: 15px;">
-                    <p style="margin: 0; font-size: 0.85rem; line-height: 1.4;">${photo.description || 'No description provided.'}</p>
+                    <h4 style="margin: 0 0 5px 0; font-family: 'Sora', sans-serif;">${photo.title || 'Untitled Photo'}</h4>
+                    <p style="margin: 0; font-size: 0.85rem; line-height: 1.4; color: var(--text-muted);">${photo.description || 'No description provided.'}</p>
                     ${photo.link ? `<p style="margin-top: 10px; font-size: 0.75rem; color: var(--accent-blue);"><i class="fa-solid fa-external-link"></i> ${photo.link}</p>` : ''}
                 </div>
             </div>
@@ -435,6 +436,10 @@ const AdminPage = {
                     <form id="photo-form" class="admin-form">
                         <input type="hidden" id="photo-id" value="${this.editingItem?.id || ''}">
                         <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" id="photo-title" value="${this.editingItem?.title || ''}" placeholder="E.g. Belém - PA">
+                        </div>
+                        <div class="form-group">
                             <label>Image URL</label>
                             <div class="upload-row">
                                 <input type="url" id="photo-image" value="${this.editingItem?.image || ''}" placeholder="https://..." required>
@@ -446,7 +451,7 @@ const AdminPage = {
                         </div>
                         <div class="form-group">
                             <label>Description</label>
-                            <textarea id="photo-desc">${this.editingItem?.description || ''}</textarea>
+                            <textarea id="photo-desc" style="height: 100px;">${this.editingItem?.description || ''}</textarea>
                         </div>
                         <div class="form-group">
                             <label>Link (Optional)</label>
@@ -456,7 +461,10 @@ const AdminPage = {
                             <input type="checkbox" id="photo-show-in-feed" ${this.editingItem?.show_in_feed !== false ? 'checked' : ''} style="width: auto;">
                             <label for="photo-show-in-feed" style="margin-bottom: 0;">Show in Public Feed</label>
                         </div>
-                        <button type="submit" class="btn-save">Save Photo</button>
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button type="submit" class="btn-save" style="flex: 1;">Save Photo</button>
+                            ${this.editingItem?.id ? `<button type="button" class="btn-delete" id="btn-delete-photo" style="background: var(--accent-red); color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer;">Delete</button>` : ''}
+                        </div>
                     </form>
                 </div>
                 <div class="panel-preview">
@@ -587,6 +595,7 @@ const AdminPage = {
         this.allPhotos = (photos.data || []).map(p => ({
             id: p.id,
             image: p.image_url,
+            title: p.title,
             description: p.description,
             link: p.link
         }));
@@ -1071,6 +1080,7 @@ const AdminPage = {
                 this.editingItem = { id: null };
             }
 
+            this.editingItem.title = document.getElementById('photo-title').value;
             this.editingItem.image = document.getElementById('photo-image').value;
             this.editingItem.description = document.getElementById('photo-desc').value;
             this.editingItem.link = document.getElementById('photo-link').value;
@@ -1079,7 +1089,7 @@ const AdminPage = {
         };
 
         // Add input listeners for live preview
-        ['photo-image', 'photo-desc', 'photo-link'].forEach(id => {
+        ['photo-title', 'photo-image', 'photo-desc', 'photo-link'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('input', updateLivePreview);
         });
@@ -1125,6 +1135,7 @@ const AdminPage = {
             e.preventDefault();
             const payload = {
                 id: document.getElementById('photo-id').value || null,
+                title: document.getElementById('photo-title').value,
                 image_url: document.getElementById('photo-image').value,
                 description: document.getElementById('photo-desc').value,
                 link: document.getElementById('photo-link').value,
@@ -1146,6 +1157,30 @@ const AdminPage = {
                 alert('Error saving photo: ' + (errData.error || 'Unknown error'));
             }
         });
+
+        const deleteBtn = document.getElementById('btn-delete-photo');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', async () => {
+                if (!confirm('Are you sure you want to delete this photo?')) return;
+                
+                const secret = sessionStorage.getItem('admin_secret');
+                const id = document.getElementById('photo-id').value;
+
+                const res = await fetch('/api/photos', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, secret })
+                });
+
+                if (res.ok) {
+                    alert('Photo deleted!');
+                    this.editingItem = null;
+                    this.loadInitialData();
+                } else {
+                    alert('Delete failed.');
+                }
+            });
+        }
     },
 
     refreshInventory() {

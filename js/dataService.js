@@ -111,6 +111,7 @@ const DataService = {
                     this.photosData = result.data.map(p => ({
                         id: p.id,
                         image: p.image_url,
+                        title: p.title,
                         description: p.description,
                         link: p.link,
                         date: p.created_at
@@ -454,7 +455,7 @@ const DataService = {
             type: 'feed-photo',
             date: p.date,
             tag: 'Photos',
-            title: 'New Photo',
+            title: p.title || 'New Photo',
             description: p.description,
             link: `#/photos`,
             image: p.image,

@@ -28,7 +28,7 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    const { id, image_url, description, link, show_in_feed, secret } = req.body;
+    const { id, title, image_url, description, link, show_in_feed, secret } = req.body;
     
     if (!API_SECRET) {
       return res.status(500).json({ error: 'Server configuration error: Admin key not found' });
@@ -48,7 +48,7 @@ export default async function handler(req, res) {
       const method = id ? 'PATCH' : 'POST';
       const endpoint = id ? `${SUPABASE_URL}/rest/v1/photos?id=eq.${id}` : `${SUPABASE_URL}/rest/v1/photos`;
       
-      const payload = { image_url, description, link, show_in_feed: show_in_feed !== false ? true : false };
+      const payload = { title, image_url, description, link, show_in_feed: show_in_feed !== false ? true : false };
       if (method === 'POST') {
         payload.id = finalId;
         payload.created_at = new Date().toISOString();
@@ -60,13 +60,34 @@ export default async function handler(req, res) {
         body: JSON.stringify(payload)
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to save photo');
-      }
-
       const result = method === 'POST' ? await response.json() : null;
       return res.status(200).json({ success: true, message: 'Photo saved!', data: result ? result[0] : null });
+    } catch (error) {
+      return res.status(500).json({ success: false, error: error.message });
+    }
+  }
+
+  if (req.method === 'DELETE') {
+    const { id, secret } = req.body;
+
+    if (!secret || secret !== API_SECRET) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    if (!id) return res.status(400).json({ error: 'Missing ID' });
+
+    try {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/photos?id=eq.${id}`, {
+        method: 'DELETE',
+        headers: supabaseHeaders
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete photo');
+      }
+
+      return res.status(200).json({ success: true, message: 'Photo deleted!' });
     } catch (error) {
       return res.status(500).json({ success: false, error: error.message });
     }

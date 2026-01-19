@@ -59,14 +59,17 @@ const FeedPage = {
                     <span class="feed-tag ${tagClass}" data-tag="${item.tag}">${item.tag}</span>
                 </div>
                 
+                <div class="feed-item-content">
+                    <h3 class="feed-title">${item.title}</h3>
+                </div>
+
                 ${item.image ? `
-                    <div class="feed-item-image ${item.type === 'full-reviews' ? 'book-feed-container' : ''}">
-                        <img src="${item.image}" alt="${item.title}" class="${item.type === 'full-reviews' ? 'book-feed-img' : ''}">
+                    <div class="feed-item-image ${item.type === 'full-reviews' ? 'book-feed-container' : ''} ${item.type === 'feed-photo' ? 'feed-photo-container' : ''}">
+                        <img src="${item.image}" alt="${item.title}" class="${item.type === 'full-reviews' ? 'book-feed-img' : ''} ${item.type === 'feed-photo' ? 'feed-photo-img' : ''}">
                     </div>
                 ` : ''}
                 
                 <div class="feed-item-content">
-                    <h4 class="feed-title">${item.title}</h4>
                     <p class="feed-description">${item.description}</p>
                     ${item.status === 'Reading' ? '<span class="status-indicator reading">Currently Reading 📖</span>' : ''}
                 </div>

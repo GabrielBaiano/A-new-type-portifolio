@@ -1310,47 +1310,45 @@ body,
     display: block;
     border-radius: 12px;
     transition: transform 0.5s ease;
+    object-fit: contain; /* Ensure no cropping */
+    background: rgba(0,0,0,0.1);
 }
 
 .photo-wrapper {
     position: relative;
     width: 100%;
-    height: 100%;
 }
 
 .photo-overlay {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-    padding: 20px;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent 70%);
+    padding: 24px;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    justify-content: flex-end;
+    gap: 4px;
     pointer-events: none;
+    border-radius: 12px;
 }
 
-.photo-overlay.simple {
-    background: transparent;
-    top: 0;
-    display: flex;
-    align-items: flex-end;
-    justify-content: flex-start;
-}
-
-.photo-item:hover .photo-overlay {
-    opacity: 1;
+.photo-title-display {
+    font-family: 'Sora', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: white;
+    margin: 0;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
 }
 
 .photo-desc {
-    font-size: 0.9rem;
-    color: white;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
     margin: 0;
-    font-weight: 500;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    font-weight: 400;
+    line-height: 1.4;
 }
 
 .photo-link-icon {
@@ -2384,11 +2382,65 @@ body,
     box-shadow: none !important;
 }
 
-[data-theme="light"] .floating-balloon:hover .balloon-card {
-    box-shadow: none !important;
+/* Newsletter Balloon Specifics */
+.balloon-bg-orange .newsletter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 8px;
+    pointer-events: auto;
 }
 
-/* Responsive adjustments */
+.balloon-bg-orange input[type="email"] {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: #000;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.balloon-bg-orange input[type="email"]:focus {
+    background: #fff;
+    border-color: rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.balloon-bg-orange .subscribe-btn {
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.balloon-bg-orange .subscribe-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.balloon-bg-orange .subscribe-btn:active {
+    transform: translateY(0);
+}
+
+.balloon-bg-orange .success-msg {
+    color: #000;
+    font-size: 0.9rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: fadeIn 0.3s ease;
+}
 @media (max-width: 768px) {
     /* Hide balloons completely on mobile */
     #balloon-container {
@@ -2571,6 +2623,18 @@ body.wide-layout .photos-masonry {
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+.feed-photo-container {
+    aspect-ratio: auto !important;
+    height: auto !important;
+    background: rgba(0,0,0,0.1);
+}
+
+.feed-photo-img {
+    object-fit: contain !important;
+    height: auto !important;
+    max-height: 500px;
 }
 
 .feed-item-content {

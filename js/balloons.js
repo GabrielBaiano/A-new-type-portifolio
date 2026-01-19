@@ -101,8 +101,9 @@ class BalloonSystem {
         
         // 1. Immediately place static/important balloons
         const ad = this.getAd();
+        const newsletter = this.getNewsletter();
         
-        [ad].forEach(item => {
+        [ad, newsletter].forEach(item => {
             if (this.isContextValid(item)) {
                 this.tryPlaceBalloon(item);
             }
@@ -275,12 +276,50 @@ class BalloonSystem {
         }, (delay + 0.8) * 1000);
 
         balloon.addEventListener('click', (e) => {
+            // Don't close if clicking input or button
+            if (e.target.closest('.newsletter-form')) return;
             if (e.target.closest('.balloon-link')) return;
+            
             e.stopPropagation();
             balloon.classList.add(side === 'left' ? 'balloon-exit-left' : 'balloon-exit-right');
             this.activeBalloons.delete(balloon);
             setTimeout(() => balloon.remove(), 600);
         });
+
+        // Specific logic for newsletter
+        if (data.type === 'newsletter') {
+            const btn = balloon.querySelector('.subscribe-btn');
+            const input = balloon.querySelector('input');
+            const form = balloon.querySelector('.newsletter-form');
+            
+            if (btn && input && form) {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const email = input.value;
+                    if (!email || !email.includes('@')) {
+                        input.style.borderColor = 'red';
+                        return;
+                    }
+
+                    // Success state
+                    form.innerHTML = `
+                        <div class="success-msg">
+                            <i class="fa-solid fa-circle-check"></i>
+                            Welcome to the loop! check your inbox.
+                        </div>
+                    `;
+                    
+                    // Auto-dismiss after 3s
+                    setTimeout(() => {
+                        if (balloon.parentElement) {
+                            balloon.classList.add(side === 'left' ? 'balloon-exit-left' : 'balloon-exit-right');
+                            this.activeBalloons.delete(balloon);
+                            setTimeout(() => balloon.remove(), 600);
+                        }
+                    }, 3000);
+                });
+            }
+        }
 
         this.container.appendChild(balloon);
     }
@@ -300,7 +339,7 @@ class BalloonSystem {
         const showAvatar = !isRelease && !isLeetCode && data.image; 
 
         return `
-            <div class="balloon-card organic-balloon balloon-bg-${color} ${isRelease ? 'balloon-type-release' : ''} ${isLeetCode ? 'balloon-type-leetcode' : ''}">
+            <div class="balloon-card organic-balloon balloon-bg-${color} ${isRelease ? 'balloon-type-release' : ''} ${isLeetCode ? 'balloon-type-leetcode' : ''} ${data.type === 'newsletter' ? 'balloon-type-newsletter' : ''}">
                 <div class="balloon-inner">
                     <div class="balloon-header">
                         ${showAvatar ? `<img src="${data.image}" class="balloon-avatar" alt="">` : ''}
@@ -309,10 +348,18 @@ class BalloonSystem {
                     </div>
                     ${data.title ? `<div class="balloon-title">${data.title}</div>` : ''}
                     ${formattedMessage ? `<div class="balloon-message">${formattedMessage}</div>` : ''}
-                    ${data.link ? `
+                    
+                    ${data.type === 'newsletter' ? `
+                        <div class="newsletter-form">
+                            <input type="email" placeholder="Type your email..." required>
+                            <button class="subscribe-btn">SUBSCRIBE NOW</button>
+                        </div>
+                    ` : ''}
+
+                    ${data.link && data.type !== 'newsletter' ? `
                          <a href="${data.link}" ${isLeetCode ? '' : 'target="_blank"'} class="balloon-link">
                             ${isRelease ? 'VIEW PATCH NOTES →' : 
-                              (isLeetCode ? 'VIEW RESOLUTION →' : (data.linkText || 'LEARN MORE →'))}
+                               (isLeetCode ? 'VIEW RESOLUTION →' : (data.linkText || 'LEARN MORE →'))}
                          </a>
                     ` : ''}
                 </div>
@@ -344,10 +391,23 @@ class BalloonSystem {
                     return true;
                 });
 
-                return [ad, ...dynamicBalloons];
+                return [ad, newsletter, ...dynamicBalloons];
             }
         } catch (error) { }
-        return [this.getAd(), ...this.getFallbackData()];
+        return [this.getAd(), this.getNewsletter(), ...this.getFallbackData()];
+    }
+
+    getNewsletter() {
+        return {
+            id: "newsletter-orange",
+            type: "newsletter",
+            name: "NEWSLETTER",
+            title: "DON'T MISS THE UPDATES",
+            message: "Join my circle for exclusive tech deep dives and project insights.",
+            badge: "Interactive",
+            color: "orange",
+            contexts: ['home', 'projects', 'academic', 'feed', 'photos']
+        };
     }
 
     getAd() {
