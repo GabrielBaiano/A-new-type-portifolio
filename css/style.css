@@ -5191,9 +5191,9 @@ body.detail-mode {
     opacity: 0;
     transition: transform 0.2s ease, filter 0.2s ease;
     
-    /* Force font family to ensure icon renders */
-    font-family: "Font Awesome 6 Free";
-    font-weight: 900;
+    /* SVG Styling */
+    vertical-align: -0.125em;
+    fill: currentColor;
 }
 
 .bio-location-pin:hover {
