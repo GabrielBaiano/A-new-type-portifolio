@@ -22,6 +22,29 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("Data preload failed:", err);
         if (loader) loader.classList.add('hidden');
     });
+
+    // 3. Loo-Kee Easter Egg (Zoom Detection)
+    function checkLooKee() {
+        const looKee = document.getElementById('loo-kee');
+        if (looKee) {
+            // "Huge Alt Zoom" = very large window.innerWidth
+            // Normal 1080p width is 1920. 25% zoom makes it 1920 * 4 = 7680.
+            // Let's set the threshold to > 2500px to catch ~75% zoom and below.
+            if (window.innerWidth > 2500) {
+                looKee.style.display = 'block';
+                if (!looKee.hasAttribute('data-seen')) {
+                    looKee.style.animation = 'peek-in 0.5s ease-out forwards';
+                    looKee.setAttribute('data-seen', 'true');
+                }
+            } else {
+                looKee.style.display = 'none';
+                looKee.removeAttribute('data-seen');
+            }
+        }
+    }
+    
+    window.addEventListener('resize', checkLooKee);
+    setTimeout(checkLooKee, 1000); // Check on init
 });
 
 /**

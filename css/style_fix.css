@@ -82,7 +82,9 @@
 }
 
 /* Updated Balloon Colors */
-.balloon-bg-blue { background-color: #0000FE !important; }
-.balloon-bg-green { background-color: #16B900 !important; }
-.balloon-bg-pink { background-color: #FF0084 !important; }
-.balloon-bg-orange { background-color: #FF5900 !important; }
+
+@keyframes peek-in {
+    0% { transform: translateY(100%) rotate(-10deg); opacity: 0; }
+    60% { transform: translateY(-10%) rotate(5deg); opacity: 1; }
+    100% { transform: translateY(0) rotate(0deg); opacity: 1; }
+}

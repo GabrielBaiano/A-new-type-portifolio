@@ -199,7 +199,7 @@ class BalloonSystem {
         if (!this.hasEnoughSpace()) return;
         const mainContainer = document.querySelector('.main-container');
         const margin = mainContainer ? (window.innerWidth - mainContainer.offsetWidth) / 2 : 500;
-        const balloonWidth = 380;
+        const balloonWidth = 418;
         const xMin = 20;
         const xMax = margin - balloonWidth - 40;
 
@@ -234,7 +234,7 @@ class BalloonSystem {
         const mainContainer = document.querySelector('.main-container');
         const margin = mainContainer ? (window.innerWidth - mainContainer.offsetWidth) / 2 : 500;
         
-        const balloonWidth = 380;
+        const balloonWidth = 418;
         const xMin = 20;
         const xMax = margin - balloonWidth - 40;
         const yMin = 50;
@@ -339,14 +339,6 @@ class BalloonSystem {
                         </div>
                     `;
                     
-                    // Auto-dismiss after 3s
-                    setTimeout(() => {
-                        if (balloon.parentElement) {
-                            balloon.classList.add(side === 'left' ? 'balloon-exit-left' : 'balloon-exit-right');
-                            this.activeBalloons.delete(balloon);
-                            setTimeout(() => balloon.remove(), 600);
-                        }
-                    }, 3000);
                 });
             }
         }
