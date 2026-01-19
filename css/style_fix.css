@@ -382,7 +382,7 @@
     left: 100%;
     top: 0;
     margin-left: 12px;
-    width: 140px;
+    width: 200px; /* Increased from 140px for better control */
     background: rgba(28, 28, 30, 0.95);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
