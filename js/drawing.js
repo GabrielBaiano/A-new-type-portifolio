@@ -44,15 +44,44 @@ class DrawingSystem {
         }, { passive: false });
         this.canvas.addEventListener('touchend', () => this.stopDrawing());
 
-        // Tools
+        // Tools & Pop-out Panel
         const tools = ['pencil', 'spray', 'eraser', 'bucket', 'rect', 'circle'];
+        const optionsPanel = document.getElementById('tool-options-panel');
+        const toolLabel = document.getElementById('active-tool-name');
+
         tools.forEach(t => {
             const btn = document.getElementById(`tool-${t}`);
-            if (btn) btn.addEventListener('click', () => {
+            if (btn) btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
+                // If clicking the same active tool, toggle panel
+                const wasActive = btn.classList.contains('active');
+                
                 this.tool = t;
                 tools.forEach(other => document.getElementById(`tool-${other}`)?.classList.remove('active'));
                 btn.classList.add('active');
+
+                if (toolLabel) toolLabel.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+                
+                if (optionsPanel) {
+                    if (wasActive) {
+                        optionsPanel.classList.toggle('active');
+                    } else {
+                        optionsPanel.classList.add('active');
+                    }
+                    
+                    // Hide wiggle for bucket
+                    const wiggleOpt = document.getElementById('wiggle-option');
+                    if (wiggleOpt) wiggleOpt.style.display = (t === 'bucket') ? 'none' : 'flex';
+                }
             });
+        });
+
+        // Close panel when clicking outside sidebar
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#drawing-sidebar') && optionsPanel) {
+                optionsPanel.classList.remove('active');
+            }
         });
 
         // Palette
@@ -61,6 +90,9 @@ class DrawingSystem {
                 this.color = swatch.dataset.color;
                 document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
                 swatch.classList.add('active');
+                // Update custom input value to match
+                const customInput = document.getElementById('draw-color');
+                if (customInput) customInput.value = this.color;
             });
         });
 
@@ -73,7 +105,13 @@ class DrawingSystem {
         }
 
         const sizeInput = document.getElementById('draw-size');
-        if (sizeInput) sizeInput.addEventListener('input', (e) => this.size = parseInt(e.target.value));
+        const sizeVal = document.getElementById('size-val');
+        if (sizeInput) {
+            sizeInput.addEventListener('input', (e) => {
+                this.size = parseInt(e.target.value);
+                if (sizeVal) sizeVal.textContent = this.size;
+            });
+        }
 
         const clearBtn = document.getElementById('draw-clear');
         if (clearBtn) clearBtn.addEventListener('click', () => this.clear());
@@ -94,9 +132,13 @@ class DrawingSystem {
         let startX, startY, initialX, initialY;
 
         handle.addEventListener('mousedown', (e) => {
-            if (e.target.closest('button')) return; // Don't drag if clicking buttons
+            if (e.target.closest('button')) return;
             isDragging = true;
             sidebar.style.transition = 'none';
+            // Also disable panel transition for smoother movement
+            const optionsPanel = document.getElementById('tool-options-panel');
+            if (optionsPanel) optionsPanel.style.transition = 'none';
+
             startX = e.clientX;
             startY = e.clientY;
             initialX = sidebar.offsetLeft;
@@ -115,7 +157,11 @@ class DrawingSystem {
         window.addEventListener('mouseup', () => {
             if (!isDragging) return;
             isDragging = false;
-            sidebar.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s, background 0.3s, width 0.3s'; 
+            sidebar.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s, background 0.3s'; 
+            
+            const optionsPanel = document.getElementById('tool-options-panel');
+            if (optionsPanel) optionsPanel.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            
             document.body.style.cursor = 'default';
         });
     }
