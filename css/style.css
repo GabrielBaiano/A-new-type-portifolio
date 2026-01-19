@@ -5190,6 +5190,10 @@ body.detail-mode {
     animation-delay: 0.5s;
     opacity: 0;
     transition: transform 0.2s ease, filter 0.2s ease;
+    
+    /* Force font family to ensure icon renders */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
 }
 
 .bio-location-pin:hover {

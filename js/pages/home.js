@@ -38,7 +38,7 @@ const HomePage = {
                 <!-- Bio -->
                 <div class="bio">
                     <p>
-Welcome, i'm a Brazilian <i class="fa-solid fa-map-pin bio-location-pin" title="See location"></i> Full-Stack Developer with over 3 years of experience, and I'm also part of the <strong>YellowHood agency</strong>.
+Welcome, i'm a Brazilian <i class="fas fa-map-marker-alt bio-location-pin" title="See location"></i> Full-Stack Developer with over 3 years of experience, and I'm also part of the <strong>YellowHood agency</strong>.
                     </p>
                     <br>
                     <p>
