@@ -77,5 +77,24 @@ export default async function handler(req, res) {
     }
   }
 
+  if (req.method === 'DELETE') {
+    const { id, secret } = req.body;
+    if (secret !== API_SECRET) return res.status(401).json({ error: 'Unauthorized' });
+    if (!id) return res.status(400).json({ error: 'Missing ID' });
+
+    try {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/feed_posts?id=eq.${id}`, {
+        method: 'DELETE',
+        headers: supabaseHeaders
+      });
+
+      if (!response.ok) throw new Error('Failed to delete from database');
+
+      return res.status(200).json({ success: true, message: 'Post deleted!' });
+    } catch (error) {
+      return res.status(500).json({ success: false, error: error.message });
+    }
+  }
+
   return res.status(405).json({ error: 'Method not allowed' });
 }

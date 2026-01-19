@@ -221,11 +221,22 @@ const AdminPage = {
                             <label>Tags (Comma separated)</label>
                             <input type="text" id="book-tags" value="${(this.editingItem?.tags || []).join(', ')}" placeholder="AI, Math, SC-FI">
                         </div>
+                        <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                            <input type="checkbox" id="book-is-special" ${this.editingItem?.is_special === true ? 'checked' : ''} style="width: auto;">
+                            <label for="book-is-special" style="margin-bottom: 0;">Mark as Special Recommendation</label>
+                        </div>
+                        <div class="form-group">
+                            <label>Review Content (Markdown)</label>
+                            <textarea id="book-content" style="height: 200px; font-family: monospace;">${this.editingItem?.content || ''}</textarea>
+                        </div>
                         <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
                             <input type="checkbox" id="book-show-in-feed" ${this.editingItem?.show_in_feed !== false ? 'checked' : ''} style="width: auto;">
                             <label for="book-show-in-feed" style="margin-bottom: 0;">Show in Public Feed</label>
                         </div>
-                        <button type="submit" class="btn-save">Save Book</button>
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button type="submit" class="btn-save" style="flex: 1;">Save Book</button>
+                            ${this.editingItem?.id ? `<button type="button" class="btn-delete" id="btn-delete-book" style="background: var(--accent-red); color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer;">Delete</button>` : ''}
+                        </div>
                     </form>
                 </div>
                 <div class="panel-preview">
@@ -328,7 +339,10 @@ const AdminPage = {
                             <input type="checkbox" id="post-show-toc" ${this.editingItem?.show_toc === true ? 'checked' : ''} style="width: auto;">
                             <label for="post-show-toc" style="margin-bottom: 0;">Show Table of Contents (TOC)</label>
                         </div>
-                        <button type="submit" class="btn-save">Publish to Feed</button>
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button type="submit" class="btn-save" style="flex: 1;">Publish to Feed</button>
+                            ${this.editingItem?.id ? `<button type="button" class="btn-delete" id="btn-delete-post" style="background: var(--accent-red); color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer;">Delete</button>` : ''}
+                        </div>
                     </form>
                 </div>
                 <div class="panel-preview">
@@ -756,6 +770,30 @@ const AdminPage = {
                 alert('Error saving post: ' + (errData.error || 'Unknown error'));
             }
         });
+
+        const deleteBtn = document.getElementById('btn-delete-post');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', async () => {
+                if (!confirm('Are you sure you want to delete this post?')) return;
+                
+                const secret = sessionStorage.getItem('admin_secret');
+                const id = document.getElementById('post-id').value;
+
+                const res = await fetch('/api/feed', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, secret })
+                });
+
+                if (res.ok) {
+                    alert('Post deleted!');
+                    this.editingItem = null;
+                    this.loadInitialData();
+                } else {
+                    alert('Delete failed.');
+                }
+            });
+        }
     },
 
     setupLeetCodeLogic() {
@@ -908,6 +946,8 @@ const AdminPage = {
                 mdLink: document.getElementById('book-md').value,
                 tags: document.getElementById('book-tags').value.split(',').map(t => t.trim()).filter(Boolean),
                 show_in_feed: document.getElementById('book-show-in-feed').checked,
+                is_special: document.getElementById('book-is-special').checked,
+                content: document.getElementById('book-content').value,
                 secret: sessionStorage.getItem('admin_secret')
             };
 
@@ -925,6 +965,30 @@ const AdminPage = {
                 alert('Error saving book: ' + (errData.error || 'Unknown error'));
             }
         });
+
+        const deleteBtn = document.getElementById('btn-delete-book');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', async () => {
+                if (!confirm('Are you sure you want to delete this book? This will also remove Github assets.')) return;
+                
+                const secret = sessionStorage.getItem('admin_secret');
+                const id = document.getElementById('book-id').value;
+
+                const res = await fetch('/api/books', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, secret })
+                });
+
+                if (res.ok) {
+                    alert('Book deleted!');
+                    this.editingItem = null;
+                    this.loadInitialData();
+                } else {
+                    alert('Delete failed.');
+                }
+            });
+        }
     },
 
     setupGuidesLogic() {

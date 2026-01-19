@@ -1,26 +1,27 @@
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Initialize SPA System immediately to prevent hanging
+    initializeSPA();
+    initializeNavigation();
+
+    // 2. Handle Loader Lifecycle
     const loader = document.getElementById('site-loader');
     const startTime = Date.now();
     const MIN_LOAD_TIME = 800; // ms
 
-    // Preload all data first
-    await DataService.preloadAllData();
-    
-    // Calculate how much longer we should wait for a smooth animation
-    const elapsedTime = Date.now() - startTime;
-    const remainingTime = Math.max(0, MIN_LOAD_TIME - elapsedTime);
+    // Preload all data in background
+    DataService.preloadAllData().then(() => {
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, MIN_LOAD_TIME - elapsedTime);
 
-    setTimeout(() => {
-        if (loader) {
-            loader.classList.add('hidden');
-        }
-    }, remainingTime);
-    
-    // Initialize SPA System
-    initializeSPA();
-    
-    // Initialize navigation
-    initializeNavigation();
+        setTimeout(() => {
+            if (loader) {
+                loader.classList.add('hidden');
+            }
+        }, remainingTime);
+    }).catch(err => {
+        console.error("Data preload failed:", err);
+        if (loader) loader.classList.add('hidden');
+    });
 });
 
 /**
