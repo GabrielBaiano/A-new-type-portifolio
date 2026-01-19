@@ -48,11 +48,6 @@ class BalloonSystem {
                 if (safe) {
                     if (this.container) this.container.style.opacity = '1';
                     this.repositionBalloons();
-                    
-                    // User Request: If returning to valid size, spawn immediately
-                    if (this.activeBalloons.size === 0) {
-                        this.initialFill();
-                    }
                 } else {
                     if (this.container) this.container.style.opacity = '0';
                     this.clearBalloons();
@@ -75,8 +70,7 @@ class BalloonSystem {
             if (document.visibilityState === "visible") {
                 // Force restart loop if it was running before
                 if (this.isRunning) {
-                   this.replenish(); // Immediate spawn
-                   this.startReplenishment(); // Restart loop
+                   this.startReplenishment(); // Restart loop (slow)
                 } else {
                     this.start();
                 }
@@ -140,26 +134,14 @@ class BalloonSystem {
         }
 
 
-        // 3. Rapid spawn sequence with forced density
+        // 3. Fast initial spawn sequence
         let delay = 0;
-        const spawnInterval = 80; // Rapid fire!
+        const spawnInterval = 80; // Rapid fire on load!
 
         for (const item of priorityQueue) {
             setTimeout(() => {
                 if (this.isRunning) {
-                    // Try normal placement first
-                    let placed = this.tryPlaceBalloon(item);
-                    
-                    // If failed and we have few balloons, try harder with "relaxed" checking logic
-                    // logic inside tryPlaceBalloon already handles some retries, but we might want to
-                    // force it more aggressively for the first batch.
-                    if (!placed && this.activeBalloons.size < 5) { // Force at least 5
-                         // Retry with a slightly modified strategy or just let the loop handle it
-                         // Actually, let's just rely on the updated tryPlaceBalloon which has increased attempts
-                         // and we could pass a flag 'isInitial' to maybe allow overlap if really needed, 
-                         // but let's stick to standard for now as we increased attempts to 50.
-                         this.tryPlaceBalloon(item); 
-                    }
+                    this.tryPlaceBalloon(item);
                 }
             }, delay);
             delay += spawnInterval;
@@ -173,7 +155,8 @@ class BalloonSystem {
 
     startReplenishment() {
         this.stopReplenishment();
-        const nextTime = 5000 + Math.random() * 7000; // 5-12s
+        // 2 to 10 minutes (Extreme delay)
+        const nextTime = 120000 + Math.random() * 480000; 
         this.replenishmentTimer = setTimeout(async () => {
             await this.replenish();
             this.startReplenishment();
@@ -504,4 +487,4 @@ class BalloonSystem {
 
 const balloonSystem = new BalloonSystem();
 window.balloonSystem = balloonSystem;
-setTimeout(() => balloonSystem.start(), 500);
+setTimeout(() => balloonSystem.start(), 500); // Back to quick start
