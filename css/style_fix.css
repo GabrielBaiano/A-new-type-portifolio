@@ -132,3 +132,64 @@
     pointer-events: auto; /* Active by default or only when HUD hidden? */
     display: block;
 }
+
+/* 7. Drawing Toolbar Styles */
+.drawing-toolbar {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: rgba(20, 20, 20, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 8px 16px;
+    border-radius: 50px;
+    display: flex;
+    gap: 16px;
+    z-index: 9999;
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.hud-hidden .drawing-toolbar {
+    transform: translateX(-50%) translateY(0);
+}
+
+.tool-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.drawing-toolbar input[type='color'] {
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    background: none;
+}
+
+.drawing-toolbar input[type='range'] {
+    width: 80px;
+    cursor: pointer;
+}
+
+.drawing-toolbar button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 5px;
+    transition: transform 0.2s, color 0.2s;
+}
+
+.drawing-toolbar button:hover {
+    transform: scale(1.2);
+    color: var(--accent-blue);
+}
+
+.drawing-toolbar button.active {
+    color: var(--accent-blue);
+}

@@ -41,6 +41,20 @@ class DrawingSystem {
             this.draw(e.touches[0]);
         }, { passive: false });
         this.canvas.addEventListener('touchend', () => this.stopDrawing());
+
+        // Toolbar Controls
+        const colorInput = document.getElementById('draw-color');
+        const sizeInput = document.getElementById('draw-size');
+        const clearBtn = document.getElementById('draw-clear');
+        const wiggleBtn = document.getElementById('draw-wiggle-toggle');
+
+        if (colorInput) colorInput.addEventListener('input', (e) => this.color = e.target.value);
+        if (sizeInput) sizeInput.addEventListener('input', (e) => this.size = parseInt(e.target.value));
+        if (clearBtn) clearBtn.addEventListener('click', () => this.clear());
+        if (wiggleBtn) wiggleBtn.addEventListener('click', () => {
+            wiggleBtn.classList.toggle('active');
+            this.wiggleAmount = wiggleBtn.classList.contains('active') ? 2 : 0;
+        });
     }
 
     resize() {
