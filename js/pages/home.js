@@ -166,13 +166,11 @@ Welcome, i'm a Brazilian Full-Stack Developer with over 3 years of experience, a
 
             <!-- Card 3: Location Map -->
             <div class="card location-card">
-                <h2 class="section-title">Where am I?</h2>
                 <div id="location-map-container" class="map-wrapper">
                     <div id="home-map"></div>
                     <div class="map-overlay">
                         <div class="location-details">
                             <p id="distance-text">Calculating distance to you...</p>
-                            <span class="footnote">According to your IP address • Itanhaém, SP</span>
                         </div>
                     </div>
                 </div>
@@ -272,7 +270,7 @@ Welcome, i'm a Brazilian Full-Stack Developer with over 3 years of experience, a
                 const distText = document.getElementById('distance-text');
                 if (distText) {
                     const visitorPlace = data.city ? `${data.city}, ${data.country_name}` : data.country_name;
-                    distText.innerHTML = `I'm from <strong>Itanhaém, Brazil</strong>, roughly <span class="highlight-dist">${distance.toLocaleString('pt-BR')}km</span> away from <strong>${visitorPlace}</strong>.`;
+                    distText.innerHTML = `I’m from <strong>Itanhaém, Brazil</strong>, roughly <span class="highlight-dist">${distance.toLocaleString('pt-BR')}km</span> away from your current location, according to your IP address.`;
                 }
 
                 // 7. Draw Connection Line (Dashed Arc)
