@@ -439,7 +439,7 @@ class BalloonSystem {
             message: "Transform your idea into an elite digital product. Strategy, Design, and Full-stack.",
             badge: "Agency",
             color: "blue", // Force blue for ad
-            link: "https://yellowhood.com.br",
+            link: "https://www.yellowhood.com.br",
             contexts: ['home', 'projects', 'academic', 'feed', 'photos']
         };
     }

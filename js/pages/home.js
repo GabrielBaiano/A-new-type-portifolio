@@ -168,10 +168,10 @@ Welcome, i'm a Brazilian Full-Stack Developer with over 3 years of experience, a
             <div class="card location-card">
                 <div id="location-map-container" class="map-wrapper">
                     <div id="home-map"></div>
-                    <div class="map-overlay">
-                        <div class="location-details">
-                            <p id="distance-text">Calculating distance to you...</p>
-                        </div>
+                </div>
+                <div class="location-footer">
+                    <div class="location-details">
+                        <p id="distance-text">Calculating distance to you...</p>
                     </div>
                 </div>
             </div>
@@ -221,6 +221,16 @@ Welcome, i'm a Brazilian Full-Stack Developer with over 3 years of experience, a
 
         // Initialize Location Map
         this.initLocationMap();
+
+        // Theme Switch Observer for Map
+        this.themeObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+                    this.updateMapTheme();
+                }
+            });
+        });
+        this.themeObserver.observe(document.documentElement, { attributes: true });
     },
 
     async initLocationMap() {
@@ -231,17 +241,17 @@ Welcome, i'm a Brazilian Full-Stack Developer with over 3 years of experience, a
         const myLocation = { lat: -24.183, lon: -46.791 };
 
         // 1. Initialize Leaflet Map
-        const map = L.map('home-map', {
+        this.map = L.map('home-map', {
             zoomControl: false,
             attributionControl: false,
             scrollWheelZoom: false,
             dragging: false
         }).setView([myLocation.lat, myLocation.lon], 4);
 
-        // 2. Add Dark Theme Tiles (CartoDB Dark Matter)
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        // 2. Add Theme Tiles
+        this.tileLayer = L.tileLayer(this.getTileUrl(), {
             maxZoom: 19
-        }).addTo(map);
+        }).addTo(this.map);
 
         // 3. Add Pulse Marker for Me
         const myIcon = L.divIcon({
@@ -250,7 +260,7 @@ Welcome, i'm a Brazilian Full-Stack Developer with over 3 years of experience, a
             iconSize: [20, 20],
             iconAnchor: [10, 10]
         });
-        L.marker([myLocation.lat, myLocation.lon], { icon: myIcon }).addTo(map);
+        L.marker([myLocation.lat, myLocation.lon], { icon: myIcon }).addTo(this.map);
 
         try {
             // 4. Get Visitor Location (IP-based)
@@ -269,16 +279,16 @@ Welcome, i'm a Brazilian Full-Stack Developer with over 3 years of experience, a
                 // 6. Update UI
                 const distText = document.getElementById('distance-text');
                 if (distText) {
-                    const visitorPlace = data.city ? `${data.city}, ${data.country_name}` : data.country_name;
                     distText.innerHTML = `I’m from <strong>Itanhaém, Brazil</strong>, roughly <span class="highlight-dist">${distance.toLocaleString('pt-BR')}km</span> away from your current location, according to your IP address.`;
                 }
 
                 // 7. Draw Connection Line (Dashed Arc)
                 const visitorMarker = L.circleMarker([visitorLoc.lat, visitorLoc.lon], {
                     radius: 5,
-                    color: '#fff',
-                    fillOpacity: 1
-                }).addTo(map);
+                    color: '#ff2d55',
+                    fillOpacity: 1,
+                    weight: 2
+                }).addTo(this.map);
 
                 const lineCoords = [
                     [myLocation.lat, myLocation.lon],
@@ -290,15 +300,31 @@ Welcome, i'm a Brazilian Full-Stack Developer with over 3 years of experience, a
                     weight: 2,
                     dashArray: '5, 10',
                     className: 'map-connection-line'
-                }).addTo(map);
+                }).addTo(this.map);
 
                 // 8. Adjust view to fit both
-                map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+                this.map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
             }
         } catch (error) {
             console.error('Error fetching visitor location:', error);
             const distText = document.getElementById('distance-text');
             if (distText) distText.innerText = "Somewhere on Earth, and I'm here in Itanhaém, Brazil.";
+        }
+    },
+
+    getTileUrl() {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        return isLight 
+            ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+            : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+    },
+
+    updateMapTheme() {
+        if (this.tileLayer && this.map) {
+            this.map.removeLayer(this.tileLayer);
+            this.tileLayer = L.tileLayer(this.getTileUrl(), {
+                maxZoom: 19
+            }).addTo(this.map);
         }
     },
 
@@ -315,6 +341,11 @@ Welcome, i'm a Brazilian Full-Stack Developer with over 3 years of experience, a
     },
 
     onUnmount() {
-        // Cleanup se necessário
+        if (this.themeObserver) {
+            this.themeObserver.disconnect();
+        }
+        if (this.map) {
+            this.map.remove();
+        }
     }
 };

@@ -1,6 +1,6 @@
 ![Agencia Yellow Hood Website](assets/images/yellowhoodsite.png)
 
-[Check the website](https://yellowhood.com.br) | [GitHub](https://github.com/Agencia-YellowHood)
+[Visitar Site](https://www.yellowhood.com.br) | [GitHub](https://github.com/Agencia-YellowHood)
 
 ## Description
 
