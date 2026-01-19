@@ -38,7 +38,7 @@ const HomePage = {
                 <!-- Bio -->
                 <div class="bio">
                     <p>
-Welcome, i'm a Brazilian Full-Stack Developer with over 3 years of experience, and I'm also part of the <strong>YellowHood agency</strong>.
+Welcome, i'm a Brazilian <i class="fa-solid fa-location-dot bio-location-pin" title="See location"></i> Full-Stack Developer with over 3 years of experience, and I'm also part of the <strong>YellowHood agency</strong>.
                     </p>
                     <br>
                     <p>
@@ -197,6 +197,25 @@ Welcome, i'm a Brazilian Full-Stack Developer with over 3 years of experience, a
             // Click manual para flipar
             avatarContainer.addEventListener('click', () => {
                 avatarFlipper.classList.toggle('flip');
+            });
+        }
+
+        // Feature: Bios Pin Scroll
+        const bioPin = document.querySelector('.bio-location-pin');
+        if (bioPin) {
+            bioPin.addEventListener('click', () => {
+                const locationCard = document.querySelector('.location-card');
+                if (locationCard) {
+                    locationCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Optional: Highlight map slightly upon arrival
+                    setTimeout(() => {
+                       locationCard.style.transition = 'box-shadow 0.5s ease';
+                       locationCard.style.boxShadow = '0 0 20px rgba(255, 45, 85, 0.3)';
+                       setTimeout(() => {
+                           locationCard.style.boxShadow = '';
+                       }, 1000);
+                    }, 500);
+                }
             });
         }
 
