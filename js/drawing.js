@@ -19,6 +19,7 @@ class DrawingSystem {
         this.wiggleAmount = 2;
 
         this.init();
+        this.initDragging();
         this.animate();
     }
 
@@ -43,7 +44,7 @@ class DrawingSystem {
         }, { passive: false });
         this.canvas.addEventListener('touchend', () => this.stopDrawing());
 
-        // Toolbar Controls
+        // Toolbar Controls (Now Sidebar)
         const colorInput = document.getElementById('draw-color');
         const sizeInput = document.getElementById('draw-size');
         const clearBtn = document.getElementById('draw-clear');
@@ -68,6 +69,40 @@ class DrawingSystem {
             this.tool = 'spray';
             sprayTool.classList.add('active');
             if (pencilTool) pencilTool.classList.remove('active');
+        });
+    }
+
+    initDragging() {
+        const sidebar = document.getElementById('drawing-sidebar');
+        const handle = document.getElementById('sidebar-handle');
+        if (!sidebar || !handle) return;
+
+        let isDragging = false;
+        let startX, startY, initialX, initialY;
+
+        handle.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            sidebar.style.transition = 'none'; // Disable transition during drag
+            startX = e.clientX;
+            startY = e.clientY;
+            initialX = sidebar.offsetLeft;
+            initialY = sidebar.offsetTop;
+            document.body.style.cursor = 'grabbing';
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            sidebar.style.left = `${initialX + dx}px`;
+            sidebar.style.top = `${initialY + dy}px`;
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            sidebar.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s'; 
+            document.body.style.cursor = 'default';
         });
     }
 
