@@ -5121,6 +5121,11 @@ body.detail-mode {
     display: flex;
     align-items: center;
     justify-content: center;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 0;
+    width: 0;
+    height: 0;
 }
 
 .custom-pulse-marker .pulse {
@@ -5129,7 +5134,11 @@ body.detail-mode {
     background: rgba(255, 45, 85, 0.4);
     border-radius: 50%;
     position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     animation: marker-pulse 2s infinite;
+    pointer-events: none;
 }
 
 .custom-pulse-marker .dot {
@@ -5139,11 +5148,15 @@ body.detail-mode {
     border: 2px solid white;
     border-radius: 50%;
     z-index: 2;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 @keyframes marker-pulse {
-    0% { transform: scale(0.5); opacity: 0.8; }
-    100% { transform: scale(2.5); opacity: 0; }
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0.8; }
+    100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
 }
 
 /* Connection Line Animation */

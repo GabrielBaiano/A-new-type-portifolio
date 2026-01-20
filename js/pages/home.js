@@ -308,8 +308,8 @@ Welcome, i'm a Brazilian<svg class="bio-location-pin" xmlns="http://www.w3.org/2
         const myIcon = L.divIcon({
             className: 'custom-pulse-marker',
             html: '<div class="pulse"></div><div class="dot"></div>',
-            iconSize: [20, 20],
-            iconAnchor: [10, 10]
+            iconSize: [0, 0],
+            iconAnchor: [0, 0]
         });
         L.marker([myLocation.lat, myLocation.lon], { icon: myIcon }).addTo(this.map);
 
