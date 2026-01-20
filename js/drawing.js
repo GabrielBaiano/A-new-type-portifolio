@@ -476,10 +476,10 @@ class DrawingSystem {
                 this.animatingStroke = {
                     points: [],
                     color: word.color,
-                    size: 8 * scale, 
+                    size: (word.size || 8) * scale, 
                     tool: 'pencil',
                     tipShape: 'round',
-                    brushType: 'fountain',
+                    brushType: word.brushType || 'fountain',
                     startTime: Date.now()
                 };
                 this.strokes.push(this.animatingStroke);
