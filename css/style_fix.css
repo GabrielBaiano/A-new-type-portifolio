@@ -369,9 +369,14 @@ body.hud-hidden .bottom-nav {
     overflow: hidden;
 }
 
-[data-theme="light"] .color-custom-btn {
-    background: rgba(0, 0, 0, 0.02);
-    border-color: rgba(0, 0, 0, 0.1);
+.color-custom-btn.active {
+    border-color: white;
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 12px rgba(255,255,255,0.2);
+}
+
+[data-theme="light"] .color-custom-btn.active {
+    border-color: #000;
 }
 
 /* Options & Panels */

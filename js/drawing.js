@@ -12,9 +12,10 @@ class DrawingSystem {
         this.strokes = [];
         this.currentStroke = null;
         
-        this.color = '#0000FE'; // Default blue (matches card)
-        this.size = 4;
+        this.color = '#ffffff'; 
+        this.size = 6;
         this.tool = 'pencil';
+        this.brushType = 'standard';
         this.wiggleSpeed = 0.005;
         this.wiggleAmount = 2;
 
@@ -45,7 +46,7 @@ class DrawingSystem {
         this.canvas.addEventListener('touchend', () => this.stopDrawing());
 
         // Tools & Pop-out Panel
-        const tools = ['pencil', 'spray', 'eraser', 'bucket', 'rect', 'circle'];
+        const tools = ['pencil', 'spray', 'eraser', 'bucket', 'rect', 'circle', 'eyedropper'];
         const optionsPanel = document.getElementById('tool-options-panel');
         const toolLabel = document.getElementById('active-tool-name');
 
@@ -70,9 +71,13 @@ class DrawingSystem {
                         optionsPanel.classList.add('active');
                     }
                     
-                    // Hide wiggle for bucket
+                    // Hide wiggle for bucket/eyedropper
                     const wiggleOpt = document.getElementById('wiggle-option');
-                    if (wiggleOpt) wiggleOpt.style.display = (t === 'bucket') ? 'none' : 'flex';
+                    if (wiggleOpt) wiggleOpt.style.display = (t === 'bucket' || t === 'eyedropper') ? 'none' : 'flex';
+                    
+                    // Show brush types only for pencil
+                    const brushTypeOpt = document.getElementById('brush-type-option');
+                    if (brushTypeOpt) brushTypeOpt.style.display = (t === 'pencil') ? 'flex' : 'none';
                 }
             });
         });
@@ -97,6 +102,7 @@ class DrawingSystem {
                 this.color = swatch.dataset.color;
                 document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
                 swatch.classList.add('active');
+                document.getElementById('custom-color-trigger')?.classList.remove('active');
                 // Update custom input value to match
                 const customInput = document.getElementById('draw-color');
                 if (customInput) customInput.value = this.color;
@@ -108,6 +114,7 @@ class DrawingSystem {
             colorInput.addEventListener('input', (e) => {
                 this.color = e.target.value;
                 document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+                document.getElementById('custom-color-trigger')?.classList.add('active');
             });
         }
 
@@ -130,6 +137,20 @@ class DrawingSystem {
         if (wiggleBtn) wiggleBtn.addEventListener('click', () => {
             wiggleBtn.classList.toggle('active');
             this.wiggleAmount = wiggleBtn.classList.contains('active') ? 2 : 0;
+        });
+
+        // Initialize custom color trigger as active since default is white
+        document.getElementById('custom-color-trigger')?.classList.add('active');
+
+        // Brush Types
+        const brushTypes = ['standard', 'fountain'];
+        brushTypes.forEach(bt => {
+            const btn = document.getElementById(`brush-${bt}`);
+            if (btn) btn.addEventListener('click', () => {
+                this.brushType = bt;
+                brushTypes.forEach(other => document.getElementById(`brush-${other}`)?.classList.remove('active'));
+                btn.classList.add('active');
+            });
         });
     }
 
@@ -190,8 +211,8 @@ class DrawingSystem {
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
 
-        if (this.tool === 'bucket') {
-            this.handleBucket(x, y);
+        if (this.tool === 'bucket' || this.tool === 'eyedropper') {
+            this.handlePickOrRecolor(x, y, this.tool);
             return;
         }
 
@@ -201,6 +222,7 @@ class DrawingSystem {
             color: this.color,
             size: this.size,
             tool: this.tool,
+            brushType: this.tool === 'pencil' ? this.brushType : 'standard',
             startTime: Date.now(),
             startPos: { x, y },
             endPos: { x, y }
@@ -249,18 +271,38 @@ class DrawingSystem {
 
             this.currentStroke.points.push({ x, y, cluster: points, mainOffset: Math.random() * Math.PI * 2 });
         } else {
-            this.currentStroke.points.push({ x, y, offset: Math.random() * Math.PI * 2 });
+            let pointSize = this.currentStroke.size;
+            let time = Date.now();
+
+            if (this.currentStroke.brushType === 'fountain') {
+                let speed = 0;
+                if (this.currentStroke.points.length > 0) {
+                    const last = this.currentStroke.points[this.currentStroke.points.length - 1];
+                    const dist = Math.hypot(x - last.x, y - last.y);
+                    const dt = time - (last.time || time);
+                    speed = dist / Math.max(1, dt);
+                }
+                // Inversely proportional: fast = thin (min 20% size), slow = thick (100% size)
+                const factor = Math.max(0.2, Math.min(1.0, 1.2 - speed * 0.4));
+                pointSize = this.currentStroke.size * factor;
+            }
+
+            this.currentStroke.points.push({ 
+                x, y, 
+                size: pointSize, 
+                time: time,
+                offset: Math.random() * Math.PI * 2 
+            });
         }
     }
 
-    handleBucket(x, y) {
+    handlePickOrRecolor(x, y, mode) {
         // Find stroke closest to the click point
         let closestStroke = null;
         let minDistance = 30; // Threshold
 
         this.strokes.forEach(stroke => {
             if (stroke.tool === 'rect' || stroke.tool === 'circle') {
-                // Check if inside or near border? For now simple distance to start/end points
                 const dStart = Math.hypot(stroke.startPos.x - x, stroke.startPos.y - y);
                 const dEnd = Math.hypot(stroke.endPos.x - x, stroke.endPos.y - y);
                 if (dStart < minDistance || dEnd < minDistance) {
@@ -279,7 +321,19 @@ class DrawingSystem {
         });
 
         if (closestStroke) {
-            closestStroke.color = this.color;
+            if (mode === 'bucket') {
+                closestStroke.color = this.color;
+            } else if (mode === 'eyedropper') {
+                this.color = closestStroke.color;
+                
+                // Update UI visually
+                const colorInput = document.getElementById('draw-color');
+                if (colorInput) colorInput.value = this.color;
+                
+                // Remove active from other swatches
+                document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+                document.getElementById('custom-color-trigger')?.classList.add('active');
+            }
         }
     }
 
@@ -339,9 +393,16 @@ class DrawingSystem {
                         const prevWiggleY = Math.cos(time * this.wiggleSpeed + prevPt.offset) * this.wiggleAmount;
                         const ppx = Math.floor((prevPt.x + prevWiggleX) / pixelSize) * pixelSize;
                         const ppy = Math.floor((prevPt.y + prevWiggleY) / pixelSize) * pixelSize;
-                        this.drawPixelLine(ppx, ppy, px, py, pixelSize, stroke.size);
+                        
+                        // Use point specific size if available
+                        const currentSize = pt.size || stroke.size;
+                        const previousSize = prevPt.size || stroke.size;
+                        const avgSize = (currentSize + previousSize) / 2;
+
+                        this.drawPixelLine(ppx, ppy, px, py, pixelSize, avgSize);
                     } else {
-                        this.ctx.fillRect(px - stroke.size / 2, py - stroke.size / 2, stroke.size, stroke.size);
+                        const currentSize = pt.size || stroke.size;
+                        this.ctx.fillRect(px - currentSize / 2, py - currentSize / 2, currentSize, currentSize);
                     }
                 }
             }

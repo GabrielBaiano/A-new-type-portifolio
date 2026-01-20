@@ -85,6 +85,8 @@
                             class="fa-solid fa-fill-drip"></i></button>
                     <button id="tool-rect" title="Rectangle Tool"><i class="fa-regular fa-square"></i></button>
                     <button id="tool-circle" title="Circle Tool"><i class="fa-regular fa-circle"></i></button>
+                    <button id="tool-eyedropper" title="Eyedropper Tool"><i
+                            class="fa-solid fa-eye-dropper"></i></button>
                 </div>
             </div>
 
@@ -93,7 +95,7 @@
             <div class="tool-section">
                 <span class="section-label">Colors</span>
                 <div class="color-palette-grid">
-                    <div class="color-swatch swatch-blue active" data-color="#3b82f6" title="Feed Blue"></div>
+                    <div class="color-swatch swatch-blue" data-color="#3b82f6" title="Feed Blue"></div>
                     <div class="color-swatch swatch-green" data-color="#22c55e" title="Green"></div>
                     <div class="color-swatch swatch-orange" data-color="#f97316" title="Orange"></div>
                     <div class="color-swatch swatch-pink" data-color="#ec4899" title="Pink"></div>
@@ -102,7 +104,7 @@
                     <div class="color-swatch swatch-grey" data-color="#333333" title="Grey"></div>
                     <div class="color-custom-btn" id="custom-color-trigger" title="Custom Color">
                         <i class="fa-solid fa-palette"></i>
-                        <input type="color" id="draw-color" value="#3b82f6">
+                        <input type="color" id="draw-color" value="#ffffff">
                     </div>
                 </div>
             </div>
@@ -127,6 +129,17 @@
                 <span id="active-tool-name">Pencil</span>
             </div>
             <div class="options-content">
+                <div class="option-group" id="brush-type-option">
+                    <label>Brush Type</label>
+                    <div class="options-grid" style="padding: 0;">
+                        <button id="brush-standard" class="active" title="Standard Pen">
+                            <i class="fa-solid fa-pen-clip"></i>
+                        </button>
+                        <button id="brush-fountain" title="Fountain Pen (Calligraphy)">
+                            <i class="fa-solid fa-pen-fancy"></i>
+                        </button>
+                    </div>
+                </div>
                 <div class="option-group">
                     <label>Size</label>
                     <div class="range-with-val">
