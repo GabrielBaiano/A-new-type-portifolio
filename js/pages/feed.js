@@ -27,6 +27,19 @@ const FeedPage = {
                     </div>
                 </div>
             </div>
+
+            <!-- Newsletter Promo Card -->
+            <div class="sidebar-card">
+                <div class="sidebar-section">
+                    <span class="sidebar-label">Newsletter</span>
+                    <p style="font-size: 0.9rem; margin-top: 0.5rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                        Join our circle for exclusive monthly updates.
+                    </p>
+                    <button class="social-btn" onclick="window.balloonSystem.tryPlaceBalloon(window.balloonSystem.getNewsletter())" style="width: 100%; justify-content: center; background-color: var(--accent-orange); border-color: var(--accent-orange); color: white;">
+                        <i class="fa-solid fa-envelope"></i> Subscribe
+                    </button>
+                </div>
+            </div>
         `;
     },
     renderFeedItems(items) {
