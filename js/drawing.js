@@ -416,116 +416,117 @@ class DrawingSystem {
             return;
         }
 
+        // Configuration: Always Stacked as requested
+        let isStacked = true;
         let scale = 1.0;
-        let isStacked = false;
         let targetVisualCenterX, centerY;
-        let word2OffsetX = 0;
-        let word2OffsetY = 0;
+        let word2OffsetX = 0; 
+        let word2OffsetY = 100; // Vertical gap between Try and drawing
 
-        if (gutterWidth > 450) {
-            scale = 1.1;
-            targetVisualCenterX = vw/2 + cardWidth/2 + gutterWidth/2;
-            centerY = 200;
-        } else if (gutterWidth > 280) {
-            scale = gutterWidth / 450;
+        if (gutterWidth > 200) {
+            // Wide screens: place in the larger gutter
+            scale = Math.min(1.0, gutterWidth / 350);
             targetVisualCenterX = vw/2 + cardWidth/2 + gutterWidth/2;
             centerY = 150;
-        } else if (gutterWidth > 180) {
-            isStacked = true;
-            scale = gutterWidth / 300;
-            targetVisualCenterX = vw/2 + cardWidth/2 + gutterWidth/2;
-            centerY = 150;
-            word2OffsetX = -220; 
-            word2OffsetY = 100;  
         } else {
-            isStacked = vw < 600;
+            // Mobile/Tablet: Centered at the top
             scale = vw < 500 ? 0.45 : 0.6;
             targetVisualCenterX = vw / 2;
-            centerY = isStacked ? 80 : 100;
-            if (isStacked) {
-                word2OffsetX = -220;
-                word2OffsetY = 100;
-            }
+            centerY = 80;
         }
 
-        const centerX = (targetVisualCenterX - vw/2) - (60 * scale);
+        // Logical center adjustment
+        const centerX = (targetVisualCenterX - vw/2);
         const baseScrollX = window.scrollX;
         const baseScrollY = window.scrollY;
 
-        // Adjusted coordinates to avoid overlap and improve cursive feel
+        // Natural cursive coordinates, centered around dx=0 per word
         const textStrokes = [
-            // "T"
-            [{ dx: -240, dy: -40 }, { dx: -180, dy: -40 }], // Top bar
-            [{ dx: -210, dy: -40 }, { dx: -210, dy: 40 }, { dx: -195, dy: 35 }], // Stem
-            // "r"
-            [{ dx: -175, dy: 40 }, { dx: -175, dy: 10 }, { dx: -160, dy: 5 }, { dx: -145, dy: 10 }, { dx: -145, dy: 40 }],
-            // "y"
-            [{ dx: -135, dy: 10 }, { dx: -135, dy: 30 }, { dx: -115, dy: 30 }, { dx: -115, dy: 10 }, { dx: -115, dy: 60 }, { dx: -140, dy: 75 }],
+            // "Try"
+            { color: '#ffffff', paths: [
+                // T
+                [{ dx: -60, dy: -40 }, { dx: 0, dy: -40 }],
+                [{ dx: -30, dy: -40 }, { dx: -30, dy: 40 }, { dx: -15, dy: 35 }],
+                // r
+                [{ dx: 10, dy: 40 }, { dx: 10, dy: 10 }, { dx: 25, dy: 5 }, { dx: 40, dy: 10 }, { dx: 40, dy: 40 }],
+                // y
+                [{ dx: 50, dy: 10 }, { dx: 50, dy: 30 }, { dx: 70, dy: 30 }, { dx: 70, dy: 10 }, { dx: 70, dy: 60 }, { dx: 50, dy: 75 }]
+            ]},
             
-            null, // Space/Stack Break
+            // Heart (Next to Try)
+            { color: '#ec4899', paths: [
+                [{ dx: 95, dy: 0 }, { dx: 85, dy: -10 }, { dx: 75, dy: 0 }, { dx: 95, dy: 25 }, { dx: 115, dy: 0 }, { dx: 105, dy: -10 }, { dx: 95, dy: 0 }]
+            ]},
 
-            // "d"
-            [{ dx: -80, dy: 40 }, { dx: -110, dy: 40 }, { dx: -110, dy: 10 }, { dx: -80, dy: 10 }, { dx: -80, dy: 40 }, { dx: -80, dy: -20 }],
-            // "r"
-            [{ dx: -65, dy: 40 }, { dx: -65, dy: 10 }, { dx: -55, dy: 5 }, { dx: -45, dy: 10 }, { dx: -45, dy: 40 }],
-            // "a"
-            [{ dx: -30, dy: 40 }, { dx: -5, dy: 40 }, { dx: -5, dy: 10 }, { dx: -30, dy: 10 }, { dx: -30, dy: 40 }, { dx: 0, dy: 40 }],
-            // "w"
-            [{ dx: 15, dy: 10 }, { dx: 15, dy: 40 }, { dx: 35, dy: 40 }, { dx: 35, dy: 20 }, { dx: 55, dy: 40 }, { dx: 75, dy: 40 }, { dx: 75, dy: 10 }],
-            // "i"
-            [{ dx: 95, dy: 40 }, { dx: 95, dy: 10 }],
-            [{ dx: 95, dy: -5 }, { dx: 95, dy: -3 }], // High Dot
-            // "n"
-            [{ dx: 110, dy: 40 }, { dx: 110, dy: 10 }, { dx: 130, dy: 10 }, { dx: 130, dy: 40 }, { dx: 150, dy: 10 }, { dx: 150, dy: 40 }],
-            // "g"
-            [{ dx: 170, dy: 40 }, { dx: 200, dy: 40 }, { dx: 200, dy: 10 }, { dx: 170, dy: 10 }, { dx: 170, dy: 40 }, { dx: 200, dy: 40 }, { dx: 200, dy: 70 }, { dx: 170, dy: 85 }]
+            null, // WORD BREAK (STOCKED)
+
+            // "drawing"
+            { color: '#ffffff', paths: [
+                // d
+                [{ dx: -100, dy: 40 }, { dx: -130, dy: 40 }, { dx: -130, dy: 10 }, { dx: -100, dy: 10 }, { dx: -100, dy: 40 }, { dx: -100, dy: -20 }],
+                // r
+                [{ dx: -80, dy: 40 }, { dx: -80, dy: 10 }, { dx: -65, dy: 5 }, { dx: -50, dy: 10 }, { dx: -50, dy: 40 }],
+                // a
+                [{ dx: -30, dy: 40 }, { dx: 0, dy: 40 }, { dx: 0, dy: 10 }, { dx: -30, dy: 10 }, { dx: -30, dy: 40 }, { dx: 10, dy: 40 }],
+                // w
+                [{ dx: 25, dy: 10 }, { dx: 25, dy: 40 }, { dx: 45, dy: 40 }, { dx: 45, dy: 20 }, { dx: 65, dy: 40 }, { dx: 85, dy: 40 }, { dx: 85, dy: 10 }],
+                // i
+                [{ dx: 100, dy: 40 }, { dx: 100, dy: 10 }],
+                [{ dx: 100, dy: -5 }, { dx: 100, dy: -3 }],
+                // n
+                [{ dx: 115, dy: 40 }, { dx: 115, dy: 10 }, { dx: 135, dy: 10 }, { dx: 135, dy: 40 }, { dx: 155, dy: 10 }, { dx: 155, dy: 40 }],
+                // g
+                [{ dx: 175, dy: 40 }, { dx: 205, dy: 40 }, { dx: 205, dy: 10 }, { dx: 175, dy: 10 }, { dx: 175, dy: 40 }, { dx: 205, dy: 40 }, { dx: 205, dy: 70 }, { dx: 175, dy: 85 }]
+            ]}
         ];
 
         let wordIndex = 0;
-        for (const path of textStrokes) {
-            if (path === null) {
+        for (const word of textStrokes) {
+            if (word === null) {
                 wordIndex++;
                 await new Promise(r => setTimeout(r, 200));
                 continue;
             }
 
-            // Using isolated property to prevent user-stroke collision
-            this.animatingStroke = {
-                points: [],
-                color: '#ffffff',
-                size: 8 * scale, 
-                tool: 'pencil',
-                tipShape: 'round',
-                brushType: 'fountain',
-                startTime: Date.now()
-            };
-            this.strokes.push(this.animatingStroke);
+            for (const path of word.paths) {
+                // Using isolated property to prevent user-stroke collision
+                this.animatingStroke = {
+                    points: [],
+                    color: word.color,
+                    size: 8 * scale, 
+                    tool: 'pencil',
+                    tipShape: 'round',
+                    brushType: 'fountain',
+                    startTime: Date.now()
+                };
+                this.strokes.push(this.animatingStroke);
 
-            const offX = (wordIndex > 0) ? word2OffsetX : 0;
-            const offY = (wordIndex > 0) ? word2OffsetY : 0;
+                const offX = (wordIndex > 0) ? word2OffsetX : 0;
+                const offY = (wordIndex > 0) ? word2OffsetY : 0;
 
-            for (let i = 0; i < path.length; i++) {
-                const p = path[i];
-                const targetX = centerX + (p.dx + offX) * scale + baseScrollX;
-                const targetY = centerY + (p.dy + offY) * scale + baseScrollY;
+                for (let i = 0; i < path.length; i++) {
+                    const p = path[i];
+                    const targetX = centerX + (p.dx + offX) * scale + baseScrollX;
+                    const targetY = centerY + (p.dy + offY) * scale + baseScrollY;
 
-                if (i > 0) {
-                    const prev = path[i - 1];
-                    const prevX = centerX + (prev.dx + offX) * scale + baseScrollX;
-                    const prevY = centerY + (prev.dy + offY) * scale + baseScrollY;
-                    const steps = Math.max(2, Math.floor(6 * scale));
-                    for (let s = 1; s <= steps; s++) {
-                        const interX = prevX + (targetX - prevX) * (s / steps);
-                        const interY = prevY + (targetY - prevY) * (s / steps);
-                        this.addPointToStroke(this.animatingStroke, interX, interY);
-                        await new Promise(r => setTimeout(r, 10));
+                    if (i > 0) {
+                        const prev = path[i - 1];
+                        const prevX = centerX + (prev.dx + offX) * scale + baseScrollX;
+                        const prevY = centerY + (prev.dy + offY) * scale + baseScrollY;
+                        const steps = Math.max(2, Math.floor(6 * scale));
+                        for (let s = 1; s <= steps; s++) {
+                            const interX = prevX + (targetX - prevX) * (s / steps);
+                            const interY = prevY + (targetY - prevY) * (s / steps);
+                            this.addPointToStroke(this.animatingStroke, interX, interY);
+                            await new Promise(r => setTimeout(r, 10));
+                        }
+                    } else {
+                        this.addPointToStroke(this.animatingStroke, targetX, targetY);
                     }
-                } else {
-                    this.addPointToStroke(this.animatingStroke, targetX, targetY);
                 }
+                this.animatingStroke = null;
+                await new Promise(r => setTimeout(r, 100));
             }
-            this.animatingStroke = null;
-            await new Promise(r => setTimeout(r, 100));
         }
         this.isAutoWriting = false;
     }
