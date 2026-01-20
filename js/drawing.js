@@ -19,6 +19,8 @@ class DrawingSystem {
         this.tipShape = 'square';
         this.wiggleSpeed = 0.005;
         this.wiggleAmount = 2;
+        
+        this.brushCache = {}; // Cache for pre-rendered brush stamps
 
         this.init();
         this.initDragging();
@@ -441,17 +443,37 @@ class DrawingSystem {
     }
 
     drawBrushTip(x, y, size, shape) {
+        const pixelSize = 2;
+        // Quantize size to avoid excessive cache entries from fountain pen
+        const qSize = Math.max(pixelSize, Math.round(size / pixelSize) * pixelSize);
+        const cacheKey = `${qSize}_${this.ctx.fillStyle}_${shape}`;
+
+        if (!this.brushCache[cacheKey]) {
+            this.createBrushStamp(qSize, this.ctx.fillStyle, shape, cacheKey);
+        }
+
+        const stamp = this.brushCache[cacheKey];
+        this.ctx.drawImage(stamp, x - qSize / 2, y - qSize / 2);
+    }
+
+    createBrushStamp(size, color, shape, key) {
+        const stamp = document.createElement('canvas');
+        const pixelSize = 2;
+        stamp.width = size + pixelSize * 2;
+        stamp.height = size + pixelSize * 2;
+        const sctx = stamp.getContext('2d');
+        sctx.fillStyle = color;
+
+        const center = stamp.width / 2;
+
         if (shape === 'round') {
             const radius = size / 2;
-            const pixelSize = 2; // Hardcoded consistent pixel size
-            
-            // Draw a filled pixelated circle
             for (let dy = -radius; dy <= radius; dy += pixelSize) {
                 for (let dx = -radius; dx <= radius; dx += pixelSize) {
                     if (dx * dx + dy * dy <= radius * radius) {
-                        this.ctx.fillRect(
-                            Math.floor((x + dx) / pixelSize) * pixelSize, 
-                            Math.floor((y + dy) / pixelSize) * pixelSize, 
+                        sctx.fillRect(
+                            Math.floor((center + dx) / pixelSize) * pixelSize, 
+                            Math.floor((center + dy) / pixelSize) * pixelSize, 
                             pixelSize, 
                             pixelSize
                         );
@@ -459,8 +481,10 @@ class DrawingSystem {
                 }
             }
         } else {
-            this.ctx.fillRect(x - size / 2, y - size / 2, size, size);
+            sctx.fillRect(center - size / 2, center - size / 2, size, size);
         }
+
+        this.brushCache[key] = stamp;
     }
 
     drawPixelRect(x, y, w, h, pixelSize, brushSize) {
