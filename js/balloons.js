@@ -345,7 +345,7 @@ class BalloonSystem {
 
         // Specific logic for newsletter
         if (data.type === 'newsletter') {
-            const btn = balloon.querySelector('.subscribe-btn');
+            const btn = balloon.querySelector('.balloon-subscribe-btn');
             const input = balloon.querySelector('input');
             const form = balloon.querySelector('.newsletter-form');
             
@@ -401,7 +401,7 @@ class BalloonSystem {
                     ${data.type === 'newsletter' ? `
                         <div class="newsletter-form">
                             <input type="email" placeholder="Type your email..." required>
-                            <button class="subscribe-btn">SUBSCRIBE NOW</button>
+                            <button class="balloon-subscribe-btn">SUBSCRIBE NOW</button>
                         </div>
                     ` : ''}
 
