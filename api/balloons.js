@@ -29,7 +29,8 @@ export default async function handler(req, res) {
   const secret = req.method === 'POST' ? req.body.secret : req.query.secret;
 
   if (isUpdateTrigger) {
-    if (!isCron && secret !== API_SECRET) return res.status(401).json({ error: 'Unauthorized' });
+    const isAuthorized = isCron || (API_SECRET && secret && secret === API_SECRET);
+    if (!isAuthorized) return res.status(401).json({ error: 'Unauthorized' });
     // Cache update logic...
     try {
       const username = (req.method === 'POST' ? req.body.username : req.query.username) || 'GabrielBaiano';

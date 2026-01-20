@@ -163,8 +163,12 @@ async function deleteFile(owner, repo, path, message, sha) {
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
+    const { secret } = req.query;
+    const isAuth = API_SECRET && secret && secret === API_SECRET;
+    const filter = isAuth ? '' : '&show_in_feed=eq.true';
+
     try {
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/books?select=*&order=date.desc`, { headers: supabaseHeaders });
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/books?select=*&order=date.desc${filter}`, { headers: supabaseHeaders });
       if (!response.ok) return res.status(200).json({ success: true, data: [] });
       const data = await response.json();
       return res.status(200).json({ success: true, count: data.length, data: data });
@@ -175,7 +179,10 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     const { id: manualId, title, image, status, mdLink, tags, show_in_feed, secret, date: manualDate, content, is_special } = req.body;
-    if (secret !== API_SECRET) return res.status(401).json({ error: 'Unauthorized' });
+    
+    if (!API_SECRET || !secret || secret !== API_SECRET) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     if (!title || !image || !status) return res.status(400).json({ error: 'Missing required fields' });
 
     try {
@@ -217,7 +224,10 @@ export default async function handler(req, res) {
 
   if (req.method === 'DELETE') {
     const { id, secret } = req.body;
-    if (secret !== API_SECRET) return res.status(401).json({ error: 'Unauthorized' });
+    
+    if (!API_SECRET || !secret || secret !== API_SECRET) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     if (!id) return res.status(400).json({ error: 'Missing ID' });
 
     try {

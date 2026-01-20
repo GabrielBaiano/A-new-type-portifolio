@@ -34,7 +34,10 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     const { number, name, content, external_link, secret, category = 'daily' } = req.body;
-    if (secret !== API_SECRET) return res.status(401).json({ error: 'Unauthorized' });
+    
+    if (!API_SECRET || !secret || secret !== API_SECRET) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     if (!number || !name || !content) return res.status(400).json({ error: 'Missing fields' });
 
     try {

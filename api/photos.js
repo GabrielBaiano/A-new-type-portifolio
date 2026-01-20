@@ -17,8 +17,12 @@ const supabaseHeaders = {
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
+    const { secret } = req.query;
+    const isAuth = API_SECRET && secret && secret === API_SECRET;
+    const filter = isAuth ? '' : '&show_in_feed=eq.true';
+
     try {
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/photos?select=*&order=created_at.desc`, { headers: supabaseHeaders });
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/photos?select=*&order=created_at.desc${filter}`, { headers: supabaseHeaders });
       if (!response.ok) {
         const errorText = await response.text();
         return res.status(500).json({ success: false, error: `Supabase Error: ${response.status} ${errorText}` });

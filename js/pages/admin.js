@@ -4,6 +4,7 @@
  */
 const AdminPage = {
     isAuthenticated: false,
+    isVerifying: false,
     activeTab: 'overview',
     allBooks: [],
     allPhotos: [],
@@ -14,6 +15,18 @@ const AdminPage = {
     isUploading: false,
 
     async render() {
+        if (this.isVerifying) {
+            return `
+                <div class="admin-login-container">
+                    <div class="card login-card" style="text-align: center; padding: 40px;">
+                        <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2rem; color: var(--accent-blue); margin-bottom: 20px;"></i>
+                        <h2 style="font-family: 'Sora', sans-serif;">🔒 Verifying Security...</h2>
+                        <p style="color: var(--text-muted); margin-top: 10px;">Establishing secure handshake with the server.</p>
+                    </div>
+                </div>
+            `;
+        }
+
         if (!this.isAuthenticated) {
             return this.renderLogin();
         }
@@ -572,23 +585,60 @@ const AdminPage = {
     },
 
     onMount() {
-        if (!this.isAuthenticated) {
-            this.setupLogin();
+        // If already authenticated in current session object, just init modules
+        if (this.isAuthenticated) {
+            this.setupNavigation();
+            this.setupModules();
+            this.loadInitialData();
             return;
         }
 
-        this.setupNavigation();
-        this.setupModules();
-        this.loadInitialData();
+        // Try Auto-login from sessionStorage
+        const savedSecret = sessionStorage.getItem('admin_secret');
+        if (savedSecret && !this.isVerifying) {
+            this.verifyAndLogin(savedSecret);
+        } else if (!this.isVerifying) {
+            this.setupLogin();
+        }
+    },
+
+    async verifyAndLogin(secret) {
+        this.isVerifying = true;
+        pageManager.loadPage('admin'); // Trigger render state
+        
+        try {
+            const res = await fetch('/api/feed', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ secret, checkOnly: true })
+            });
+            
+            if (res.ok) {
+                this.isAuthenticated = true;
+                sessionStorage.setItem('admin_authenticated', 'true');
+                sessionStorage.setItem('admin_secret', secret);
+            } else {
+                this.isAuthenticated = false;
+                sessionStorage.removeItem('admin_authenticated');
+                sessionStorage.removeItem('admin_secret');
+            }
+        } catch (err) {
+            console.error('Session verification failed:', err);
+            this.isAuthenticated = false;
+        } finally {
+            this.isVerifying = false;
+            pageManager.loadPage('admin'); // Transition to final state (Dashboard or Login)
+        }
     },
 
     async loadInitialData() {
+        const secret = sessionStorage.getItem('admin_secret');
         const [books, photos, balloons, posts, leetcode] = await Promise.all([
-            fetch('/api/books').then(r => r.json()).catch(() => ({ data: [] })),
-            fetch('/api/photos').then(r => r.json()).catch(() => ({ data: [] })),
-            fetch('/api/balloons?context=all').then(r => r.json()).catch(() => ({ data: [] })),
-            fetch('/api/feed').then(r => r.json()).catch(() => ({ data: [] })),
-            fetch('/api/leetcode').then(r => r.json()).catch(() => ({ data: [] }))
+            fetch(`/api/books?secret=${secret}`).then(r => r.json()).catch(() => ({ data: [] })),
+            fetch(`/api/photos?secret=${secret}`).then(r => r.json()).catch(() => ({ data: [] })),
+            fetch(`/api/balloons?context=all&secret=${secret}`).then(r => r.json()).catch(() => ({ data: [] })),
+            fetch(`/api/feed?secret=${secret}`).then(r => r.json()).catch(() => ({ data: [] })),
+            fetch(`/api/leetcode?secret=${secret}`).then(r => r.json()).catch(() => ({ data: [] }))
         ]);
         
         this.allBooks = books.data || [];
