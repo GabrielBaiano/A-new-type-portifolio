@@ -414,12 +414,10 @@ class DrawingSystem {
     }
 
     async autoWriteTryDrawing() {
-        // Cycle to next sketch if we were already writing (Auto-Pilot mode)
-        const key = this.sketchKeys[this.currentSketchIndex];
-        this.currentSketchIndex = (this.currentSketchIndex + 1) % this.sketchKeys.length;
-        
-        await this.autoWrite(key);
+        // Just draw the "try-drawing" sketch once on init
+        await this.autoWrite('try-drawing');
     }
+
 
     async autoWrite(sketchKey) {
         if (this.isDrawing) return; 
