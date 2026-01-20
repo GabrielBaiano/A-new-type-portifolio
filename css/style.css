@@ -5253,10 +5253,3 @@ body.detail-mode {
         font-size: 0.95rem;
     }
 }
-. n e w s l e t t e r - c a r d  
-   t r a n s i t i o n :   t r a n s f o r m   0 . 2 s   e a s e ,   b o x - s h a d o w   0 . 2 s    
- e a s e ;    
- . n e w s l e t t e r - c a r d : h o v e r  
-   t r a n s f o r m :   t r a n s l a t e Y ( - 2 p x ) ;   b o x - s h a d o w :   0   4 p x    
- 1 2 p x   r g b a ( 2 5 5 ,   8 5 ,   0 ,   0 . 1 5 ) ;    
- 
