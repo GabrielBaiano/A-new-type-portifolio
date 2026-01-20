@@ -34,38 +34,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 5. Auto-Draw Toggle Logic
-    const autoDrawToggle = document.getElementById('auto-draw-toggle-wrapper');
-    let autoDrawInterval = null;
-
-    if (autoDrawToggle) {
-        autoDrawToggle.addEventListener('click', () => {
-            const isActive = autoDrawToggle.classList.toggle('active');
-            const label = autoDrawToggle.querySelector('.toggle-label');
-            const icon = autoDrawToggle.querySelector('.fa-wand-magic-sparkles');
-            
-            if (label) label.textContent = isActive ? 'ON' : 'OFF';
-            if (icon) icon.style.color = isActive ? 'var(--accent-blue)' : 'var(--text-muted)';
-
-            if (isActive) {
-                // START looping
-                if (window.drawingSystem) {
-                    window.drawingSystem.autoWriteTryDrawing(); // First run
-                    autoDrawInterval = setInterval(() => {
-                        if (!window.drawingSystem.isAutoWriting && !window.drawingSystem.isDrawing) {
-                            window.drawingSystem.autoWriteTryDrawing();
-                        }
-                    }, 10000); // Try to repeat every 10s if not busy
-                }
-            } else {
-                // STOP looping
-                if (autoDrawInterval) {
-                    clearInterval(autoDrawInterval);
-                    autoDrawInterval = null;
-                }
-                if (window.drawingSystem) {
-                    window.drawingSystem.isAutoWriting = false; // Interrupt current if possible
-                }
+    // 5. Auto-Draw Logic (Manual Trigger)
+    const autoDrawBtn = document.getElementById('auto-draw-trigger');
+    if (autoDrawBtn) {
+        autoDrawBtn.addEventListener('click', () => {
+            if (window.drawingSystem) {
+                window.drawingSystem.autoWriteTryDrawing();
             }
         });
     }
