@@ -261,7 +261,7 @@ Welcome, i'm a Brazilian<svg class="bio-location-pin" xmlns="http://www.w3.org/2
                 const isHidden = extraExp.style.display === 'none';
                 
                 if (isHidden) {
-                    extraExp.style.display = 'block';
+                    extraExp.style.display = 'flex'; // Changed to flex to respect gap
                     toggleBtn.innerHTML = 'Show less <i class="fa-solid fa-chevron-up"></i>';
                 } else {
                     extraExp.style.display = 'none';
@@ -288,8 +288,8 @@ Welcome, i'm a Brazilian<svg class="bio-location-pin" xmlns="http://www.w3.org/2
         const mapContainer = document.getElementById('home-map');
         if (!mapContainer) return;
 
-        // Coordinates for Itanhaém, SP, Brazil
-        const myLocation = { lat: -24.183, lon: -46.791 };
+        // Coordinates for Itanhaém, SP, Brazil - Fine-tuned for label alignment
+        const myLocation = { lat: -24.1915, lon: -46.7885 };
 
         // 1. Initialize Leaflet Map
         this.map = L.map('home-map', {

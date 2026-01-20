@@ -102,7 +102,7 @@
 #extra-experience {
     display: flex;
     flex-direction: column;
-    gap: 20px; /* Same as parent */
+    gap: 20px !important; /* Force same as parent */
 }
 
 .job-item {
