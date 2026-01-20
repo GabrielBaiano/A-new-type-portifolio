@@ -89,6 +89,7 @@ class BalloonSystem {
     }
 
     async start() {
+        return; // Temporarily disabled
         if (this.isRunning || !this.hasEnoughSpace()) return;
         this.isRunning = true;
         await this.initialFill();
@@ -102,6 +103,7 @@ class BalloonSystem {
     }
 
     async initialFill() {
+        return; // Temporarily disabled
         this.clearBalloons();
         
         // 1. Get all available data
