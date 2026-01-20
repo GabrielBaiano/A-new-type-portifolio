@@ -34,31 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 5. Auto-Draw Toggle Logic (Navbar Button)
-    const autoDrawBtn = document.getElementById('auto-draw-trigger');
-    let autoDrawInterval = null;
-
-    if (autoDrawBtn) {
-        autoDrawBtn.addEventListener('click', () => {
-            const isActive = autoDrawBtn.classList.toggle('active');
-            
-            if (isActive) {
-                if (window.drawingSystem) {
-                    window.drawingSystem.autoWriteTryDrawing(); // First run focus
-                    autoDrawInterval = setInterval(() => {
-                        if (!window.drawingSystem.isAutoWriting && !window.drawingSystem.isDrawing) {
-                            window.drawingSystem.autoWriteTryDrawing();
-                        }
-                    }, 12000); // Repeat cycle
-                }
-            } else {
-                if (autoDrawInterval) {
-                    clearInterval(autoDrawInterval);
-                    autoDrawInterval = null;
-                }
-            }
-        });
-    }
 });
 
 /**
