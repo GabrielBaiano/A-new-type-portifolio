@@ -83,7 +83,7 @@ Welcome, i'm a Brazilian<svg class="bio-location-pin" xmlns="http://www.w3.org/2
                     <!-- Item 1 -->
                     <div class="job-item">
                         <div class="job-left">
-                            <div class="company-logo bg-darkblue"></div>
+                            <div class="company-logo bg-orange"></div>
                             <div class="job-details">
                                 <h3>Compass UOL</h3>
                                 <span>Mobile Developer</span>
@@ -109,7 +109,7 @@ Welcome, i'm a Brazilian<svg class="bio-location-pin" xmlns="http://www.w3.org/2
                         <!-- Item 3 -->
                         <div class="job-item">
                             <div class="job-left">
-                                <div class="company-logo bg-orange"></div>
+                                <div class="company-logo bg-red"></div>
                                 <div class="job-details">
                                     <h3>Emporio 24h</h3>
                                     <span>Web Developer</span>
