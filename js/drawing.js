@@ -360,9 +360,11 @@ class DrawingSystem {
     async autoWriteTrySketch() {
         if (this.isDrawing) return; // Don't interrupt user
 
-        const centerX = window.innerWidth / 2;
-        const centerY = window.innerHeight / 2;
-        const scale = Math.min(window.innerWidth / 1200, 1);
+        // Position it to the right of the central card
+        // Assuming card is centered and ~800px wide
+        const centerX = window.innerWidth > 1200 ? (window.innerWidth / 2 + 500) : (window.innerWidth - 150);
+        const centerY = 150; 
+        const scale = 0.5; // Smaller for sidebar
 
         const textStrokes = [
             // "t"
