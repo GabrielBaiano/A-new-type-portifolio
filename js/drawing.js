@@ -188,13 +188,14 @@ class DrawingSystem {
                 brushTypes.forEach(other => document.getElementById(`brush-${other}`)?.classList.remove('active'));
                 btn.classList.add('active');
 
-                // Update main tool icon
+                // Correct icons as requested (match the selection buttons)
+                const newIconClass = bt === 'fountain' ? 'fa-solid fa-pen-fancy' : 'fa-solid fa-pen-clip';
+
+                // Update main tool icon in sidebar (match selection button)
                 const toolPencil = document.getElementById('tool-pencil');
                 if (toolPencil) {
                     const icon = toolPencil.querySelector('i');
-                    if (icon) {
-                        icon.className = bt === 'fountain' ? 'fa-solid fa-paintbrush' : 'fa-solid fa-pencil';
-                    }
+                    if (icon) icon.className = newIconClass;
                 }
             });
         });

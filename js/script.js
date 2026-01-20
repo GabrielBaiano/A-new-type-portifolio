@@ -30,13 +30,41 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.classList.toggle('hud-hidden');
             hudToggle.classList.toggle('active');
             
-            // Toggle icon eye/eye-slash
-            const icon = hudToggle.querySelector('i');
-            if (icon) {
-                if (document.body.classList.contains('hud-hidden')) {
-                    icon.className = 'fa-solid fa-eye';
-                } else {
-                    icon.className = 'fa-solid fa-eye-slash';
+            // Icon is now managed dynamically by drawingSystem to match selected tool theme
+        });
+    }
+
+    // 5. Auto-Draw Toggle Logic
+    const autoDrawToggle = document.getElementById('auto-draw-toggle-wrapper');
+    let autoDrawInterval = null;
+
+    if (autoDrawToggle) {
+        autoDrawToggle.addEventListener('click', () => {
+            const isActive = autoDrawToggle.classList.toggle('active');
+            const label = autoDrawToggle.querySelector('.toggle-label');
+            const icon = autoDrawToggle.querySelector('.fa-wand-magic-sparkles');
+            
+            if (label) label.textContent = isActive ? 'ON' : 'OFF';
+            if (icon) icon.style.color = isActive ? 'var(--accent-blue)' : 'var(--text-muted)';
+
+            if (isActive) {
+                // START looping
+                if (window.drawingSystem) {
+                    window.drawingSystem.autoWriteTryDrawing(); // First run
+                    autoDrawInterval = setInterval(() => {
+                        if (!window.drawingSystem.isAutoWriting && !window.drawingSystem.isDrawing) {
+                            window.drawingSystem.autoWriteTryDrawing();
+                        }
+                    }, 10000); // Try to repeat every 10s if not busy
+                }
+            } else {
+                // STOP looping
+                if (autoDrawInterval) {
+                    clearInterval(autoDrawInterval);
+                    autoDrawInterval = null;
+                }
+                if (window.drawingSystem) {
+                    window.drawingSystem.isAutoWriting = false; // Interrupt current if possible
                 }
             }
         });
