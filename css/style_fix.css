@@ -83,10 +83,9 @@
 
 /* Updated Balloon Colors */
 
-@keyframes peek-in {
-    0% { transform: translateY(100%) rotate(-10deg); opacity: 0; }
-    60% { transform: translateY(-10%) rotate(5deg); opacity: 1; }
-    100% { transform: translateY(0) rotate(0deg); opacity: 1; }
+@keyframes marker-pulse {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(2.5); opacity: 0; }
 }
 
 /* Optimization: Allow balloons to be slightly closer */
@@ -111,8 +110,7 @@
 
 /* 6. HUD Toggle Styles */
 .hud-hidden .main-container,
-.hud-hidden #balloon-container,
-.hud-hidden #loo-kee {
+.hud-hidden #balloon-container {
     opacity: 0 !important;
     pointer-events: none !important;
     transition: opacity 0.4s ease;

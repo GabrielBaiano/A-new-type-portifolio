@@ -226,9 +226,8 @@ class DrawingSystem {
     }
 
     startDrawing(e) {
-        const rect = this.canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        if (this.isAutoWriting) return;
+        const { x, y } = this.getDocCoords(e);
 
         if (this.tool === 'bucket' || this.tool === 'eyedropper') {
             this.handlePickOrRecolor(x, y, this.tool);
@@ -257,9 +256,7 @@ class DrawingSystem {
 
     draw(e) {
         if (!this.isDrawing) return;
-        const rect = this.canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const { x, y } = this.getDocCoords(e);
 
         if (this.tool === 'rect' || this.tool === 'circle') {
             this.currentStroke.endPos = { x, y };
@@ -274,9 +271,7 @@ class DrawingSystem {
     }
 
     addPoint(e) {
-        const rect = this.canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const { x, y } = this.getDocCoords(e);
         
         if (this.currentStroke.tool === 'spray') {
             const points = [];
@@ -358,42 +353,70 @@ class DrawingSystem {
     }
 
     async autoWriteTrySketch() {
-        if (this.isDrawing) return; // Don't interrupt user
+        if (this.isDrawing) return; 
+        this.isAutoWriting = true;
 
-        // Position it to the right of the central card
-        const isMobile = window.innerWidth < 768;
-        const centerX = window.innerWidth > 1200 ? (window.innerWidth / 2 + 450) : (window.innerWidth - 200);
-        const centerY = isMobile ? 80 : 150; 
-        const scale = isMobile ? 0.4 : 0.8; // Bigger for desktop
+        // Smart Responsive Placement
+        const cardWidth = 800; // Expected card width
+        const viewportWidth = window.innerWidth;
+        const leftGutter = (viewportWidth - cardWidth) / 2;
+        const rightGutter = viewportWidth - (viewportWidth + cardWidth) / 2;
+
+        let centerX, centerY, scale;
+
+        if (viewportWidth > 1400) {
+            // Large screens: place in the right margin
+            centerX = viewportWidth - leftGutter / 2;
+            centerY = 200;
+            scale = 1.0;
+        } else if (viewportWidth > 1100) {
+            // Medium screens: place in the right margin but smaller
+            centerX = viewportWidth - leftGutter / 2;
+            centerY = 150;
+            scale = 0.7;
+        } else {
+            // Mobile/Small: Place at the very top center before the card
+            centerX = viewportWidth / 2;
+            centerY = 80;
+            scale = 0.5;
+        }
+
+        // Add current scroll to base coordinates so it sticks to the grid
+        const baseScrollX = window.scrollX;
+        const baseScrollY = window.scrollY;
 
         const textStrokes = [
-            // "t"
-            [{ dx: -250, dy: 0 }, { dx: -250, dy: -60 }, { dx: -250, dy: 20 }, { dx: -220, dy: 20 }],
-            // "r"
-            [{ dx: -220, dy: 20 }, { dx: -200, dy: -10 }, { dx: -180, dy: -10 }, { dx: -180, dy: 20 }],
-            // "y"
-            [{ dx: -180, dy: 20 }, { dx: -160, dy: -10 }, { dx: -140, dy: -10 }, { dx: -140, dy: 30 }, { dx: -160, dy: 60 }, { dx: -180, dy: 40 }],
-            // "t-cross"
-            [{ dx: -270, dy: -30 }, { dx: -230, dy: -30 }],
+            // "T"
+            [{ dx: -180, dy: -40 }, { dx: -120, dy: -40 }],
+            [{ dx: -150, dy: -40 }, { dx: -150, dy: 40 }],
+            // "R"
+            [{ dx: -100, dy: 40 }, { dx: -100, dy: -40 }, { dx: -60, dy: -40 }, { dx: -50, dy: -20 }, { dx: -60, dy: 0 }, { dx: -100, dy: 0 }],
+            [{ dx: -80, dy: 0 }, { dx: -50, dy: 40 }],
+            // "Y"
+            [{ dx: -30, dy: -40 }, { dx: 0, dy: 0 }, { dx: 30, dy: -40 }],
+            [{ dx: 0, dy: 0 }, { dx: 0, dy: 40 }],
             // gap
             null,
-            // "s"
-            [{ dx: -80, dy: 20 }, { dx: -60, dy: -10 }, { dx: -50, dy: 10 }, { dx: -70, dy: 20 }, { dx: -40, dy: 20 }],
-            // "k"
-            [{ dx: -40, dy: 20 }, { dx: -40, dy: -60 }, { dx: -40, dy: 20 }, { dx: -20, dy: 0 }, { dx: -30, dy: 10 }, { dx: -10, dy: 20 }],
-            // "e"
-            [{ dx: -10, dy: 20 }, { dx: 10, dy: -10 }, { dx: 20, dy: 0 }, { dx: 0, dy: 20 }, { dx: 30, dy: 20 }],
-            // "t"
-            [{ dx: 30, dy: 20 }, { dx: 30, dy: -60 }, { dx: 30, dy: 20 }, { dx: 50, dy: 20 }],
-            // "c"
-            [{ dx: 80, dy: 0 }, { dx: 60, dy: 0 }, { dx: 60, dy: 20 }, { dx: 90, dy: 20 }],
-            // "h"
-            [{ dx: 90, dy: 20 }, { dx: 90, dy: -60 }, { dx: 90, dy: 20 }, { dx: 110, dy: 0 }, { dx: 110, dy: 20 }, { dx: 130, dy: 20 }],
-            // "t-cross"
-            [{ dx: 10, dy: -30 }, { dx: 50, dy: -30 }],
+            // "S"
+            [{ dx: 50, dy: -20 }, { dx: 60, dy: -40 }, { dx: 100, dy: -40 }, { dx: 110, dy: -20 }, { dx: 110, dy: -10 }, { dx: 50, dy: 10 }, { dx: 50, dy: 20 }, { dx: 60, dy: 40 }, { dx: 100, dy: 40 }, { dx: 110, dy: 20 }],
+            // "K"
+            [{ dx: 130, dy: -40 }, { dx: 130, dy: 40 }],
+            [{ dx: 180, dy: -40 }, { dx: 130, dy: 0 }, { dx: 180, dy: 40 }],
+            // "E"
+            [{ dx: 230, dy: -40 }, { dx: 200, dy: -40 }, { dx: 200, dy: 40 }, { dx: 230, dy: 40 }],
+            [{ dx: 200, dy: 0 }, { dx: 220, dy: 0 }],
+            // "T"
+            [{ dx: 250, dy: -40 }, { dx: 300, dy: -40 }],
+            [{ dx: 275, dy: -40 }, { dx: 275, dy: 40 }],
+            // "C"
+            [{ dx: 350, dy: -40 }, { dx: 320, dy: -40 }, { dx: 320, dy: 40 }, { dx: 350, dy: 40 }],
+            // "H"
+            [{ dx: 370, dy: -40 }, { dx: 370, dy: 40 }],
+            [{ dx: 370, dy: 0 }, { dx: 410, dy: 0 }],
+            [{ dx: 410, dy: -40 }, { dx: 410, dy: 40 }],
             // "!"
-            [{ dx: 160, dy: -60 }, { dx: 160, dy: 10 }],
-            [{ dx: 160, dy: 25 }, { dx: 160, dy: 27 }]
+            [{ dx: 440, dy: -40 }, { dx: 440, dy: 10 }],
+            [{ dx: 440, dy: 30 }, { dx: 440, dy: 35 }]
         ];
 
         for (const path of textStrokes) {
@@ -406,7 +429,7 @@ class DrawingSystem {
             this.currentStroke = {
                 points: [],
                 color: '#ffffff',
-                size: 8, // Thicker for better legibility
+                size: 10, // Even thicker
                 tool: 'pencil',
                 tipShape: 'round',
                 brushType: 'fountain',
@@ -416,14 +439,14 @@ class DrawingSystem {
 
             for (let i = 0; i < path.length; i++) {
                 const p = path[i];
-                const targetX = centerX + p.dx * scale;
-                const targetY = centerY + p.dy * scale;
+                const targetX = centerX + p.dx * scale + baseScrollX;
+                const targetY = centerY + p.dy * scale + baseScrollY;
 
                 if (i > 0) {
                     // Interpolate between path nodes for smooth writing
                     const prev = path[i - 1];
-                    const prevX = centerX + prev.dx * scale;
-                    const prevY = centerY + prev.dy * scale;
+                    const prevX = centerX + prev.dx * scale + baseScrollX;
+                    const prevY = centerY + prev.dy * scale + baseScrollY;
                     const steps = 5;
                     for (let s = 1; s <= steps; s++) {
                         const interX = prevX + (targetX - prevX) * (s / steps);
@@ -438,6 +461,7 @@ class DrawingSystem {
             this.currentStroke = null;
             await new Promise(r => setTimeout(r, 100));
         }
+        this.isAutoWriting = false;
     }
 
     addPointDirect(x, y) {
@@ -481,6 +505,9 @@ class DrawingSystem {
         const time = Date.now();
         const pixelSize = 2;
 
+        const scrollX = window.scrollX;
+        const scrollY = window.scrollY;
+
         this.strokes.forEach(stroke => {
             this.ctx.globalCompositeOperation = stroke.tool === 'eraser' ? 'destination-out' : 'source-over';
             this.ctx.fillStyle = stroke.color;
@@ -490,8 +517,8 @@ class DrawingSystem {
             if (stroke.tool === 'rect' || stroke.tool === 'circle') {
                 const wiggleX = Math.sin(time * 0.005) * this.wiggleAmount;
                 const wiggleY = Math.cos(time * 0.005) * this.wiggleAmount;
-                const x = Math.floor((stroke.startPos.x + wiggleX) / pixelSize) * pixelSize;
-                const y = Math.floor((stroke.startPos.y + wiggleY) / pixelSize) * pixelSize;
+                const x = Math.floor(((stroke.startPos.x - scrollX) + wiggleX) / pixelSize) * pixelSize;
+                const y = Math.floor(((stroke.startPos.y - scrollY) + wiggleY) / pixelSize) * pixelSize;
                 const w = Math.floor((stroke.endPos.x - stroke.startPos.x) / pixelSize) * pixelSize;
                 const h = Math.floor((stroke.endPos.y - stroke.startPos.y) / pixelSize) * pixelSize;
 
@@ -507,8 +534,8 @@ class DrawingSystem {
                     pt.cluster.forEach(dot => {
                         const dotWiggleX = Math.sin(time * this.wiggleSpeed * 2 + dot.offset) * (this.wiggleAmount * 0.5);
                         const dotWiggleY = Math.cos(time * this.wiggleSpeed * 2 + dot.offset) * (this.wiggleAmount * 0.5);
-                        const px = Math.floor((pt.x + dot.dx + mainWiggleX + dotWiggleX) / pixelSize) * pixelSize;
-                        const py = Math.floor((pt.y + dot.dy + mainWiggleY + dotWiggleY) / pixelSize) * pixelSize;
+                        const px = Math.floor(((pt.x - scrollX) + dot.dx + mainWiggleX + dotWiggleX) / pixelSize) * pixelSize;
+                        const py = Math.floor(((pt.y - scrollY) + dot.dy + mainWiggleY + dotWiggleY) / pixelSize) * pixelSize;
                         this.ctx.fillRect(px, py, pixelSize, pixelSize);
                     });
                 });
@@ -518,15 +545,15 @@ class DrawingSystem {
                     const pt = stroke.points[i];
                     const wiggleX = Math.sin(time * this.wiggleSpeed + pt.offset) * this.wiggleAmount;
                     const wiggleY = Math.cos(time * this.wiggleSpeed + pt.offset) * this.wiggleAmount;
-                    const px = Math.floor((pt.x + wiggleX) / pixelSize) * pixelSize;
-                    const py = Math.floor((pt.y + wiggleY) / pixelSize) * pixelSize;
+                    const px = Math.floor(((pt.x - scrollX) + wiggleX) / pixelSize) * pixelSize;
+                    const py = Math.floor(((pt.y - scrollY) + wiggleY) / pixelSize) * pixelSize;
 
                     if (i > 0) {
                         const prevPt = stroke.points[i - 1];
                         const prevWiggleX = Math.sin(time * this.wiggleSpeed + prevPt.offset) * this.wiggleAmount;
                         const prevWiggleY = Math.cos(time * this.wiggleSpeed + prevPt.offset) * this.wiggleAmount;
-                        const ppx = Math.floor((prevPt.x + prevWiggleX) / pixelSize) * pixelSize;
-                        const ppy = Math.floor((prevPt.y + prevWiggleY) / pixelSize) * pixelSize;
+                        const ppx = Math.floor(((prevPt.x - scrollX) + prevWiggleX) / pixelSize) * pixelSize;
+                        const ppy = Math.floor(((prevPt.y - scrollY) + prevWiggleY) / pixelSize) * pixelSize;
                         
                         // Use point specific size if available
                         const currentSize = pt.size || stroke.size;
