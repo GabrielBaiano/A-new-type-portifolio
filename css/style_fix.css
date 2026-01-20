@@ -123,11 +123,15 @@
 }
 
 [data-theme="light"] #hud-toggle i {
-    color: #1976d2 !important;
+    color: #333333 !important;
+}
+
+[data-theme="light"] #hud-toggle.active {
+    background-color: transparent !important;
 }
 
 [data-theme="light"] .hud-hidden #hud-toggle i {
-    color: #1976d2 !important;
+    color: #000000 !important;
 }
 
 #bg-drawing-canvas {
