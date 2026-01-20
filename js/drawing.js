@@ -361,10 +361,10 @@ class DrawingSystem {
         if (this.isDrawing) return; // Don't interrupt user
 
         // Position it to the right of the central card
-        // Assuming card is centered and ~800px wide
-        const centerX = window.innerWidth > 1200 ? (window.innerWidth / 2 + 500) : (window.innerWidth - 150);
-        const centerY = 150; 
-        const scale = 0.5; // Smaller for sidebar
+        const isMobile = window.innerWidth < 768;
+        const centerX = window.innerWidth > 1200 ? (window.innerWidth / 2 + 450) : (window.innerWidth - 200);
+        const centerY = isMobile ? 80 : 150; 
+        const scale = isMobile ? 0.4 : 0.8; // Bigger for desktop
 
         const textStrokes = [
             // "t"
@@ -406,7 +406,7 @@ class DrawingSystem {
             this.currentStroke = {
                 points: [],
                 color: '#ffffff',
-                size: 6,
+                size: 8, // Thicker for better legibility
                 tool: 'pencil',
                 tipShape: 'round',
                 brushType: 'fountain',
