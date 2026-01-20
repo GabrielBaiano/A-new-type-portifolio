@@ -144,6 +144,9 @@ class DrawingSystem {
             this.wiggleAmount = wiggleBtn.classList.contains('active') ? 2 : 0;
         });
 
+        // Trigger Auto-Write Animation after a delay
+        setTimeout(() => this.autoWriteTrySketch(), 1500);
+
         // Initialize custom color trigger as active since default is white
         document.getElementById('custom-color-trigger')?.classList.add('active');
 
@@ -351,6 +354,118 @@ class DrawingSystem {
                 document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
                 document.getElementById('custom-color-trigger')?.classList.add('active');
             }
+        }
+    }
+
+    async autoWriteTrySketch() {
+        if (this.isDrawing) return; // Don't interrupt user
+
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        const scale = Math.min(window.innerWidth / 1200, 1);
+
+        const textStrokes = [
+            // "t"
+            [{ dx: -250, dy: 0 }, { dx: -250, dy: -60 }, { dx: -250, dy: 20 }, { dx: -220, dy: 20 }],
+            // "r"
+            [{ dx: -220, dy: 20 }, { dx: -200, dy: -10 }, { dx: -180, dy: -10 }, { dx: -180, dy: 20 }],
+            // "y"
+            [{ dx: -180, dy: 20 }, { dx: -160, dy: -10 }, { dx: -140, dy: -10 }, { dx: -140, dy: 30 }, { dx: -160, dy: 60 }, { dx: -180, dy: 40 }],
+            // "t-cross"
+            [{ dx: -270, dy: -30 }, { dx: -230, dy: -30 }],
+            // gap
+            null,
+            // "s"
+            [{ dx: -80, dy: 20 }, { dx: -60, dy: -10 }, { dx: -50, dy: 10 }, { dx: -70, dy: 20 }, { dx: -40, dy: 20 }],
+            // "k"
+            [{ dx: -40, dy: 20 }, { dx: -40, dy: -60 }, { dx: -40, dy: 20 }, { dx: -20, dy: 0 }, { dx: -30, dy: 10 }, { dx: -10, dy: 20 }],
+            // "e"
+            [{ dx: -10, dy: 20 }, { dx: 10, dy: -10 }, { dx: 20, dy: 0 }, { dx: 0, dy: 20 }, { dx: 30, dy: 20 }],
+            // "t"
+            [{ dx: 30, dy: 20 }, { dx: 30, dy: -60 }, { dx: 30, dy: 20 }, { dx: 50, dy: 20 }],
+            // "c"
+            [{ dx: 80, dy: 0 }, { dx: 60, dy: 0 }, { dx: 60, dy: 20 }, { dx: 90, dy: 20 }],
+            // "h"
+            [{ dx: 90, dy: 20 }, { dx: 90, dy: -60 }, { dx: 90, dy: 20 }, { dx: 110, dy: 0 }, { dx: 110, dy: 20 }, { dx: 130, dy: 20 }],
+            // "t-cross"
+            [{ dx: 10, dy: -30 }, { dx: 50, dy: -30 }],
+            // "!"
+            [{ dx: 160, dy: -60 }, { dx: 160, dy: 10 }],
+            [{ dx: 160, dy: 25 }, { dx: 160, dy: 27 }]
+        ];
+
+        for (const path of textStrokes) {
+            if (path === null) {
+                await new Promise(r => setTimeout(r, 200));
+                continue;
+            }
+
+            // Start new stroke
+            this.currentStroke = {
+                points: [],
+                color: '#ffffff',
+                size: 6,
+                tool: 'pencil',
+                tipShape: 'round',
+                brushType: 'fountain',
+                startTime: Date.now()
+            };
+            this.strokes.push(this.currentStroke);
+
+            for (let i = 0; i < path.length; i++) {
+                const p = path[i];
+                const targetX = centerX + p.dx * scale;
+                const targetY = centerY + p.dy * scale;
+
+                if (i > 0) {
+                    // Interpolate between path nodes for smooth writing
+                    const prev = path[i - 1];
+                    const prevX = centerX + prev.dx * scale;
+                    const prevY = centerY + prev.dy * scale;
+                    const steps = 5;
+                    for (let s = 1; s <= steps; s++) {
+                        const interX = prevX + (targetX - prevX) * (s / steps);
+                        const interY = prevY + (targetY - prevY) * (s / steps);
+                        this.addPointDirect(interX, interY);
+                        await new Promise(r => setTimeout(r, 20));
+                    }
+                } else {
+                    this.addPointDirect(targetX, targetY);
+                }
+            }
+            this.currentStroke = null;
+            await new Promise(r => setTimeout(r, 100));
+        }
+    }
+
+    addPointDirect(x, y) {
+        if (!this.currentStroke) return;
+        const time = Date.now();
+        let pointSize = this.currentStroke.size;
+
+        if (this.currentStroke.brushType === 'fountain') {
+            let speed = 0;
+            if (this.currentStroke.points.length > 0) {
+                const last = this.currentStroke.points[this.currentStroke.points.length - 1];
+                const dist = Math.hypot(x - last.x, y - last.y);
+                const dt = time - (last.time || time);
+                speed = dist / Math.max(1, dt);
+            }
+            const factor = Math.max(0.3, Math.min(1.0, 1.0 - speed * 0.2));
+            pointSize = this.currentStroke.size * factor;
+        }
+
+        this.currentStroke.points.push({
+            x, y,
+            size: pointSize,
+            time: time,
+            offset: Math.random() * Math.PI * 2
+        });
+    }
+
+    clear() {
+        if (window.confirm("Você quer mesmo apagar todo o desenho?")) {
+            this.strokes = [];
         }
     }
 
