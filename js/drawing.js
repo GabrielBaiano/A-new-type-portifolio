@@ -187,6 +187,15 @@ class DrawingSystem {
                 this.brushType = bt;
                 brushTypes.forEach(other => document.getElementById(`brush-${other}`)?.classList.remove('active'));
                 btn.classList.add('active');
+
+                // Update main tool icon
+                const toolPencil = document.getElementById('tool-pencil');
+                if (toolPencil) {
+                    const icon = toolPencil.querySelector('i');
+                    if (icon) {
+                        icon.className = bt === 'fountain' ? 'fa-solid fa-paintbrush' : 'fa-solid fa-pencil';
+                    }
+                }
             });
         });
 
