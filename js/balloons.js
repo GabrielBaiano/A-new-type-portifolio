@@ -340,7 +340,7 @@ class BalloonSystem {
             e.stopPropagation();
             balloon.classList.add(side === 'left' ? 'balloon-exit-left' : 'balloon-exit-right');
             this.activeBalloons.delete(balloon);
-            setTimeout(() => balloon.remove(), 600);
+            setTimeout(() => balloon.remove(), 800);
         });
 
         // Specific logic for newsletter

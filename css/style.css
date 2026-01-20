@@ -2323,11 +2323,11 @@ body,
 
 /* Exit animations override everything else */
 .floating-balloon.balloon-exit-left {
-    animation: balloon-slide-left 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards !important;
+    animation: balloon-slide-left 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards !important;
 }
 
 .floating-balloon.balloon-exit-right {
-    animation: balloon-slide-right 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards !important;
+    animation: balloon-slide-right 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards !important;
 }
 
 @keyframes balloon-slide-left {
@@ -2335,7 +2335,8 @@ body,
         transform: scale(1) rotate(var(--balloon-rotation, 0deg));
     }
     to {
-        transform: translateX(-150%) scale(0.9) rotate(-20deg);
+        transform: translateX(-120vw) scale(0.9) rotate(-20deg);
+        opacity: 1; /* Keep visible until off-screen */
     }
 }
 
@@ -2344,7 +2345,8 @@ body,
         transform: scale(1) rotate(var(--balloon-rotation, 0deg));
     }
     to {
-        transform: translateX(150%) scale(0.9) rotate(20deg);
+        transform: translateX(120vw) scale(0.9) rotate(20deg);
+        opacity: 1; /* Keep visible until off-screen */
     }
 }
 
