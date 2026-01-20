@@ -16,6 +16,7 @@ class DrawingSystem {
         this.size = 6;
         this.tool = 'pencil';
         this.brushType = 'standard';
+        this.tipShape = 'square';
         this.wiggleSpeed = 0.005;
         this.wiggleAmount = 2;
 
@@ -75,9 +76,11 @@ class DrawingSystem {
                     const wiggleOpt = document.getElementById('wiggle-option');
                     if (wiggleOpt) wiggleOpt.style.display = (t === 'bucket' || t === 'eyedropper') ? 'none' : 'flex';
                     
-                    // Show brush types only for pencil
+                    // Show brush types & tip shape only for pencil
                     const brushTypeOpt = document.getElementById('brush-type-option');
+                    const tipShapeOpt = document.getElementById('tip-shape-option');
                     if (brushTypeOpt) brushTypeOpt.style.display = (t === 'pencil') ? 'flex' : 'none';
+                    if (tipShapeOpt) tipShapeOpt.style.display = (t === 'pencil' || t === 'eraser' || t === 'spray') ? 'flex' : 'none';
                 }
             });
         });
@@ -152,6 +155,17 @@ class DrawingSystem {
                 btn.classList.add('active');
             });
         });
+
+        // Tip Shapes
+        const tipShapes = ['square', 'round'];
+        tipShapes.forEach(ts => {
+            const btn = document.getElementById(`tip-${ts}`);
+            if (btn) btn.addEventListener('click', () => {
+                this.tipShape = ts;
+                tipShapes.forEach(other => document.getElementById(`tip-${other}`)?.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
     }
 
     undo() {
@@ -222,6 +236,7 @@ class DrawingSystem {
             color: this.color,
             size: this.size,
             tool: this.tool,
+            tipShape: this.tipShape,
             brushType: this.tool === 'pencil' ? this.brushType : 'standard',
             startTime: Date.now(),
             startPos: { x, y },
@@ -399,10 +414,10 @@ class DrawingSystem {
                         const previousSize = prevPt.size || stroke.size;
                         const avgSize = (currentSize + previousSize) / 2;
 
-                        this.drawPixelLine(ppx, ppy, px, py, pixelSize, avgSize);
+                        this.drawPixelLine(ppx, ppy, px, py, pixelSize, avgSize, stroke.tipShape);
                     } else {
                         const currentSize = pt.size || stroke.size;
-                        this.ctx.fillRect(px - currentSize / 2, py - currentSize / 2, currentSize, currentSize);
+                        this.drawBrushTip(px, py, currentSize, stroke.tipShape);
                     }
                 }
             }
@@ -410,18 +425,41 @@ class DrawingSystem {
         this.ctx.globalCompositeOperation = 'source-over';
     }
 
-    drawPixelLine(x1, y1, x2, y2, pixelSize, brushSize) {
+    drawPixelLine(x1, y1, x2, y2, pixelSize, brushSize, tipShape) {
         const dx = Math.abs(x2 - x1);
         const dy = Math.abs(y2 - y1);
         const sx = (x1 < x2) ? pixelSize : -pixelSize;
         const sy = (y1 < y2) ? pixelSize : -pixelSize;
         let err = dx - dy;
         while (true) {
-            this.ctx.fillRect(x1 - brushSize / 2, y1 - brushSize / 2, brushSize, brushSize);
+            this.drawBrushTip(x1, y1, brushSize, tipShape);
             if (Math.abs(x1 - x2) < pixelSize && Math.abs(y1 - y2) < pixelSize) break;
             const e2 = 2 * err;
             if (e2 > -dy) { err -= dy; x1 += sx; }
             if (e2 < dx) { err += dx; y1 += sy; }
+        }
+    }
+
+    drawBrushTip(x, y, size, shape) {
+        if (shape === 'round') {
+            const radius = size / 2;
+            const pixelSize = 2; // Hardcoded consistent pixel size
+            
+            // Draw a filled pixelated circle
+            for (let dy = -radius; dy <= radius; dy += pixelSize) {
+                for (let dx = -radius; dx <= radius; dx += pixelSize) {
+                    if (dx * dx + dy * dy <= radius * radius) {
+                        this.ctx.fillRect(
+                            Math.floor((x + dx) / pixelSize) * pixelSize, 
+                            Math.floor((y + dy) / pixelSize) * pixelSize, 
+                            pixelSize, 
+                            pixelSize
+                        );
+                    }
+                }
+            }
+        } else {
+            this.ctx.fillRect(x - size / 2, y - size / 2, size, size);
         }
     }
 
