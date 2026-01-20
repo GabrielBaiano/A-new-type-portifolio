@@ -566,3 +566,19 @@ body.hud-hidden .bottom-nav {
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
+
+/* 8. Auto-Draw Navbar Toggle Visuals */
+#auto-draw-trigger.active i {
+    color: var(--accent-blue) !important;
+    filter: drop-shadow(0 0 8px var(--accent-blue));
+    transform: scale(1.1);
+}
+
+[data-theme="light"] #auto-draw-trigger.active i {
+    color: var(--accent-blue) !important;
+    filter: drop-shadow(0 0 5px rgba(0, 112, 243, 0.4));
+}
+
+#auto-draw-trigger {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
