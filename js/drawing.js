@@ -22,6 +22,8 @@ class DrawingSystem {
         
         this.brushCache = {}; // Cache for pre-rendered brush stamps
 
+        this.currentSketchIndex = 0;
+        this.sketchKeys = Object.keys(SKETCH_GALLERY);
         this.init();
         this.initDragging();
         this.animate();
@@ -412,7 +414,18 @@ class DrawingSystem {
     }
 
     async autoWriteTryDrawing() {
+        // Cycle to next sketch if we were already writing (Auto-Pilot mode)
+        const key = this.sketchKeys[this.currentSketchIndex];
+        this.currentSketchIndex = (this.currentSketchIndex + 1) % this.sketchKeys.length;
+        
+        await this.autoWrite(key);
+    }
+
+    async autoWrite(sketchKey) {
         if (this.isDrawing) return; 
+        const sketch = SKETCH_GALLERY[sketchKey];
+        if (!sketch) return;
+
         this.isAutoWriting = true;
 
         const vw = window.innerWidth;
@@ -421,28 +434,29 @@ class DrawingSystem {
         
         const gutterWidth = (vw - cardWidth) / 2;
         
-        if (gutterWidth < 100 && vw < 800) {
+        // Safety check for mobile
+        if (gutterWidth < 60 && vw < 500) {
             this.isAutoWriting = false;
             return;
         }
 
-        // Configuration: Always Stacked as requested
-        let isStacked = true;
-        let scale = 1.0;
+        // Configuration
+        let isStacked = sketch.isStacked;
+        let scale = sketch.scale;
         let targetVisualCenterX, centerY;
         let word2OffsetX = 0; 
-        let word2OffsetY = 100; // Vertical gap between Try and drawing
+        let word2OffsetY = sketch.wordSpacingY; 
 
         if (gutterWidth > 200) {
             // Wide screens: place in the larger gutter
-            scale = Math.min(1.0, gutterWidth / 350);
+            scale *= Math.min(1.0, gutterWidth / 350);
             targetVisualCenterX = vw/2 + cardWidth/2 + gutterWidth/2;
-            centerY = 150;
+            centerY = 200;
         } else {
             // Mobile/Tablet: Centered at the top
-            scale = vw < 500 ? 0.45 : 0.6;
+            scale *= vw < 500 ? 0.45 : 0.6;
             targetVisualCenterX = vw / 2;
-            centerY = 80;
+            centerY = 100;
         }
 
         // Logical center adjustment
@@ -450,48 +464,8 @@ class DrawingSystem {
         const baseScrollX = window.scrollX;
         const baseScrollY = window.scrollY;
 
-        // Natural cursive coordinates, centered around dx=0 per word
-        const textStrokes = [
-            // "Try"
-            { color: '#ffffff', paths: [
-                // T
-                [{ dx: -60, dy: -40 }, { dx: 0, dy: -40 }],
-                [{ dx: -30, dy: -40 }, { dx: -30, dy: 40 }, { dx: -15, dy: 35 }],
-                // r
-                [{ dx: 10, dy: 40 }, { dx: 10, dy: 10 }, { dx: 25, dy: 5 }, { dx: 40, dy: 10 }, { dx: 40, dy: 40 }],
-                // y
-                [{ dx: 50, dy: 10 }, { dx: 50, dy: 30 }, { dx: 70, dy: 30 }, { dx: 70, dy: 10 }, { dx: 70, dy: 60 }, { dx: 50, dy: 75 }]
-            ]},
-            
-            // Heart (Next to Try)
-            { color: '#ec4899', paths: [
-                [{ dx: 95, dy: 0 }, { dx: 85, dy: -10 }, { dx: 75, dy: 0 }, { dx: 95, dy: 25 }, { dx: 115, dy: 0 }, { dx: 105, dy: -10 }, { dx: 95, dy: 0 }]
-            ]},
-
-            null, // WORD BREAK (STOCKED)
-
-            // "drawing"
-            { color: '#ffffff', paths: [
-                // d
-                [{ dx: -100, dy: 40 }, { dx: -130, dy: 40 }, { dx: -130, dy: 10 }, { dx: -100, dy: 10 }, { dx: -100, dy: 40 }, { dx: -100, dy: -20 }],
-                // r
-                [{ dx: -80, dy: 40 }, { dx: -80, dy: 10 }, { dx: -65, dy: 5 }, { dx: -50, dy: 10 }, { dx: -50, dy: 40 }],
-                // a
-                [{ dx: -30, dy: 40 }, { dx: 0, dy: 40 }, { dx: 0, dy: 10 }, { dx: -30, dy: 10 }, { dx: -30, dy: 40 }, { dx: 10, dy: 40 }],
-                // w
-                [{ dx: 25, dy: 10 }, { dx: 25, dy: 40 }, { dx: 45, dy: 40 }, { dx: 45, dy: 20 }, { dx: 65, dy: 40 }, { dx: 85, dy: 40 }, { dx: 85, dy: 10 }],
-                // i
-                [{ dx: 100, dy: 40 }, { dx: 100, dy: 10 }],
-                [{ dx: 100, dy: -5 }, { dx: 100, dy: -3 }],
-                // n
-                [{ dx: 115, dy: 40 }, { dx: 115, dy: 10 }, { dx: 135, dy: 10 }, { dx: 135, dy: 40 }, { dx: 155, dy: 10 }, { dx: 155, dy: 40 }],
-                // g
-                [{ dx: 175, dy: 40 }, { dx: 205, dy: 40 }, { dx: 205, dy: 10 }, { dx: 175, dy: 10 }, { dx: 175, dy: 40 }, { dx: 205, dy: 40 }, { dx: 205, dy: 70 }, { dx: 175, dy: 85 }]
-            ]}
-        ];
-
         let wordIndex = 0;
-        for (const word of textStrokes) {
+        for (const word of sketch.strokes) {
             if (word === null) {
                 wordIndex++;
                 await new Promise(r => setTimeout(r, 200));
@@ -499,7 +473,6 @@ class DrawingSystem {
             }
 
             for (const path of word.paths) {
-                // Using isolated property to prevent user-stroke collision
                 this.animatingStroke = {
                     points: [],
                     color: word.color,
