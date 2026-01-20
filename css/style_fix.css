@@ -84,8 +84,8 @@
 /* Updated Balloon Colors */
 
 @keyframes marker-pulse {
-    0% { transform: scale(1); opacity: 1; }
-    100% { transform: scale(2.5); opacity: 0; }
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
 }
 
 /* Optimization: Allow balloons to be slightly closer */
@@ -104,8 +104,8 @@
     gap: 20px !important; /* Force same as parent */
 }
 
-.job-item {
-    padding: 10px 12px !important; /* Original padding */
+body {
+    background-position: center top !important;
 }
 
 /* 6. HUD Toggle Styles */

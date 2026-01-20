@@ -78,11 +78,31 @@ class DrawingSystem {
                     const wiggleOpt = document.getElementById('wiggle-option');
                     if (wiggleOpt) wiggleOpt.style.display = (t === 'bucket' || t === 'eyedropper') ? 'none' : 'flex';
                     
-                    // Show brush types & tip shape only for pencil
+                    // Show brush types & tip shape only for brush/pencil
                     const brushTypeOpt = document.getElementById('brush-type-option');
                     const tipShapeOpt = document.getElementById('tip-shape-option');
-                    if (brushTypeOpt) brushTypeOpt.style.display = (t === 'pencil') ? 'flex' : 'none';
-                    if (tipShapeOpt) tipShapeOpt.style.display = (t === 'pencil' || t === 'eraser' || t === 'spray') ? 'flex' : 'none';
+                    if (t === 'pencil') {
+                        if (brushTypeOpt) brushTypeOpt.style.display = 'block';
+                        if (tipShapeOpt) tipShapeOpt.style.display = 'block';
+                    } else if (t === 'eraser' || t === 'spray') {
+                        if (brushTypeOpt) brushTypeOpt.style.display = 'none';
+                        if (tipShapeOpt) tipShapeOpt.style.display = 'block';
+                    } else {
+                        if (brushTypeOpt) brushTypeOpt.style.display = 'none';
+                        if (tipShapeOpt) tipShapeOpt.style.display = 'none';
+                    }
+
+                    const toolNameMap = {
+                        'pencil': 'Brush',
+                        'spray': 'Spray Can',
+                        'eraser': 'Eraser',
+                        'bucket': 'Bucket Fill',
+                        'rect': 'Rectangle',
+                        'circle': 'Circle',
+                        'eyedropper': 'Eyedropper'
+                    };
+                    const nameEl = document.getElementById('active-tool-name');
+                    if (nameEl) nameEl.textContent = toolNameMap[t] || t.charAt(0).toUpperCase() + t.slice(1);
                 }
             });
         });
@@ -91,7 +111,16 @@ class DrawingSystem {
         if (optionsPanel && this.tool) {
             optionsPanel.classList.add('active');
             const toolLabel = document.getElementById('active-tool-name');
-            if (toolLabel) toolLabel.textContent = this.tool.charAt(0).toUpperCase() + this.tool.slice(1);
+            const toolNameMap = {
+                'pencil': 'Brush',
+                'spray': 'Spray Can',
+                'eraser': 'Eraser',
+                'bucket': 'Bucket Fill',
+                'rect': 'Rectangle',
+                'circle': 'Circle',
+                'eyedropper': 'Eyedropper'
+            };
+            if (toolLabel) toolLabel.textContent = toolNameMap[this.tool] || this.tool.charAt(0).toUpperCase() + this.tool.slice(1);
         }
 
         // Close panel when clicking outside sidebar
@@ -145,7 +174,7 @@ class DrawingSystem {
         });
 
         // Trigger Auto-Write Animation after a delay
-        setTimeout(() => this.autoWriteTrySketch(), 1500);
+        setTimeout(() => this.autoWriteTryDrawing(), 1500);
 
         // Initialize custom color trigger as active since default is white
         document.getElementById('custom-color-trigger')?.classList.add('active');
@@ -188,6 +217,7 @@ class DrawingSystem {
         handle.addEventListener('mousedown', (e) => {
             if (e.target.closest('button')) return;
             isDragging = true;
+            this.isDraggingSidebar = true; // Set flag to block drawing
             sidebar.style.transition = 'none';
             // Also disable panel transition for smoother movement
             const optionsPanel = document.getElementById('tool-options-panel');
@@ -211,6 +241,7 @@ class DrawingSystem {
         window.addEventListener('mouseup', () => {
             if (!isDragging) return;
             isDragging = false;
+            this.isDraggingSidebar = false; // Reset flag
             sidebar.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s, background 0.3s'; 
             
             const optionsPanel = document.getElementById('tool-options-panel');
@@ -225,9 +256,27 @@ class DrawingSystem {
         this.canvas.height = window.innerHeight;
     }
 
+    getDocCoords(e) {
+        if (!e) return { x: 0, y: 0 };
+        const rect = this.canvas.getBoundingClientRect();
+        const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+        const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+        
+        // Anchor horizontal X to the center of the viewport
+        // This ensures drawings stay in sync with centered cards when zooming/resizing
+        return {
+            x: (clientX - rect.left) - (window.innerWidth / 2) + window.scrollX,
+            y: (clientY - rect.top) + window.scrollY
+        };
+    }
+
     startDrawing(e) {
-        if (this.isAutoWriting) return;
-        const { x, y } = this.getDocCoords(e);
+        if (this.isDraggingSidebar) return;
+        if (this.isAutoWriting) return; // Block user input during animation
+        
+        const coords = this.getDocCoords(e);
+        const x = coords.x;
+        const y = coords.y;
 
         if (this.tool === 'bucket' || this.tool === 'eyedropper') {
             this.handlePickOrRecolor(x, y, this.tool);
@@ -352,142 +401,160 @@ class DrawingSystem {
         }
     }
 
-    async autoWriteTrySketch() {
+    async autoWriteTryDrawing() {
         if (this.isDrawing) return; 
         this.isAutoWriting = true;
 
-        // Smart Responsive Placement
-        const cardWidth = 800; // Expected card width
-        const viewportWidth = window.innerWidth;
-        const leftGutter = (viewportWidth - cardWidth) / 2;
-        const rightGutter = viewportWidth - (viewportWidth + cardWidth) / 2;
-
-        let centerX, centerY, scale;
-
-        if (viewportWidth > 1400) {
-            // Large screens: place in the right margin
-            centerX = viewportWidth - leftGutter / 2;
-            centerY = 200;
-            scale = 1.0;
-        } else if (viewportWidth > 1100) {
-            // Medium screens: place in the right margin but smaller
-            centerX = viewportWidth - leftGutter / 2;
-            centerY = 150;
-            scale = 0.7;
-        } else {
-            // Mobile/Small: Place at the very top center before the card
-            centerX = viewportWidth / 2;
-            centerY = 80;
-            scale = 0.5;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const cardWidth = 640; 
+        
+        const gutterWidth = (vw - cardWidth) / 2;
+        
+        if (gutterWidth < 100 && vw < 800) {
+            this.isAutoWriting = false;
+            return;
         }
 
-        // Add current scroll to base coordinates so it sticks to the grid
+        let scale = 1.0;
+        let isStacked = false;
+        let targetVisualCenterX, centerY;
+        let word2OffsetX = 0;
+        let word2OffsetY = 0;
+
+        if (gutterWidth > 450) {
+            scale = 1.1;
+            targetVisualCenterX = vw/2 + cardWidth/2 + gutterWidth/2;
+            centerY = 200;
+        } else if (gutterWidth > 280) {
+            scale = gutterWidth / 450;
+            targetVisualCenterX = vw/2 + cardWidth/2 + gutterWidth/2;
+            centerY = 150;
+        } else if (gutterWidth > 180) {
+            isStacked = true;
+            scale = gutterWidth / 300;
+            targetVisualCenterX = vw/2 + cardWidth/2 + gutterWidth/2;
+            centerY = 150;
+            word2OffsetX = -220; 
+            word2OffsetY = 100;  
+        } else {
+            isStacked = vw < 600;
+            scale = vw < 500 ? 0.45 : 0.6;
+            targetVisualCenterX = vw / 2;
+            centerY = isStacked ? 80 : 100;
+            if (isStacked) {
+                word2OffsetX = -220;
+                word2OffsetY = 100;
+            }
+        }
+
+        const centerX = (targetVisualCenterX - vw/2) - (60 * scale);
         const baseScrollX = window.scrollX;
         const baseScrollY = window.scrollY;
 
+        // Adjusted coordinates to avoid overlap and improve cursive feel
         const textStrokes = [
             // "T"
-            [{ dx: -180, dy: -40 }, { dx: -120, dy: -40 }],
-            [{ dx: -150, dy: -40 }, { dx: -150, dy: 40 }],
-            // "R"
-            [{ dx: -100, dy: 40 }, { dx: -100, dy: -40 }, { dx: -60, dy: -40 }, { dx: -50, dy: -20 }, { dx: -60, dy: 0 }, { dx: -100, dy: 0 }],
-            [{ dx: -80, dy: 0 }, { dx: -50, dy: 40 }],
-            // "Y"
-            [{ dx: -30, dy: -40 }, { dx: 0, dy: 0 }, { dx: 30, dy: -40 }],
-            [{ dx: 0, dy: 0 }, { dx: 0, dy: 40 }],
-            // gap
-            null,
-            // "S"
-            [{ dx: 50, dy: -20 }, { dx: 60, dy: -40 }, { dx: 100, dy: -40 }, { dx: 110, dy: -20 }, { dx: 110, dy: -10 }, { dx: 50, dy: 10 }, { dx: 50, dy: 20 }, { dx: 60, dy: 40 }, { dx: 100, dy: 40 }, { dx: 110, dy: 20 }],
-            // "K"
-            [{ dx: 130, dy: -40 }, { dx: 130, dy: 40 }],
-            [{ dx: 180, dy: -40 }, { dx: 130, dy: 0 }, { dx: 180, dy: 40 }],
-            // "E"
-            [{ dx: 230, dy: -40 }, { dx: 200, dy: -40 }, { dx: 200, dy: 40 }, { dx: 230, dy: 40 }],
-            [{ dx: 200, dy: 0 }, { dx: 220, dy: 0 }],
-            // "T"
-            [{ dx: 250, dy: -40 }, { dx: 300, dy: -40 }],
-            [{ dx: 275, dy: -40 }, { dx: 275, dy: 40 }],
-            // "C"
-            [{ dx: 350, dy: -40 }, { dx: 320, dy: -40 }, { dx: 320, dy: 40 }, { dx: 350, dy: 40 }],
-            // "H"
-            [{ dx: 370, dy: -40 }, { dx: 370, dy: 40 }],
-            [{ dx: 370, dy: 0 }, { dx: 410, dy: 0 }],
-            [{ dx: 410, dy: -40 }, { dx: 410, dy: 40 }],
-            // "!"
-            [{ dx: 440, dy: -40 }, { dx: 440, dy: 10 }],
-            [{ dx: 440, dy: 30 }, { dx: 440, dy: 35 }]
+            [{ dx: -240, dy: -40 }, { dx: -180, dy: -40 }], // Top bar
+            [{ dx: -210, dy: -40 }, { dx: -210, dy: 40 }, { dx: -195, dy: 35 }], // Stem
+            // "r"
+            [{ dx: -175, dy: 40 }, { dx: -175, dy: 10 }, { dx: -160, dy: 5 }, { dx: -145, dy: 10 }, { dx: -145, dy: 40 }],
+            // "y"
+            [{ dx: -135, dy: 10 }, { dx: -135, dy: 30 }, { dx: -115, dy: 30 }, { dx: -115, dy: 10 }, { dx: -115, dy: 60 }, { dx: -140, dy: 75 }],
+            
+            null, // Space/Stack Break
+
+            // "d"
+            [{ dx: -80, dy: 40 }, { dx: -110, dy: 40 }, { dx: -110, dy: 10 }, { dx: -80, dy: 10 }, { dx: -80, dy: 40 }, { dx: -80, dy: -20 }],
+            // "r"
+            [{ dx: -65, dy: 40 }, { dx: -65, dy: 10 }, { dx: -55, dy: 5 }, { dx: -45, dy: 10 }, { dx: -45, dy: 40 }],
+            // "a"
+            [{ dx: -30, dy: 40 }, { dx: -5, dy: 40 }, { dx: -5, dy: 10 }, { dx: -30, dy: 10 }, { dx: -30, dy: 40 }, { dx: 0, dy: 40 }],
+            // "w"
+            [{ dx: 15, dy: 10 }, { dx: 15, dy: 40 }, { dx: 35, dy: 40 }, { dx: 35, dy: 20 }, { dx: 55, dy: 40 }, { dx: 75, dy: 40 }, { dx: 75, dy: 10 }],
+            // "i"
+            [{ dx: 95, dy: 40 }, { dx: 95, dy: 10 }],
+            [{ dx: 95, dy: -5 }, { dx: 95, dy: -3 }], // High Dot
+            // "n"
+            [{ dx: 110, dy: 40 }, { dx: 110, dy: 10 }, { dx: 130, dy: 10 }, { dx: 130, dy: 40 }, { dx: 150, dy: 10 }, { dx: 150, dy: 40 }],
+            // "g"
+            [{ dx: 170, dy: 40 }, { dx: 200, dy: 40 }, { dx: 200, dy: 10 }, { dx: 170, dy: 10 }, { dx: 170, dy: 40 }, { dx: 200, dy: 40 }, { dx: 200, dy: 70 }, { dx: 170, dy: 85 }]
         ];
 
+        let wordIndex = 0;
         for (const path of textStrokes) {
             if (path === null) {
+                wordIndex++;
                 await new Promise(r => setTimeout(r, 200));
                 continue;
             }
 
-            // Start new stroke
-            this.currentStroke = {
+            // Using isolated property to prevent user-stroke collision
+            this.animatingStroke = {
                 points: [],
                 color: '#ffffff',
-                size: 10, // Even thicker
+                size: 8 * scale, 
                 tool: 'pencil',
                 tipShape: 'round',
                 brushType: 'fountain',
                 startTime: Date.now()
             };
-            this.strokes.push(this.currentStroke);
+            this.strokes.push(this.animatingStroke);
+
+            const offX = (wordIndex > 0) ? word2OffsetX : 0;
+            const offY = (wordIndex > 0) ? word2OffsetY : 0;
 
             for (let i = 0; i < path.length; i++) {
                 const p = path[i];
-                const targetX = centerX + p.dx * scale + baseScrollX;
-                const targetY = centerY + p.dy * scale + baseScrollY;
+                const targetX = centerX + (p.dx + offX) * scale + baseScrollX;
+                const targetY = centerY + (p.dy + offY) * scale + baseScrollY;
 
                 if (i > 0) {
-                    // Interpolate between path nodes for smooth writing
                     const prev = path[i - 1];
-                    const prevX = centerX + prev.dx * scale + baseScrollX;
-                    const prevY = centerY + prev.dy * scale + baseScrollY;
-                    const steps = 5;
+                    const prevX = centerX + (prev.dx + offX) * scale + baseScrollX;
+                    const prevY = centerY + (prev.dy + offY) * scale + baseScrollY;
+                    const steps = Math.max(2, Math.floor(6 * scale));
                     for (let s = 1; s <= steps; s++) {
                         const interX = prevX + (targetX - prevX) * (s / steps);
                         const interY = prevY + (targetY - prevY) * (s / steps);
-                        this.addPointDirect(interX, interY);
-                        await new Promise(r => setTimeout(r, 20));
+                        this.addPointToStroke(this.animatingStroke, interX, interY);
+                        await new Promise(r => setTimeout(r, 10));
                     }
                 } else {
-                    this.addPointDirect(targetX, targetY);
+                    this.addPointToStroke(this.animatingStroke, targetX, targetY);
                 }
             }
-            this.currentStroke = null;
+            this.animatingStroke = null;
             await new Promise(r => setTimeout(r, 100));
         }
         this.isAutoWriting = false;
     }
 
-    addPointDirect(x, y) {
-        if (!this.currentStroke) return;
+    addPointToStroke(stroke, x, y) {
+        if (!stroke) return;
         const time = Date.now();
-        let pointSize = this.currentStroke.size;
+        let pointSize = stroke.size;
 
-        if (this.currentStroke.brushType === 'fountain') {
+        if (stroke.brushType === 'fountain') {
             let speed = 0;
-            if (this.currentStroke.points.length > 0) {
-                const last = this.currentStroke.points[this.currentStroke.points.length - 1];
+            if (stroke.points.length > 0) {
+                const last = stroke.points[stroke.points.length - 1];
                 const dist = Math.hypot(x - last.x, y - last.y);
                 const dt = time - (last.time || time);
                 speed = dist / Math.max(1, dt);
             }
-            const factor = Math.max(0.3, Math.min(1.0, 1.0 - speed * 0.2));
-            pointSize = this.currentStroke.size * factor;
+            const factor = Math.max(0.4, Math.min(1.0, 1.0 - speed * 0.15));
+            pointSize = stroke.size * factor;
         }
 
-        this.currentStroke.points.push({
+        stroke.points.push({
             x, y,
             size: pointSize,
             time: time,
             offset: Math.random() * Math.PI * 2
         });
     }
+
 
     clear() {
         if (window.confirm("Você quer mesmo apagar todo o desenho?")) {
@@ -507,6 +574,7 @@ class DrawingSystem {
 
         const scrollX = window.scrollX;
         const scrollY = window.scrollY;
+        const midX = this.canvas.width / 2;
 
         this.strokes.forEach(stroke => {
             this.ctx.globalCompositeOperation = stroke.tool === 'eraser' ? 'destination-out' : 'source-over';
@@ -517,7 +585,7 @@ class DrawingSystem {
             if (stroke.tool === 'rect' || stroke.tool === 'circle') {
                 const wiggleX = Math.sin(time * 0.005) * this.wiggleAmount;
                 const wiggleY = Math.cos(time * 0.005) * this.wiggleAmount;
-                const x = Math.floor(((stroke.startPos.x - scrollX) + wiggleX) / pixelSize) * pixelSize;
+                const x = Math.floor(((stroke.startPos.x + midX - scrollX) + wiggleX) / pixelSize) * pixelSize;
                 const y = Math.floor(((stroke.startPos.y - scrollY) + wiggleY) / pixelSize) * pixelSize;
                 const w = Math.floor((stroke.endPos.x - stroke.startPos.x) / pixelSize) * pixelSize;
                 const h = Math.floor((stroke.endPos.y - stroke.startPos.y) / pixelSize) * pixelSize;
@@ -534,7 +602,7 @@ class DrawingSystem {
                     pt.cluster.forEach(dot => {
                         const dotWiggleX = Math.sin(time * this.wiggleSpeed * 2 + dot.offset) * (this.wiggleAmount * 0.5);
                         const dotWiggleY = Math.cos(time * this.wiggleSpeed * 2 + dot.offset) * (this.wiggleAmount * 0.5);
-                        const px = Math.floor(((pt.x - scrollX) + dot.dx + mainWiggleX + dotWiggleX) / pixelSize) * pixelSize;
+                        const px = Math.floor(((pt.x + midX - scrollX) + dot.dx + mainWiggleX + dotWiggleX) / pixelSize) * pixelSize;
                         const py = Math.floor(((pt.y - scrollY) + dot.dy + mainWiggleY + dotWiggleY) / pixelSize) * pixelSize;
                         this.ctx.fillRect(px, py, pixelSize, pixelSize);
                     });
@@ -545,14 +613,14 @@ class DrawingSystem {
                     const pt = stroke.points[i];
                     const wiggleX = Math.sin(time * this.wiggleSpeed + pt.offset) * this.wiggleAmount;
                     const wiggleY = Math.cos(time * this.wiggleSpeed + pt.offset) * this.wiggleAmount;
-                    const px = Math.floor(((pt.x - scrollX) + wiggleX) / pixelSize) * pixelSize;
+                    const px = Math.floor(((pt.x + midX - scrollX) + wiggleX) / pixelSize) * pixelSize;
                     const py = Math.floor(((pt.y - scrollY) + wiggleY) / pixelSize) * pixelSize;
 
                     if (i > 0) {
                         const prevPt = stroke.points[i - 1];
                         const prevWiggleX = Math.sin(time * this.wiggleSpeed + prevPt.offset) * this.wiggleAmount;
                         const prevWiggleY = Math.cos(time * this.wiggleSpeed + prevPt.offset) * this.wiggleAmount;
-                        const ppx = Math.floor(((prevPt.x - scrollX) + prevWiggleX) / pixelSize) * pixelSize;
+                        const ppx = Math.floor(((prevPt.x + midX - scrollX) + prevWiggleX) / pixelSize) * pixelSize;
                         const ppy = Math.floor(((prevPt.y - scrollY) + prevWiggleY) / pixelSize) * pixelSize;
                         
                         // Use point specific size if available
