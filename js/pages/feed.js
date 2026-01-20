@@ -29,13 +29,16 @@ const FeedPage = {
             </div>
 
             <!-- Newsletter Promo Card -->
+            <!-- Adding a spacer div instead of relying on margin to be safe -->
+            <div style="height: 2.5rem;"></div>
+            
             <div class="sidebar-card">
                 <div class="sidebar-section">
                     <span class="sidebar-label">Newsletter</span>
                     <p style="font-size: 0.9rem; margin-top: 0.5rem; color: var(--text-secondary); margin-bottom: 1rem;">
                         Join our circle for exclusive monthly updates.
                     </p>
-                    <button class="social-btn" onclick="window.balloonSystem.tryPlaceBalloon(window.balloonSystem.getNewsletter())" style="width: 100%; justify-content: center; background-color: var(--accent-orange); border-color: var(--accent-orange); color: white;">
+                    <button class="social-btn subscribe-btn" onclick="window.balloonSystem.tryPlaceBalloon(window.balloonSystem.getNewsletter(), true)">
                         <i class="fa-solid fa-envelope"></i> Subscribe
                     </button>
                 </div>

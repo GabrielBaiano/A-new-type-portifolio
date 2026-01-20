@@ -229,7 +229,7 @@ class BalloonSystem {
         });
     }
 
-    tryPlaceBalloon(data) {
+    tryPlaceBalloon(data, force = false) {
         const side = Math.random() < 0.5 ? 'left' : 'right';
         const mainContainer = document.querySelector('.main-container');
         const margin = mainContainer ? (window.innerWidth - mainContainer.offsetWidth) / 2 : 500;
@@ -246,6 +246,22 @@ class BalloonSystem {
         document.body.appendChild(temp);
         const height = temp.offsetHeight;
         temp.remove();
+
+        // FORCE PLACEMENT: Random anywhere on screen
+        if (force) {
+            const xMinFull = 20;
+            const xMaxFull = window.innerWidth - balloonWidth - 20;
+            const yMinFull = 50;
+            const yMaxFull = window.innerHeight - height - 20;
+            
+            const x = xMinFull + Math.random() * (xMaxFull - xMinFull);
+            const y = yMinFull + Math.random() * (yMaxFull - yMinFull);
+            
+            const rect = { x, y, w: balloonWidth, h: height };
+            const side = x < window.innerWidth / 2 ? 'left' : 'right';
+            this.spawnBalloon(data, side, x, y, rect);
+            return true;
+        }
 
         const maxAttempts = 50; // Increased attempts
         for (let i = 0; i < maxAttempts; i++) {
