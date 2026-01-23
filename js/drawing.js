@@ -562,8 +562,8 @@ class DrawingSystem {
         // Let's try anchoring CenterY relative to VH.
         
         const scaledHalfWidth = (baseWidth / 2) * scale;
-        // Padding left 5%
-        const centerX = scaledHalfWidth + (vw * 0.05); 
+        // Move even further left: bleeding 5% off the edge
+        const centerX = scaledHalfWidth - (vw * 0.05); 
         
         // Anchor bottom
         const centerY = vh - (scaledHalfWidth * 0.6); // Guesstimate height ratio as 0.6 of width

@@ -76,12 +76,10 @@ class PageManager {
             this.currentPage = pageName;
             this.currentParams = params;
             
-            // Toggle Ornamental Border for Home (About) page
+            // Ensure Ornamental Border is active (User wants it to persist)
             if (window.drawingSystem) {
                 if (pageName === 'home') {
                     window.drawingSystem.setOrnamentalBorder(true);
-                } else {
-                    window.drawingSystem.setOrnamentalBorder(false);
                 }
             }
             
