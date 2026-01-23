@@ -489,16 +489,8 @@ class DrawingSystem {
     }
 
     async autoWriteTryDrawing() {
-        // Just draw the "try-drawing" sketch once on init
-        // Modified to verify new feature: load the detailed sketch
-        // this.loadSketchFromJson('data/anime_sketch.json');
-        
-        if (typeof ANIME_SKETCH_DATA !== 'undefined') {
-            console.log("Loading sketch from inline data");
-            this.autoWrite(ANIME_SKETCH_DATA);
-        } else {
-            console.error("ANIME_SKETCH_DATA not found!");
-        }
+        console.log("Loading generated sketch...");
+        this.loadSketchFromJson('data/anime_sketch.json');
     }
 
 
@@ -549,7 +541,11 @@ class DrawingSystem {
         // Let's center it.
         
         // Scale adjustment if needed
-        scale *= Math.min(1.0, vw / 800); // Scale down on mobile
+        // Goal: Fill ~80% of the screen width on Desktop, or 100% on mobile.
+        // Base sketch width is ~1000px.
+        const baseWidth = 1000;
+        const targetWidth = Math.min(vw * 0.9, 1400); // 90% of screen, max 1400px
+        scale *= (targetWidth / baseWidth);
 
         // Logical center adjustment
         const centerX = targetVisualCenterX; // vw / 2
