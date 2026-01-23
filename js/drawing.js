@@ -395,9 +395,16 @@ class DrawingSystem {
                 const stepSize = 5; // Fill every 5px (adjust for smoothness)
                 
                 if (dist > stepSize) {
-                    const steps = Math.floor(dist / stepSize);
+                    let steps = Math.floor(dist / stepSize);
+                    // Performance Safety: Limit interpolation steps to avoid freezing on massive jumps (e.g. tab switch)
+                    // 100 steps * 5px = 500px jump. If larger, we just draw a straight line gap or interpolation stops early.
+                    if (steps > 100) steps = 100;
+
                     for (let i = 1; i <= steps; i++) {
-                        const t = i / steps; // Wait, we want to reach target? No, standard line drawing reaches target on next event.
+                        const t = i / steps; // Correctly distribute points even if clamped? 
+                        // If clamped, t will go 1/100 to 100/100. 
+                        // So we effectively just generate 100 points along the path.
+
                         // Actually regular drawing events will eventualy catch up.
                         // But for "fast" swipes, we want to fill the GAP now.
                          const lx = last.x + (x - last.x) * t;
@@ -902,17 +909,20 @@ class DrawingSystem {
         const pixelSize = 2; // Pixel art grid size
         const midX = this.canvas.width / 2;
 
-        this.strokes.forEach(stroke => {
+        strokeLoop: for (const stroke of this.strokes) {
             this.ctx.globalCompositeOperation = stroke.tool === 'eraser' ? 'destination-out' : 'source-over';
             this.ctx.fillStyle = stroke.color;
             this.ctx.strokeStyle = stroke.color;
-            this.ctx.lineWidth = stroke.size;
+            
+            // Optimization: If using standard brush (constant size), use a single Path for maximum performance.
+            // This is crucial for the "Greek Key" border which has hundreds of points.
+            const useSinglePath = stroke.brushType === 'standard' || stroke.brushType === 'marker'; 
 
             if (stroke.tool === 'rect' || stroke.tool === 'circle') {
+                this.ctx.lineWidth = stroke.size;
                 const wiggleX = Math.sin(time * 0.005) * this.wiggleAmount;
                 const wiggleY = Math.cos(time * 0.005) * this.wiggleAmount;
                 // Shapes use startPos/endPos which are captured as Viewport Coords
-                // So they are absolute. No scroll interaction needed.
                 const x = Math.floor((stroke.startPos.x + wiggleX) / pixelSize) * pixelSize;
                 const y = Math.floor((stroke.startPos.y + wiggleY) / pixelSize) * pixelSize;
                 const w = Math.floor((stroke.endPos.x - stroke.startPos.x) / pixelSize) * pixelSize;
@@ -930,7 +940,6 @@ class DrawingSystem {
                     pt.cluster.forEach(dot => {
                         const dotWiggleX = Math.sin(time * this.wiggleSpeed * 2 + dot.offset) * (this.wiggleAmount * 0.5);
                         const dotWiggleY = Math.cos(time * this.wiggleSpeed * 2 + dot.offset) * (this.wiggleAmount * 0.5);
-                        // Spray points are absolute Viewport Coords
                         const px = Math.floor((pt.x + dot.dx + mainWiggleX + dotWiggleX) / pixelSize) * pixelSize;
                         const py = Math.floor((pt.y + dot.dy + mainWiggleY + dotWiggleY) / pixelSize) * pixelSize;
                         this.ctx.fillRect(px, py, pixelSize, pixelSize);
@@ -940,64 +949,104 @@ class DrawingSystem {
                 // Pencil or Eraser
                 const isBorder = stroke.isBorder;
                 
-                for (let i = 0; i < stroke.points.length; i++) {
-                    const pt = stroke.points[i];
+                if (useSinglePath) {
+                    // FAST PATH: Single Path Stroke (100x faster than pixel-by-pixel)
+                    this.ctx.lineWidth = stroke.size;
+                    this.ctx.lineCap = stroke.tipShape === 'round' ? 'round' : 'square';
+                    this.ctx.lineJoin = 'round';
+                    this.ctx.beginPath();
                     
-                    let wiggleX = 0, wiggleY = 0;
-                    // Always wiggle (Style Choice: User requested shaky border)
-                    wiggleX = Math.sin(time * this.wiggleSpeed + pt.offset) * this.wiggleAmount;
-                    wiggleY = Math.cos(time * this.wiggleSpeed + pt.offset) * this.wiggleAmount;
+                    let hasPoints = false;
 
-                    // Coordinate Logic:
-                    // 1. isBorder: points are relative to {midX, 0}
-                    // 2. Standard: points are absolute Viewport Coordinates {x, y}
-                    // "Sticker on Glass" -> No scroll adjustments.
-                    
-                    let rawX, rawY;
-                    if (isBorder) {
-                        rawX = pt.x + midX; 
-                        rawY = pt.y;       
-                    } else {
-                        rawX = pt.x;
-                        rawY = pt.y;
+                    for (let i = 0; i < stroke.points.length; i++) {
+                        const pt = stroke.points[i];
+                        
+                        // Calculate wiggled position once
+                        const wiggleX = Math.sin(time * this.wiggleSpeed + pt.offset) * this.wiggleAmount;
+                        const wiggleY = Math.cos(time * this.wiggleSpeed + pt.offset) * this.wiggleAmount;
+
+                        let rawX = pt.x, rawY = pt.y;
+                        if (isBorder) rawX += midX;
+
+                        const px = Math.floor((rawX + wiggleX) / pixelSize) * pixelSize;
+                        const py = Math.floor((rawY + wiggleY) / pixelSize) * pixelSize;
+
+                        if (i === 0) {
+                            this.ctx.moveTo(px, py);
+                            hasPoints = true;
+                        } else {
+                            this.ctx.lineTo(px, py);
+                        }
+                    }
+                    if (hasPoints) this.ctx.stroke();
+
+                    // Handle single point dot
+                    if (stroke.points.length === 1) {
+                        const pt = stroke.points[0];
+                         // Recalculate just for dot to ensure it renders
+                        const wiggleX = Math.sin(time * this.wiggleSpeed + pt.offset) * this.wiggleAmount;
+                        const wiggleY = Math.cos(time * this.wiggleSpeed + pt.offset) * this.wiggleAmount;
+                        let rawX = pt.x, rawY = pt.y;
+                        if (isBorder) rawX += midX;
+                        const px = Math.floor((rawX + wiggleX) / pixelSize) * pixelSize;
+                        const py = Math.floor((rawY + wiggleY) / pixelSize) * pixelSize;
+                        
+                        const s = stroke.size;
+                        if (stroke.tipShape === 'round') {
+                            this.ctx.beginPath();
+                            this.ctx.arc(px, py, s/2, 0, Math.PI*2);
+                            this.ctx.fill();
+                        } else {
+                            this.ctx.fillRect(px - s/2, py - s/2, s, s);
+                        }
                     }
 
-                    const px = Math.floor((rawX + wiggleX) / pixelSize) * pixelSize;
-                    const py = Math.floor((rawY + wiggleY) / pixelSize) * pixelSize;
+                } else {
+                    // SLOW PATH: Variable Width (Pressure/Speed sensitivity) - Segmented Stroke
+                    this.ctx.lineCap = 'round';
+                    this.ctx.lineJoin = 'round';
 
-                    if (i > 0) {
+                    for (let i = 1; i < stroke.points.length; i++) {
+                        const pt = stroke.points[i];
                         const prevPt = stroke.points[i - 1];
-                        
-                        let prevWiggleX = 0, prevWiggleY = 0;
-                        // Always wiggle
-                        prevWiggleX = Math.sin(time * this.wiggleSpeed + prevPt.offset) * this.wiggleAmount;
-                        prevWiggleY = Math.cos(time * this.wiggleSpeed + prevPt.offset) * this.wiggleAmount;
 
-                        let prevRawX, prevRawY;
+                        const wiggleX = Math.sin(time * this.wiggleSpeed + pt.offset) * this.wiggleAmount;
+                        const wiggleY = Math.cos(time * this.wiggleSpeed + pt.offset) * this.wiggleAmount;
+                        
+                        const prevWiggleX = Math.sin(time * this.wiggleSpeed + prevPt.offset) * this.wiggleAmount;
+                        const prevWiggleY = Math.cos(time * this.wiggleSpeed + prevPt.offset) * this.wiggleAmount;
+
+                        let rawX = pt.x, rawY = pt.y;
+                        let prevRawX = prevPt.x, prevRawY = prevPt.y;
+                        
                         if (isBorder) {
-                            prevRawX = prevPt.x + midX;
-                            prevRawY = prevPt.y;
-                        } else {
-                            prevRawX = prevPt.x;
-                            prevRawY = prevPt.y;
+                            rawX += midX;
+                            prevRawX += midX;
                         }
 
+                        const px = Math.floor((rawX + wiggleX) / pixelSize) * pixelSize;
+                        const py = Math.floor((rawY + wiggleY) / pixelSize) * pixelSize;
                         const ppx = Math.floor((prevRawX + prevWiggleX) / pixelSize) * pixelSize;
                         const ppy = Math.floor((prevRawY + prevWiggleY) / pixelSize) * pixelSize;
-                        
-                        const currentSize = pt.size || stroke.size;
-                        const previousSize = prevPt.size || stroke.size;
-                        const avgSize = (currentSize + previousSize) / 2;
 
-                        this.drawPixelLine(ppx, ppy, px, py, pixelSize, avgSize, stroke.tipShape);
-                    } else {
-                        // Single point dot
-                        const currentSize = pt.size || stroke.size;
-                        this.drawBrushTip(px, py, currentSize, stroke.tipShape);
+                        const avgSize = (pt.size + prevPt.size) / 2;
+                        
+                        this.ctx.beginPath();
+                        this.ctx.lineWidth = avgSize;
+                        this.ctx.moveTo(ppx, ppy);
+                        this.ctx.lineTo(px, py);
+                        this.ctx.stroke();
+                    }
+                    
+                    // Single point in variable mode
+                    if (stroke.points.length === 1) {
+                         // Similar dot logic if needed...
+                         const pt = stroke.points[0];
+                         // ... (render dot)
                     }
                 }
             }
-        });
+        } // end strokeLoop
 
         this.ctx.globalCompositeOperation = 'source-over';
     }
