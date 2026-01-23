@@ -1204,6 +1204,7 @@ const AdminPage = {
                 this.loadInitialData();
             } else {
                 const errData = await res.json();
+                console.error('Upload failed:', errData);
                 alert('Error saving photo: ' + (errData.error || 'Unknown error'));
             }
         });

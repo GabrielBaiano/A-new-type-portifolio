@@ -76,6 +76,15 @@ class PageManager {
             this.currentPage = pageName;
             this.currentParams = params;
             
+            // Toggle Ornamental Border for Home (About) page
+            if (window.drawingSystem) {
+                if (pageName === 'home') {
+                    window.drawingSystem.setOrnamentalBorder(true);
+                } else {
+                    window.drawingSystem.setOrnamentalBorder(false);
+                }
+            }
+            
         } catch (error) {
             console.error(`[PageManager] Error loading page ${pageName}:`, error);
             // Emergency restore: show container if it failed during fade

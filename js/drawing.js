@@ -24,31 +24,49 @@ class DrawingSystem {
 
         this.currentSketchIndex = 0;
         this.sketchKeys = Object.keys(SKETCH_GALLERY);
+        this.borderAnimationId = 0; // Token for cancelling old animations
         this.init();
         this.initDragging();
         this.animate();
+        
+        // Start the auto-drawing demo
+        setTimeout(() => this.autoWriteTryDrawing(), 500);
     }
 
     init() {
         this.resize();
         window.addEventListener('resize', () => this.resize());
 
-        // Mouse Events
-        this.canvas.addEventListener('mousedown', (e) => this.startDrawing(e));
-        this.canvas.addEventListener('mousemove', (e) => this.draw(e));
-        this.canvas.addEventListener('mouseup', () => this.stopDrawing());
-        this.canvas.addEventListener('mouseleave', () => this.stopDrawing());
+        // Mouse Events - Window level to capture background clicks (even if canvas is behind)
+        window.addEventListener('mousedown', (e) => this.startDrawing(e));
+        window.addEventListener('mousemove', (e) => this.draw(e));
+        window.addEventListener('mouseup', () => this.stopDrawing());
+        
+        // Touch Events - Window level
+        window.addEventListener('touchstart', (e) => {
+             // We need to check if we should draw. 
+             // If canvas is z-index: -1, we rely on event bubbling or direct window capture.
+             // If we want to "draw on background", we shouldn't block buttons.
+             // So we check if the target is "interactive".
+            const target = e.target;
+            const isInteractive = target.closest('button') || target.closest('a') || target.closest('input') || target.closest('.card'); 
+            // Note: IF we want to draw "on background only", we should probably NOT draw if clicking on a card?
+            // User said: "não é pra dar pra desenhar por cima de nada da tela, só no background"
+            // So YES, we block drawing if clicking on a card.
+            
+            if (isInteractive) return;
 
-        // Touch Events
-        this.canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
             this.startDrawing(e.touches[0]);
         }, { passive: false });
-        this.canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            this.draw(e.touches[0]);
+
+        window.addEventListener('touchmove', (e) => {
+            if (this.isDrawing) {
+                e.preventDefault();
+                this.draw(e.touches[0]);
+            }
         }, { passive: false });
-        this.canvas.addEventListener('touchend', () => this.stopDrawing());
+        window.addEventListener('touchend', () => this.stopDrawing());
 
         // Tools & Pop-out Panel
         const tools = ['pencil', 'spray', 'eraser', 'bucket', 'rect', 'circle', 'eyedropper'];
@@ -266,6 +284,12 @@ class DrawingSystem {
     resize() {
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
+        // If border is active, we need to redraw it to fit new size
+        if (this.isBorderActive) {
+            // Debounce or just clear?
+            // Let's instant redraw for now (animateBorder clears old ones)
+            this.animateBorder(); 
+        }
     }
 
     getDocCoords(e) {
@@ -274,17 +298,32 @@ class DrawingSystem {
         const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
         const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
         
-        // Anchor horizontal X to the center of the viewport
-        // This ensures drawings stay in sync with centered cards when zooming/resizing
+        // Return pure viewport coordinates (relative to window top-left)
+        // We do NOT add window.scrollX/Y because we want "Fixed" (sticker on glass) behavior.
+        // We subtract the canvas offset (rect.left/top) just in case, though usually 0/0 for fixed canvas.
         return {
-            x: (clientX - rect.left) - (window.innerWidth / 2) + window.scrollX,
-            y: (clientY - rect.top) + window.scrollY
+            x: (clientX - rect.left), // Relative to canvas top-left
+            y: (clientY - rect.top)   // Relative to canvas top-left
         };
     }
 
     startDrawing(e) {
         if (this.isDraggingSidebar) return;
-        if (this.isAutoWriting) return; // Block user input during animation
+        
+        // Background Drawing Check:
+        // Ensure we are NOT clicking on content if we only want to draw on background.
+        const target = e.target;
+        if (target) {
+             const isContent = target.closest('.card') || target.closest('button') || target.closest('a') || target.closest('input') || target.closest('#drawing-sidebar');
+             if (isContent) return;
+        }
+
+        // If auto-writing is happening, stop it so user can draw
+        if (this.isAutoWriting) {
+            this.stopAutoDraw();
+            // Optional: return here to just stop on first click, or proceed to draw. 
+            // Let's proceed to draw immediately for better responsiveness
+        }
         
         const coords = this.getDocCoords(e);
         const x = coords.x;
@@ -347,29 +386,58 @@ class DrawingSystem {
 
             this.currentStroke.points.push({ x, y, cluster: points, mainOffset: Math.random() * Math.PI * 2 });
         } else {
-            let pointSize = this.currentStroke.size;
-            let time = Date.now();
-
-            if (this.currentStroke.brushType === 'fountain') {
-                let speed = 0;
-                if (this.currentStroke.points.length > 0) {
-                    const last = this.currentStroke.points[this.currentStroke.points.length - 1];
-                    const dist = Math.hypot(x - last.x, y - last.y);
-                    const dt = time - (last.time || time);
-                    speed = dist / Math.max(1, dt);
+            // Input Interpolation for smooth wiggle
+            // If distance from last point is large, fill with intermediate points
+            const points = this.currentStroke.points;
+            if (points.length > 0) {
+                const last = points[points.length - 1];
+                const dist = Math.hypot(x - last.x, y - last.y);
+                const stepSize = 5; // Fill every 5px (adjust for smoothness)
+                
+                if (dist > stepSize) {
+                    const steps = Math.floor(dist / stepSize);
+                    for (let i = 1; i <= steps; i++) {
+                        const t = i / steps; // Wait, we want to reach target? No, standard line drawing reaches target on next event.
+                        // Actually regular drawing events will eventualy catch up.
+                        // But for "fast" swipes, we want to fill the GAP now.
+                         const lx = last.x + (x - last.x) * t;
+                         const ly = last.y + (y - last.y) * t;
+                         this.addSinglePointToStroke(this.currentStroke, lx, ly);
+                    }
+                    // Finally add the actual point? loop includes target if we go to <= steps?
+                    // if t=1, lx=x. Yes.
+                    return; 
                 }
-                // Inversely proportional: fast = thin (min 20% size), slow = thick (100% size)
-                const factor = Math.max(0.2, Math.min(1.0, 1.2 - speed * 0.4));
-                pointSize = this.currentStroke.size * factor;
             }
-
-            this.currentStroke.points.push({ 
-                x, y, 
-                size: pointSize, 
-                time: time,
-                offset: Math.random() * Math.PI * 2 
-            });
+            this.addSinglePointToStroke(this.currentStroke, x, y);
         }
+    }
+
+    addSinglePointToStroke(stroke, x, y) {
+        let pointSize = stroke.size;
+        let time = Date.now();
+
+        if (stroke.brushType === 'fountain') {
+            let speed = 0;
+            if (stroke.points.length > 0) {
+                const last = stroke.points[stroke.points.length - 1];
+                // Use actual time diff, handle 0
+                const lastTime = last.time || time;
+                const dt = Math.max(1, time - lastTime);
+                const dist = Math.hypot(x - last.x, y - last.y);
+                speed = dist / dt;
+            }
+            // Inversely proportional: fast = thin (min 20% size), slow = thick (100% size)
+            const factor = Math.max(0.2, Math.min(1.0, 1.2 - speed * 0.4));
+            pointSize = stroke.size * factor;
+        }
+
+        stroke.points.push({ 
+            x, y, 
+            size: pointSize, 
+            time: time,
+            offset: Math.random() * Math.PI * 2 
+        });
     }
 
     handlePickOrRecolor(x, y, mode) {
@@ -415,16 +483,39 @@ class DrawingSystem {
 
     async autoWriteTryDrawing() {
         // Just draw the "try-drawing" sketch once on init
-        await this.autoWrite('try-drawing');
+        // Modified to verify new feature: load the detailed sketch
+        // this.loadSketchFromJson('data/anime_sketch.json');
+        
+        if (typeof ANIME_SKETCH_DATA !== 'undefined') {
+            console.log("Loading sketch from inline data");
+            this.autoWrite(ANIME_SKETCH_DATA);
+        } else {
+            console.error("ANIME_SKETCH_DATA not found!");
+        }
     }
 
 
-    async autoWrite(sketchKey) {
+    async autoWrite(sketchOrKey) {
         if (this.isDrawing) return; 
-        const sketch = SKETCH_GALLERY[sketchKey];
+        
+        // Allow user to cancel previous auto-write
+        if (this.isAutoWriting) {
+            this.stopAutoDraw();
+            // Give a small buffer for the loop to exit
+            await new Promise(r => setTimeout(r, 100));
+        }
+
+        let sketch;
+        if (typeof sketchOrKey === 'string') {
+            sketch = SKETCH_GALLERY[sketchOrKey];
+        } else {
+            sketch = sketchOrKey;
+        }
+
         if (!sketch) return;
 
         this.isAutoWriting = true;
+        this.stopSignal = false; // Reset stop signal
 
         const vw = window.innerWidth;
         const vh = window.innerHeight;
@@ -439,23 +530,19 @@ class DrawingSystem {
         }
 
         // Configuration
+        // Configuration
         let isStacked = sketch.isStacked;
         let scale = sketch.scale;
-        let targetVisualCenterX, centerY;
-        let word2OffsetX = 0; 
-        let word2OffsetY = sketch.wordSpacingY; 
-
-        if (gutterWidth > 200) {
-            // Wide screens: place in the larger gutter
-            scale *= Math.min(1.0, gutterWidth / 350);
-            targetVisualCenterX = vw/2 + cardWidth/2 + gutterWidth/2;
-            centerY = 200;
-        } else {
-            // Mobile/Tablet: Centered at the top
-            scale *= vw < 500 ? 0.45 : 0.6;
-            targetVisualCenterX = vw / 2;
-            centerY = 100;
-        }
+        
+        // Always center on screen for "Whole Screen" effect
+        // Ignore the card gutter logic
+        const targetVisualCenterX = vw / 2;
+        const centerY = vh / 2; // Center vertically too? Or top offset? 
+        // User said "area de desenho automatico pra pegar a tela inteira"
+        // Let's center it.
+        
+        // Scale adjustment if needed
+        scale *= Math.min(1.0, vw / 800); // Scale down on mobile
 
         // Logical center adjustment
         const centerX = (targetVisualCenterX - vw/2);
@@ -463,21 +550,25 @@ class DrawingSystem {
         const baseScrollY = window.scrollY;
 
         let wordIndex = 0;
-        for (const word of sketch.strokes) {
-            if (word === null) {
+        for (const strokeData of sketch.strokes) {
+            if (this.stopSignal || this.isDrawing) break;
+
+            if (strokeData === null) {
                 wordIndex++;
-                await new Promise(r => setTimeout(r, 200));
+                // await new Promise(r => setTimeout(r, 20));
                 continue;
             }
 
-            for (const path of word.paths) {
+            for (const path of strokeData.paths) {
+                if (this.stopSignal || this.isDrawing) break;
+
                 this.animatingStroke = {
                     points: [],
-                    color: word.color,
-                    size: (word.size || 8) * scale, 
+                    color: strokeData.color,
+                    size: (strokeData.size || 8) * scale, // Use size from JSON if available
                     tool: 'pencil',
                     tipShape: 'round',
-                    brushType: word.brushType || 'fountain',
+                    brushType: strokeData.brushType || 'fountain',
                     startTime: Date.now()
                 };
                 this.strokes.push(this.animatingStroke);
@@ -486,6 +577,8 @@ class DrawingSystem {
                 const offY = (wordIndex > 0) ? word2OffsetY : 0;
 
                 for (let i = 0; i < path.length; i++) {
+                    if (this.stopSignal || this.isDrawing) break;
+
                     const p = path[i];
                     const targetX = centerX + (p.dx + offX) * scale + baseScrollX;
                     const targetY = centerY + (p.dy + offY) * scale + baseScrollY;
@@ -494,22 +587,46 @@ class DrawingSystem {
                         const prev = path[i - 1];
                         const prevX = centerX + (prev.dx + offX) * scale + baseScrollX;
                         const prevY = centerY + (prev.dy + offY) * scale + baseScrollY;
-                        const steps = Math.max(2, Math.floor(6 * scale));
+                        const steps = Math.max(1, Math.floor(1 * scale));
                         for (let s = 1; s <= steps; s++) {
                             const interX = prevX + (targetX - prevX) * (s / steps);
                             const interY = prevY + (targetY - prevY) * (s / steps);
                             this.addPointToStroke(this.animatingStroke, interX, interY);
-                            await new Promise(r => setTimeout(r, 10));
+                            // Removed await for performance
                         }
                     } else {
                         this.addPointToStroke(this.animatingStroke, targetX, targetY);
                     }
                 }
                 this.animatingStroke = null;
-                await new Promise(r => setTimeout(r, 100));
+                // Yield to event loop every few strokes
+                if (this.strokes.length % 5 === 0) {
+                     await new Promise(r => setTimeout(r, 1));
+                } else {
+                     // No delay for most strokes
+                }
             }
         }
         this.isAutoWriting = false;
+    }
+
+    stopAutoDraw() {
+        this.stopSignal = true;
+        this.isAutoWriting = false;
+        this.animatingStroke = null;
+    }
+
+    async loadSketchFromJson(url) {
+        try {
+            console.log("Attempting to load sketch from:", url);
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            console.log("Sketch loaded successfully, strokes:", data.strokes.length);
+            this.autoWrite(data);
+        } catch (e) {
+            console.error("Failed to load sketch:", e);
+        }
     }
 
     addPointToStroke(stroke, x, y) {
@@ -549,13 +666,240 @@ class DrawingSystem {
         requestAnimationFrame(() => this.animate());
     }
 
+    setOrnamentalBorder(active) {
+        if (this.isBorderActive === active) return;
+        this.isBorderActive = active;
+        
+        if (active) {
+            this.animateBorder();
+        } else {
+            // Remove border strokes
+            this.strokes = this.strokes.filter(s => !s.isBorder);
+        }
+    }
+
+    async animateBorder() {
+        // Cancel previous animation
+        this.borderAnimationId++;
+        const myId = this.borderAnimationId;
+
+        // Clear existing border strokes first to avoid duplicates
+        this.strokes = this.strokes.filter(s => !s.isBorder);
+        
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        const color = '#ffffff'; // White (User Request)
+        const padding = 20;
+        const cornerSize = 48; // Size S
+        const lineW = 4; // Thicker lines
+
+        // Coordinates System:
+        // X: 0 is center. Range: -w/2 to w/2
+        // Y: 0 is top. Range: 0 to h
+        const left = -w/2 + padding;
+        const right = w/2 - padding;
+        const top = padding;
+        const bottom = h - padding;
+
+        const strokeConfig = {
+            color: color,
+            size: lineW,
+            tool: 'pencil',
+            tipShape: 'square',
+            brushType: 'standard', 
+            isBorder: true
+        };
+
+        // Helper to create a straight line path
+        const createLine = (x1, y1, x2, y2) => {
+            const points = [];
+            const dist = Math.hypot(x2 - x1, y2 - y1);
+            const steps = Math.ceil(dist / 12); // 12px density (Performance Optimization)
+            if (steps <= 0) {
+                 points.push({ x: x1, y: y1, offset: Math.random() * Math.PI * 2 });
+                 return points;
+            }
+            for (let i = 0; i <= steps; i++) {
+                const t = i / steps;
+                points.push({
+                    x: x1 + (x2 - x1) * t,
+                    y: y1 + (y2 - y1) * t,
+                    offset: Math.random() * Math.PI * 2 // Fix: Add offset for wiggle
+                });
+            }
+            return points;
+        };
+
+        // Helper to generate DETAILED Meander Corner path (Greek Key)
+        // This generates a "Square Knot" pattern that connects P1 (Edge) to P3 (Edge)
+        // visually traversing the corner.
+        const createCornerPath = (cornerX, cornerY, rotation) => {
+            const s = cornerSize; // 48
+            const u = s / 4; // 12
+            
+            // Path Sequence:
+            // 1. Enter from Right of box (s, 0)
+            // 2. Go Left to (s/2, 0) -> (u*2, 0)
+            // 3. Go Down to (u*2, u)
+            // 4. Go Right to (s-u, u)
+            // 5. Go Down to (s-u, s-u)
+            // 6. Go Left to (u, s-u)
+            // 7. Go Up to (u, 0)
+            // 8. Go Left to (0, 0)
+            // 9. Go Down to (0, s) -> Exit Bottom
+            
+            const pts = [
+                {x: s, y: 0},       // Start (Right)
+                {x: u*2, y: 0},     // Left to u*2
+                {x: u*2, y: u},     // Down
+                {x: s-u, y: u},     // Right
+                {x: s-u, y: s-u},   // Down
+                {x: u, y: s-u},     // Left
+                {x: u, y: 0},       // Up to Top Edge
+                {x: 0, y: 0},       // Left to Top-Left Corner
+                {x: 0, y: s}        // Down to Bottom (Exit)
+            ];
+             
+            // Transform
+            return pts.map(pt => {
+                let rx = pt.x, ry = pt.y;
+                if (rotation === 1) { rx = -rx; } // TR
+                if (rotation === 2) { rx = -rx; ry = -ry; } // BR
+                if (rotation === 3) { ry = -ry; } // BL
+                return { 
+                    x: cornerX + rx, 
+                    y: cornerY + ry,
+                    offset: Math.random() * Math.PI * 2 // Fix: Add offset for wiggle
+                };
+            });
+        };
+        
+        const borderStrokes = [];
+        const pushStroke = (points) => {
+            borderStrokes.push({ ...strokeConfig, points: points });
+        };
+
+        // 1. Generate Corners with connected path logic
+        const tl = createCornerPath(left, top, 0); 
+        const tr = createCornerPath(right, top, 1);
+        const br = createCornerPath(right, bottom, 2);
+        const bl = createCornerPath(left, bottom, 3);
+        
+        // 2. Continuous Drawing Sequence (Clockwise from TL)
+        
+        // Top Line (Left+s -> Right-s)
+        pushStroke(createLine(left + cornerSize, top, right - cornerSize, top));
+        
+        // TR Corner (Enter Right, Exit Bottom)
+        // TR Rot 1: P1(-s,0) -> P3(0,s). Matches.
+        pushStroke(tr);
+        
+        // Right Line
+        pushStroke(createLine(right, top + cornerSize, right, bottom - cornerSize));
+        
+        // BR Corner (Enter Right, Exit Bottom relative??)
+        // BR Rot 2: P1(-s,0), P3(0,-s).
+        // Right ends at P3 location?? P3 rel is (0,-s). Abs is (Right, Bottom-s).
+        // Wait, BR Rot 2 P3 is top of bracket. Right Line comes from top.
+        // So we Enter P3 and Exit P1.
+        // Reverse BR.
+        pushStroke([...br].reverse());
+        
+        // Bottom Line
+        pushStroke(createLine(right - cornerSize, bottom, left + cornerSize, bottom));
+        
+        // BL Corner 
+        // BL Rot 3: P1(s,0) is Right. P3(0,s) relative??
+        // Rot 3 (Flip Y) on P3(0,s) -> (0,-s). Abs (Left, Bottom-s).
+        // Bottom Line ends at (Left+s, Bottom).
+        // BL Rot 3 P1 is (s,0) -> (s,0). Abs (Left+s, Bottom).
+        // Matches P1.
+        // Exit P3 (Left, Bottom-s).
+        // Forward BL.
+        pushStroke(bl);
+        
+        // Left Line
+        pushStroke(createLine(left, bottom - cornerSize, left, top + cornerSize));
+        
+        // TL Corner
+        // TL Rot 0: P1(s,0) Right. P3(0,s) Bottom.
+        // Left line ends at (Left, Top+s). Matches P3 location.
+        // Exit P1 (Left+s, Top).
+        // Reverse TL.
+        pushStroke([...tl].reverse());
+
+        // Animate them
+        await this.animateStrokesSequence(borderStrokes, myId);
+    }
+    
+    
+    async animateStrokesSequence(strokesData, executionId) {
+        // This is like autoWrite but for 'pencil' strokes
+        // We add them to this.strokes but incrementally add points
+        for (const sData of strokesData) {
+            if (!this.isBorderActive) break; 
+            if (this.borderAnimationId !== executionId) break; // Check Cancellation
+
+            const newStroke = {
+                points: [],
+                color: sData.color,
+                size: sData.size,
+                tool: sData.tool,
+                tipShape: sData.tipShape,
+                brushType: sData.brushType,
+                startPos: sData.points[0], // needed?
+                endPos: sData.points[sData.points.length-1],
+                isBorder: true,
+                startTime: Date.now()
+            };
+            
+            this.strokes.push(newStroke);
+            
+            const points = sData.points;
+            // Trace the points
+            for (let i = 0; i < points.length; i++) {
+                if (!this.isBorderActive) break;
+                if (this.borderAnimationId !== executionId) break; // Check Cancellation
+                
+                // Add the key point
+                const p = points[i];
+                this.addPointToStroke(newStroke, p.x, p.y);
+                
+                // Yield for dense paths (like straight lines)
+                if (i % 5 === 0) {
+                     if (this.borderAnimationId !== executionId) break; 
+                     await new Promise(r => setTimeout(r, 1));
+                }
+                
+                // Lerp to next point
+                if (i < points.length - 1) {
+                    const next = points[i+1];
+                    const dist = Math.hypot(next.x - p.x, next.y - p.y);
+                    const steps = Math.floor(dist / 2); // Smoother (2px steps)
+                    
+                    for (let j = 1; j <= steps; j++) {
+                         const t = j / steps;
+                         const lx = p.x + (next.x - p.x) * t;
+                         const ly = p.y + (next.y - p.y) * t;
+                         this.addPointToStroke(newStroke, lx, ly);
+                         
+                         // Update screen more frequently but smoother
+                         // Yield every 7 steps (approx 14px)
+                         if (j % 7 === 0) {
+                            if (this.borderAnimationId !== executionId) return; 
+                            await new Promise(r => setTimeout(r, 1));
+                         }
+                    }
+                }
+            }
+        }
+    }
+
     render() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
         const time = Date.now();
-        const pixelSize = 2;
-
-        const scrollX = window.scrollX;
-        const scrollY = window.scrollY;
+        const pixelSize = 2; // Pixel art grid size
         const midX = this.canvas.width / 2;
 
         this.strokes.forEach(stroke => {
@@ -567,8 +911,10 @@ class DrawingSystem {
             if (stroke.tool === 'rect' || stroke.tool === 'circle') {
                 const wiggleX = Math.sin(time * 0.005) * this.wiggleAmount;
                 const wiggleY = Math.cos(time * 0.005) * this.wiggleAmount;
-                const x = Math.floor(((stroke.startPos.x + midX - scrollX) + wiggleX) / pixelSize) * pixelSize;
-                const y = Math.floor(((stroke.startPos.y - scrollY) + wiggleY) / pixelSize) * pixelSize;
+                // Shapes use startPos/endPos which are captured as Viewport Coords
+                // So they are absolute. No scroll interaction needed.
+                const x = Math.floor((stroke.startPos.x + wiggleX) / pixelSize) * pixelSize;
+                const y = Math.floor((stroke.startPos.y + wiggleY) / pixelSize) * pixelSize;
                 const w = Math.floor((stroke.endPos.x - stroke.startPos.x) / pixelSize) * pixelSize;
                 const h = Math.floor((stroke.endPos.y - stroke.startPos.y) / pixelSize) * pixelSize;
 
@@ -584,40 +930,75 @@ class DrawingSystem {
                     pt.cluster.forEach(dot => {
                         const dotWiggleX = Math.sin(time * this.wiggleSpeed * 2 + dot.offset) * (this.wiggleAmount * 0.5);
                         const dotWiggleY = Math.cos(time * this.wiggleSpeed * 2 + dot.offset) * (this.wiggleAmount * 0.5);
-                        const px = Math.floor(((pt.x + midX - scrollX) + dot.dx + mainWiggleX + dotWiggleX) / pixelSize) * pixelSize;
-                        const py = Math.floor(((pt.y - scrollY) + dot.dy + mainWiggleY + dotWiggleY) / pixelSize) * pixelSize;
+                        // Spray points are absolute Viewport Coords
+                        const px = Math.floor((pt.x + dot.dx + mainWiggleX + dotWiggleX) / pixelSize) * pixelSize;
+                        const py = Math.floor((pt.y + dot.dy + mainWiggleY + dotWiggleY) / pixelSize) * pixelSize;
                         this.ctx.fillRect(px, py, pixelSize, pixelSize);
                     });
                 });
             } else if (stroke.points.length > 0) {
                 // Pencil or Eraser
+                const isBorder = stroke.isBorder;
+                
                 for (let i = 0; i < stroke.points.length; i++) {
                     const pt = stroke.points[i];
-                    const wiggleX = Math.sin(time * this.wiggleSpeed + pt.offset) * this.wiggleAmount;
-                    const wiggleY = Math.cos(time * this.wiggleSpeed + pt.offset) * this.wiggleAmount;
-                    const px = Math.floor(((pt.x + midX - scrollX) + wiggleX) / pixelSize) * pixelSize;
-                    const py = Math.floor(((pt.y - scrollY) + wiggleY) / pixelSize) * pixelSize;
+                    
+                    let wiggleX = 0, wiggleY = 0;
+                    // Always wiggle (Style Choice: User requested shaky border)
+                    wiggleX = Math.sin(time * this.wiggleSpeed + pt.offset) * this.wiggleAmount;
+                    wiggleY = Math.cos(time * this.wiggleSpeed + pt.offset) * this.wiggleAmount;
+
+                    // Coordinate Logic:
+                    // 1. isBorder: points are relative to {midX, 0}
+                    // 2. Standard: points are absolute Viewport Coordinates {x, y}
+                    // "Sticker on Glass" -> No scroll adjustments.
+                    
+                    let rawX, rawY;
+                    if (isBorder) {
+                        rawX = pt.x + midX; 
+                        rawY = pt.y;       
+                    } else {
+                        rawX = pt.x;
+                        rawY = pt.y;
+                    }
+
+                    const px = Math.floor((rawX + wiggleX) / pixelSize) * pixelSize;
+                    const py = Math.floor((rawY + wiggleY) / pixelSize) * pixelSize;
 
                     if (i > 0) {
                         const prevPt = stroke.points[i - 1];
-                        const prevWiggleX = Math.sin(time * this.wiggleSpeed + prevPt.offset) * this.wiggleAmount;
-                        const prevWiggleY = Math.cos(time * this.wiggleSpeed + prevPt.offset) * this.wiggleAmount;
-                        const ppx = Math.floor(((prevPt.x + midX - scrollX) + prevWiggleX) / pixelSize) * pixelSize;
-                        const ppy = Math.floor(((prevPt.y - scrollY) + prevWiggleY) / pixelSize) * pixelSize;
                         
-                        // Use point specific size if available
+                        let prevWiggleX = 0, prevWiggleY = 0;
+                        // Always wiggle
+                        prevWiggleX = Math.sin(time * this.wiggleSpeed + prevPt.offset) * this.wiggleAmount;
+                        prevWiggleY = Math.cos(time * this.wiggleSpeed + prevPt.offset) * this.wiggleAmount;
+
+                        let prevRawX, prevRawY;
+                        if (isBorder) {
+                            prevRawX = prevPt.x + midX;
+                            prevRawY = prevPt.y;
+                        } else {
+                            prevRawX = prevPt.x;
+                            prevRawY = prevPt.y;
+                        }
+
+                        const ppx = Math.floor((prevRawX + prevWiggleX) / pixelSize) * pixelSize;
+                        const ppy = Math.floor((prevRawY + prevWiggleY) / pixelSize) * pixelSize;
+                        
                         const currentSize = pt.size || stroke.size;
                         const previousSize = prevPt.size || stroke.size;
                         const avgSize = (currentSize + previousSize) / 2;
 
                         this.drawPixelLine(ppx, ppy, px, py, pixelSize, avgSize, stroke.tipShape);
                     } else {
+                        // Single point dot
                         const currentSize = pt.size || stroke.size;
                         this.drawBrushTip(px, py, currentSize, stroke.tipShape);
                     }
                 }
             }
         });
+
         this.ctx.globalCompositeOperation = 'source-over';
     }
 
@@ -627,9 +1008,15 @@ class DrawingSystem {
         const sx = (x1 < x2) ? pixelSize : -pixelSize;
         const sy = (y1 < y2) ? pixelSize : -pixelSize;
         let err = dx - dy;
+        let loopCount = 0;
         while (true) {
             this.drawBrushTip(x1, y1, brushSize, tipShape);
             if (Math.abs(x1 - x2) < pixelSize && Math.abs(y1 - y2) < pixelSize) break;
+            
+            // Safety break for infinite loops (e.g. NaN coords)
+            loopCount++;
+            if (loopCount > 2000) break;
+
             const e2 = 2 * err;
             if (e2 > -dy) { err -= dy; x1 += sx; }
             if (e2 < dx) { err += dx; y1 += sy; }
@@ -655,74 +1042,74 @@ class DrawingSystem {
         const pixelSize = 2;
         stamp.width = size + pixelSize * 2;
         stamp.height = size + pixelSize * 2;
-        const sctx = stamp.getContext('2d');
-        sctx.fillStyle = color;
-
-        const center = stamp.width / 2;
-
+        const ctx = stamp.getContext('2d');
+        
+        ctx.fillStyle = color;
+        // Draw centered
+        const cx = stamp.width / 2;
+        const cy = stamp.height / 2;
+        
         if (shape === 'round') {
-            const radius = size / 2;
-            for (let dy = -radius; dy <= radius; dy += pixelSize) {
-                for (let dx = -radius; dx <= radius; dx += pixelSize) {
-                    if (dx * dx + dy * dy <= radius * radius) {
-                        sctx.fillRect(
-                            Math.floor((center + dx) / pixelSize) * pixelSize, 
-                            Math.floor((center + dy) / pixelSize) * pixelSize, 
-                            pixelSize, 
-                            pixelSize
-                        );
+            // Pixel art circle approximation
+            const r = size / 2;
+            for (let y = -r; y <= r; y += pixelSize) {
+                for (let x = -r; x <= r; x += pixelSize) {
+                    if (x*x + y*y <= r*r) {
+                        ctx.fillRect(cx + x - pixelSize/2, cy + y - pixelSize/2, pixelSize, pixelSize);
                     }
                 }
             }
         } else {
-            sctx.fillRect(center - size / 2, center - size / 2, size, size);
+            // Square
+            ctx.fillRect(cx - size/2, cy - size/2, size, size);
         }
-
+        
         this.brushCache[key] = stamp;
     }
 
-    drawPixelRect(x, y, w, h, pixelSize, brushSize) {
-        this.drawPixelLine(x, y, x + w, y, pixelSize, brushSize);
-        this.drawPixelLine(x + w, y, x + w, y + h, pixelSize, brushSize);
-        this.drawPixelLine(x + w, y + h, x, y + h, pixelSize, brushSize);
-        this.drawPixelLine(x, y + h, x, y, pixelSize, brushSize);
+    drawPixelRect(x, y, w, h, pixelSize, size) {
+        // Draw hollow rect
+        // Top
+        this.drawPixelLine(x, y, x + w, y, pixelSize, size, 'square');
+        // Bottom
+        this.drawPixelLine(x, y + h, x + w, y + h, pixelSize, size, 'square');
+        // Left
+        this.drawPixelLine(x, y, x, y + h, pixelSize, size, 'square');
+        // Right
+        this.drawPixelLine(x + w, y, x + w, y + h, pixelSize, size, 'square');
     }
 
-    drawPixelCircle(xc, yc, r, pixelSize, brushSize) {
-        let x = 0;
-        let y = r;
-        let d = 3 - 2 * r;
-        this.drawCirclePoints(xc, yc, x, y, brushSize);
-        while (y >= x) {
-            x += pixelSize;
-            if (d > 0) {
-                y -= pixelSize;
-                d = d + 4 * (x - y) + 10;
+    drawPixelCircle(cx, cy, radius, pixelSize, brushSize) {
+        let x = radius;
+        let y = 0;
+        let err = 1 - x;
+        
+        while (x >= y) {
+            this.drawBrushTip(cx + x, cy + y, brushSize, 'square');
+            this.drawBrushTip(cx + y, cy + x, brushSize, 'square');
+            this.drawBrushTip(cx - y, cy + x, brushSize, 'square');
+            this.drawBrushTip(cx - x, cy + y, brushSize, 'square');
+            this.drawBrushTip(cx - x, cy - y, brushSize, 'square');
+            this.drawBrushTip(cx - y, cy - x, brushSize, 'square');
+            this.drawBrushTip(cx + y, cy - x, brushSize, 'square');
+            this.drawBrushTip(cx + x, cy - y, brushSize, 'square');
+            
+            y += pixelSize;
+            if (err < 0) {
+                err += 2 * y + 1;
             } else {
-                d = d + 4 * x + 6;
+                x -= pixelSize;
+                err += 2 * (y - x) + 1;
             }
-            this.drawCirclePoints(xc, yc, x, y, brushSize);
-        }
-    }
-
-    drawCirclePoints(xc, yc, x, y, brushSize) {
-        this.ctx.fillRect(xc + x, yc + y, brushSize, brushSize);
-        this.ctx.fillRect(xc - x, yc + y, brushSize, brushSize);
-        this.ctx.fillRect(xc + x, yc - y, brushSize, brushSize);
-        this.ctx.fillRect(xc - x, yc - y, brushSize, brushSize);
-        this.ctx.fillRect(xc + y, yc + x, brushSize, brushSize);
-        this.ctx.fillRect(xc - y, yc + x, brushSize, brushSize);
-        this.ctx.fillRect(xc + y, yc - x, brushSize, brushSize);
-        this.ctx.fillRect(xc - y, yc - x, brushSize, brushSize);
-    }
-
-    clear() {
-        if (window.confirm("Você quer mesmo apagar todo o desenho?")) {
-            this.strokes = [];
         }
     }
 }
 
+// Instantiate the system when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    window.drawingSystem = new DrawingSystem('bg-drawing-canvas');
+    // Only if canvas exists
+    if (document.getElementById('bg-drawing-canvas')) {
+        window.drawingSystem = new DrawingSystem('bg-drawing-canvas');
+        console.log("DrawingSystem started");
+    }
 });

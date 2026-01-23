@@ -97,14 +97,19 @@ body.wide-layout .main-container {
     color: #000000;
 }
 
-body {
+html {
     background-color: var(--bg-color);
+    /* The grid pattern needs to be on HTML so body is transparent for the canvas between them */
+    background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
+    background-size: 20px 20px;
+    min-height: 100%;
+}
+
+body {
+    background-color: transparent; /* Allow canvas at z-index -1 to be seen */
     color: var(--text-main);
     font-family: 'Inter', sans-serif;
     min-height: 100vh;
-    /* Subtle grid pattern */
-    background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
-    background-size: 20px 20px;
     padding: 40px 20px 120px 20px;
     position: relative;
     overflow-x: hidden;
@@ -253,11 +258,18 @@ body,
     transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
 }
 
-.page.active {
-    opacity: 1;
-    visibility: visible;
-    position: relative;
+/* Background Drawing Canvas */
+#bg-drawing-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1; /* Background mode - specific request by user to fix interaction */
+    /* pointer-events: none; removed to allow drawing */
+    touch-action: none;
 }
+
 
 /* Animação de fade */
 @keyframes fadeIn {

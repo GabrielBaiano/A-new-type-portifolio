@@ -67,9 +67,16 @@ export default async function handler(req, res) {
         body: JSON.stringify(payload)
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Supabase Error:', response.status, errorText);
+        return res.status(500).json({ success: false, error: `Supabase Error: ${response.status} ${errorText}` });
+      }
+
       const result = method === 'POST' ? await response.json() : null;
       return res.status(200).json({ success: true, message: 'Photo saved!', data: result ? result[0] : null });
     } catch (error) {
+      console.error('API Error:', error);
       return res.status(500).json({ success: false, error: error.message });
     }
   }
