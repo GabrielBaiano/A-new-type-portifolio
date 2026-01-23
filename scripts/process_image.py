@@ -47,15 +47,15 @@ def process_image(image_path, output_path=None, max_width=1000):
         if len(approx) > 2: 
             simplified_contours.append(approx)
 
-    print(f"Found {len(simplified_contours)} strokes after filtering (min_len={min_length}).")
-
     # 6. Sort Paths (Nearest Neighbor TSP)
     if not simplified_contours:
         print("No contours found.")
         return
 
     sorted_contours = []
-    current_pos = np.array([max_width/2, new_h/2])
+    center_x = max_width / 2
+    center_y = new_h / 2
+    current_pos = np.array([center_x, center_y])
     
     pool = simplified_contours[:]
     
@@ -64,9 +64,11 @@ def process_image(image_path, output_path=None, max_width=1000):
         min_dist = float('inf')
         reverse_best = False
         
-        # Optimize: Only check every Nth element if pool is huge to speed up processing
-        # checking all for quality
-        for i, cnt in enumerate(pool):
+        # Optimization: Scan limited window for speed
+        scan_limit = 500
+        for i in range(min(len(pool), scan_limit)):
+            cnt = pool[i]
+            # Use the first point of the contour
             start_pt = cnt[0][0]
             dist_start = np.linalg.norm(start_pt - current_pos)
             end_pt = cnt[-1][0]
@@ -81,7 +83,7 @@ def process_image(image_path, output_path=None, max_width=1000):
                 min_dist = dist_end
                 best_idx = i
                 reverse_best = True
-        
+                
         best_cnt = pool.pop(best_idx)
         if reverse_best:
             best_cnt = best_cnt[::-1]
@@ -90,9 +92,8 @@ def process_image(image_path, output_path=None, max_width=1000):
         current_pos = best_cnt[-1][0]
 
     # 7. Convert to JSON format for DrawingSystem
-    center_x = max_width / 2
-    center_y = new_h / 2
-
+    # Output single stroke group with white color
+    
     json_paths = []
     
     for cnt in sorted_contours:
@@ -114,7 +115,8 @@ def process_image(image_path, output_path=None, max_width=1000):
             {
                 "color": "#ffffff", 
                 "brushType": "standard", 
-                "size": 2, # Thinner lines for precision
+                "size": 2, 
+                "static": True, # Enable Path2D Caching
                 "paths": json_paths
             }
         ]

@@ -535,8 +535,8 @@ class DrawingSystem {
         
         // Always center on screen for "Whole Screen" effect
         // Ignore the card gutter logic
-        const targetVisualCenterX = vw / 2;
-        const centerY = vh / 2; // Center vertically too? Or top offset? 
+        // const targetVisualCenterX = vw / 2;
+        // const centerY = vh / 2; 
         // User said "area de desenho automatico pra pegar a tela inteira"
         // Let's center it.
         
@@ -548,7 +548,25 @@ class DrawingSystem {
         scale *= (targetWidth / baseWidth);
 
         // Logical center adjustment
-        const centerX = targetVisualCenterX; // vw / 2
+        // BOTTOM-LEFT Alignment Logic:
+        // Drawing coordinates (dx, dy) are relative to center (0,0). Range [-Width/2, Width/2].
+        // To verify: Left Edge = -Width/2. Bottom Edge = Height/2 (approx).
+        // We want Left Edge at Screen X=0 (or small padding).
+        // ScreenX = CenterX + (dx * scale). 
+        // 0 = CenterX + (-baseWidth/2 * scale)  =>  CenterX = (baseWidth/2) * scale
+        
+        // We want Bottom Edge at Screen Y=VH.
+        // ScreenY = CenterY + (dy * scale).
+        // VH = CenterY + (baseHeight/2 * scale). Assuming roughly square/landscape.
+        // Let's assume aspect ratio ~1.5 (landscape). Height ~ 600-700?
+        // Let's try anchoring CenterY relative to VH.
+        
+        const scaledHalfWidth = (baseWidth / 2) * scale;
+        // Padding left 5%
+        const centerX = scaledHalfWidth + (vw * 0.05); 
+        
+        // Anchor bottom
+        const centerY = vh - (scaledHalfWidth * 0.6); // Guesstimate height ratio as 0.6 of width
         
         let wordIndex = 0;
         for (const strokeData of sketch.strokes) {
@@ -689,7 +707,7 @@ class DrawingSystem {
         
         const w = this.canvas.width;
         const h = this.canvas.height;
-        const color = '#ffffff'; // White (User Request)
+        const color = '#ff6b6b'; // Pastel Red (User Request)
         const padding = 20;
         const cornerSize = 48; // Size S
         const lineW = 4; // Thicker lines
@@ -944,6 +962,27 @@ class DrawingSystem {
                 const isBorder = stroke.isBorder;
                 
                 if (useSinglePath) {
+                    // CACHING OPTIMIZATION: Static Paths
+                    // If stroke is flagged as static (background sketch), use cached Path2D
+                    if (stroke.static) {
+                        if (!stroke.cachedPath) {
+                            const p = new Path2D();
+                            let first = true;
+                            for (const pt of stroke.points) {
+                                let rawX = pt.x, rawY = pt.y;
+                                if (isBorder) rawX += midX;
+                                if (first) { p.moveTo(rawX, rawY); first = false; }
+                                else { p.lineTo(rawX, rawY); }
+                            }
+                            stroke.cachedPath = p;
+                        }
+                        this.ctx.lineWidth = stroke.size;
+                        this.ctx.lineCap = stroke.tipShape === 'round' ? 'round' : 'square';
+                        this.ctx.lineJoin = 'round';
+                        this.ctx.stroke(stroke.cachedPath);
+                        continue; // Skip the wobbly loop below
+                    }
+
                     // FAST PATH: Single Path Stroke (100x faster than pixel-by-pixel)
                     this.ctx.lineWidth = stroke.size;
                     this.ctx.lineCap = stroke.tipShape === 'round' ? 'round' : 'square';
