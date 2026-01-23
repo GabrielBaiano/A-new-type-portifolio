@@ -33,15 +33,15 @@ def process_image(image_path, output_path=None, max_width=1000):
 
     # 5. Simplify paths (PolyDP)
     simplified_contours = []
-    min_length = 15 # Slightly more sensitive
+    min_length = 30 # Aggressive simplification
     
     for cnt in contours:
         length = cv2.arcLength(cnt, True)
         if length < min_length:
             continue
             
-        # Lower epsilon for higher precision (closer to original pixels)
-        epsilon = 0.001 * length 
+        # Balanced epsilon for quality and performance
+        epsilon = 1.5 
         approx = cv2.approxPolyDP(cnt, epsilon, False) 
         
         if len(approx) > 2: 

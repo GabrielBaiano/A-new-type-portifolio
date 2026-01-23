@@ -562,41 +562,45 @@ class DrawingSystem {
         // Let's try anchoring CenterY relative to VH.
         
         const scaledHalfWidth = (baseWidth / 2) * scale;
-        // Move even further left: bleeding 5% off the edge
-        const centerX = scaledHalfWidth - (vw * 0.05); 
+        // Move even further left: bleeding 15% off the edge
+        const centerX = scaledHalfWidth - (vw * 0.15); 
         
         // Anchor bottom
         const centerY = vh - (scaledHalfWidth * 0.6); // Guesstimate height ratio as 0.6 of width
         
         let wordIndex = 0;
+        const sessionStrokes = []; // Track strokes created in this pass for later consolidation
+
         for (const strokeData of sketch.strokes) {
-            if (this.stopSignal || this.isDrawing) break;
+            if (this.stopSignal) break;
 
             if (strokeData === null) {
                 wordIndex++;
-                // await new Promise(r => setTimeout(r, 20));
                 continue;
             }
 
             for (const path of strokeData.paths) {
-                if (this.stopSignal || this.isDrawing) break;
+                if (this.stopSignal) break;
 
+                // BACK TO MULTI-STROKE: High-fidelity animation
                 this.animatingStroke = {
                     points: [],
                     color: strokeData.color,
-                    size: (strokeData.size || 8) * scale, // Use size from JSON if available
+                    size: (strokeData.size || 8) * scale,
                     tool: 'pencil',
                     tipShape: 'round',
                     brushType: strokeData.brushType || 'fountain',
                     startTime: Date.now()
                 };
+                
                 this.strokes.push(this.animatingStroke);
+                sessionStrokes.push(this.animatingStroke);
 
                 const offX = (wordIndex > 0) ? word2OffsetX : 0;
                 const offY = (wordIndex > 0) ? word2OffsetY : 0;
 
                 for (let i = 0; i < path.length; i++) {
-                    if (this.stopSignal || this.isDrawing) break;
+                    if (this.stopSignal) break;
 
                     const p = path[i];
                     const targetX = centerX + (p.dx + offX) * scale;
@@ -606,27 +610,76 @@ class DrawingSystem {
                         const prev = path[i - 1];
                         const prevX = centerX + (prev.dx + offX) * scale;
                         const prevY = centerY + (prev.dy + offY) * scale;
-                        const steps = Math.max(1, Math.floor(1 * scale));
+                        const steps = 1; 
                         for (let s = 1; s <= steps; s++) {
                             const interX = prevX + (targetX - prevX) * (s / steps);
                             const interY = prevY + (targetY - prevY) * (s / steps);
-                            this.addPointToStroke(this.animatingStroke, interX, interY);
-                            // Removed await for performance
+                            this.addPointToStroke(this.animatingStroke, interX, interY, false);
                         }
                     } else {
-                        this.addPointToStroke(this.animatingStroke, targetX, targetY);
+                        this.addPointToStroke(this.animatingStroke, targetX, targetY, false);
                     }
+
+                    // Forming animation: yield per point segment
+                    if (i % 3 === 0) await new Promise(r => setTimeout(r, 1));
                 }
-                this.animatingStroke = null;
-                // Yield to event loop every few strokes
-                if (this.strokes.length % 5 === 0) {
-                     await new Promise(r => setTimeout(r, 1));
-                } else {
-                     // No delay for most strokes
-                }
+                
+                // No longer clearing animatingStroke here to allow wiggle during sequence
             }
         }
+
+        // CONSOLIDATION STEP: Post-draw optimization
+        if (!this.stopSignal && sessionStrokes.length > 1) {
+            this.consolidateSession(sessionStrokes);
+        } else if (sessionStrokes.length === 1) {
+            this.animatingStroke = sessionStrokes[0];
+        }
+
         this.isAutoWriting = false;
+    }
+
+    /**
+     * Merge multiple strokes into a single unified stroke using isMove flags.
+     * Drastically improves rendering performance after drawing is complete.
+     */
+    consolidateSession(strokeList) {
+        if (!strokeList || strokeList.length <= 1) return;
+
+        // Create the unified replacement
+        const base = strokeList[0];
+        const unified = {
+            points: [],
+            color: base.color,
+            size: base.size,
+            tool: base.tool,
+            tipShape: base.tipShape,
+            brushType: 'standard', 
+            static: false, // Keep it false so it wiggles! One big stroke is fast enough.
+            isBorder: false,
+            startTime: base.startTime
+        };
+
+        const sessionSet = new Set(strokeList);
+
+        for (const s of strokeList) {
+            if (!s.points || s.points.length === 0) continue;
+            
+            // Mark the first point of each segment as a MoveTo
+            s.points[0].isMove = true;
+            
+            // Append points
+            unified.points.push(...s.points);
+        }
+
+        // Efficiently remove the individual strokes and add the consolidated one
+        this.strokes = this.strokes.filter(s => !sessionSet.has(s));
+        this.strokes.push(unified);
+        
+        // Ensure it wiggles
+        this.animatingStroke = unified;
+
+        console.log(`Consolidated ${strokeList.length} strokes into 1. Total points: ${unified.points.length}`);
+        this.render();
     }
 
     stopAutoDraw() {
@@ -648,14 +701,15 @@ class DrawingSystem {
         }
     }
 
-    addPointToStroke(stroke, x, y) {
+    addPointToStroke(stroke, x, y, isMove = false) {
         if (!stroke) return;
         const time = Date.now();
         let pointSize = stroke.size;
 
         if (stroke.brushType === 'fountain') {
             let speed = 0;
-            if (stroke.points.length > 0) {
+            // Only calculate speed if it's a continuous line
+            if (stroke.points.length > 0 && !isMove) {
                 const last = stroke.points[stroke.points.length - 1];
                 const dist = Math.hypot(x - last.x, y - last.y);
                 const dt = time - (last.time || time);
@@ -669,6 +723,7 @@ class DrawingSystem {
             x, y,
             size: pointSize,
             time: time,
+            isMove: isMove, // Jumps to this point without drawing a line
             offset: Math.random() * Math.PI * 2
         });
     }
@@ -971,8 +1026,12 @@ class DrawingSystem {
                             for (const pt of stroke.points) {
                                 let rawX = pt.x, rawY = pt.y;
                                 if (isBorder) rawX += midX;
-                                if (first) { p.moveTo(rawX, rawY); first = false; }
-                                else { p.lineTo(rawX, rawY); }
+                                if (first || pt.isMove) { 
+                                    p.moveTo(rawX, rawY); 
+                                    first = false; 
+                                } else { 
+                                    p.lineTo(rawX, rawY); 
+                                }
                             }
                             stroke.cachedPath = p;
                         }
@@ -1004,7 +1063,7 @@ class DrawingSystem {
                         const px = Math.floor((rawX + wiggleX) / pixelSize) * pixelSize;
                         const py = Math.floor((rawY + wiggleY) / pixelSize) * pixelSize;
 
-                        if (i === 0) {
+                        if (i === 0 || pt.isMove) {
                             this.ctx.moveTo(px, py);
                             hasPoints = true;
                         } else {
