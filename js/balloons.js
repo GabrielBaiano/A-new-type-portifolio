@@ -230,6 +230,15 @@ class BalloonSystem {
     }
 
     tryPlaceBalloon(data, force = false) {
+        // Enforce max 1 newsletter approach
+        if (data.type === 'newsletter') {
+            for (let balloonContext of this.activeBalloons.values()) {
+                if (balloonContext.data.type === 'newsletter') {
+                    return false; // Already showing a newsletter
+                }
+            }
+        }
+
         const side = Math.random() < 0.5 ? 'left' : 'right';
         const mainContainer = document.querySelector('.main-container');
         const margin = mainContainer ? (window.innerWidth - mainContainer.offsetWidth) / 2 : 500;
@@ -332,16 +341,16 @@ class BalloonSystem {
             if (balloon.parentElement) balloon.classList.add('is-ready');
         }, (delay + 0.8) * 1000);
 
-        balloon.addEventListener('click', (e) => {
-            // Don't close if clicking input or button
-            if (e.target.closest('.newsletter-form')) return;
-            if (e.target.closest('.balloon-link')) return;
-            
-            e.stopPropagation();
-            balloon.classList.add(side === 'left' ? 'balloon-exit-left' : 'balloon-exit-right');
-            this.activeBalloons.delete(balloon);
-            setTimeout(() => balloon.remove(), 800);
-        });
+        // Close button logic
+        const closeBtn = balloon.querySelector('.balloon-close-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                balloon.classList.add(side === 'left' ? 'balloon-exit-left' : 'balloon-exit-right');
+                this.activeBalloons.delete(balloon);
+                setTimeout(() => balloon.remove(), 800);
+            });
+        }
 
         // Specific logic for newsletter
         if (data.type === 'newsletter') {
@@ -351,6 +360,7 @@ class BalloonSystem {
             
             if (btn && input && form) {
                 btn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent propagation
                     e.preventDefault();
                     const email = input.value;
                     if (!email || !email.includes('@')) {
@@ -389,6 +399,7 @@ class BalloonSystem {
 
         return `
             <div class="balloon-card organic-balloon balloon-bg-${color} ${isRelease ? 'balloon-type-release' : ''} ${isLeetCode ? 'balloon-type-leetcode' : ''} ${data.type === 'newsletter' ? 'balloon-type-newsletter' : ''}">
+                <button class="balloon-close-btn" title="Close"><i class="fa-solid fa-xmark"></i></button>
                 <div class="balloon-inner">
                     <div class="balloon-header">
                         ${showAvatar ? `<img src="${data.image}" class="balloon-avatar" alt="">` : ''}

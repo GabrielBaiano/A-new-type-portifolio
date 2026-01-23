@@ -72,12 +72,18 @@ const PhotosPage = {
                 </div>
             `;
 
-            if (hasLink && !item.description) {
-                // If just a link, wrap the whole thing
-                photoEl.innerHTML = `<a href="${item.link}" target="_blank">${displayHtml}</a>`;
-            } else {
-                photoEl.innerHTML = displayHtml;
-            }
+            photoEl.innerHTML = displayHtml;
+            
+            // Interaction
+            photoEl.style.cursor = 'pointer';
+            photoEl.addEventListener('click', (e) => {
+                // Allow clicking external link icon without initiating router navigation
+                if (e.target.closest('.photo-link-icon')) return;
+                
+                if (item.id) {
+                    router.navigate(`detail/feed/${item.id}`);
+                }
+            });
             
             container.appendChild(photoEl);
         });
