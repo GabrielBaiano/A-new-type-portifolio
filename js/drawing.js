@@ -25,6 +25,13 @@ class DrawingSystem {
         this.currentSketchIndex = 0;
         this.sketchKeys = Object.keys(SKETCH_GALLERY);
         this.borderAnimationId = 0; // Token for cancelling old animations
+        this.lastVH = window.innerHeight; // Track height for background anchoring
+        
+        // Background Universal Scaling References
+        this.bgReferenceScale = null;
+        this.bgReferenceCenterX = null;
+        this.bgReferenceCenterY = null;
+
         this.init();
         this.initDragging();
         this.animate();
@@ -243,51 +250,177 @@ class DrawingSystem {
 
         let isDragging = false;
         let startX, startY, initialX, initialY;
+        let startTime;
+        let totalDist = 0;
 
-        handle.addEventListener('mousedown', (e) => {
-            if (e.target.closest('button')) return;
+        // On mobile, start collapsed
+        if (window.innerWidth < 600) {
+            sidebar.classList.add('collapsed');
+        }
+
+        const start = (e) => {
+            // If the user clicked a tool button inside, don't start dragging
+            if (e.target.closest('button') || e.target.closest('.color-swatch') || e.target.closest('input')) return;
+            
             isDragging = true;
-            this.isDraggingSidebar = true; // Set flag to block drawing
+            this.isDraggingSidebar = true;
             sidebar.style.transition = 'none';
-            // Also disable panel transition for smoother movement
             const optionsPanel = document.getElementById('tool-options-panel');
             if (optionsPanel) optionsPanel.style.transition = 'none';
 
-            startX = e.clientX;
-            startY = e.clientY;
+            const clientX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
+            const clientY = e.clientY ?? (e.touches ? e.touches[0].clientY : 0);
+
+            startX = clientX;
+            startY = clientY;
             initialX = sidebar.offsetLeft;
             initialY = sidebar.offsetTop;
+            startTime = Date.now();
+            totalDist = 0;
             document.body.style.cursor = 'grabbing';
-        });
+        };
 
-        window.addEventListener('mousemove', (e) => {
+        const move = (e) => {
             if (!isDragging) return;
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            sidebar.style.left = `${initialX + dx}px`;
-            sidebar.style.top = `${initialY + dy}px`;
-        });
+            const clientX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
+            const clientY = e.clientY ?? (e.touches ? e.touches[0].clientY : 0);
 
-        window.addEventListener('mouseup', () => {
+            const dx = clientX - startX;
+            const dy = clientY - startY;
+            totalDist += Math.hypot(dx, dy);
+
+            if (window.innerWidth < 600) {
+                sidebar.style.left = '0px';
+                sidebar.style.top = `${Math.min(0, initialY + dy)}px`;
+            } else {
+                sidebar.style.left = `${initialX + dx}px`;
+                sidebar.style.top = `${initialY + dy}px`;
+            }
+            
+            initialX = sidebar.offsetLeft;
+            initialY = sidebar.offsetTop;
+            startX = clientX;
+            startY = clientY;
+        };
+
+        const end = () => {
             if (!isDragging) return;
             isDragging = false;
-            this.isDraggingSidebar = false; // Reset flag
-            sidebar.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s, background 0.3s'; 
+            this.isDraggingSidebar = false;
+            sidebar.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s, background 0.3s, height 0.3s'; 
             
             const optionsPanel = document.getElementById('tool-options-panel');
             if (optionsPanel) optionsPanel.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
             
             document.body.style.cursor = 'default';
-        });
+
+            const clickDuration = Date.now() - startTime;
+            if (clickDuration < 250 && totalDist < 10) {
+                sidebar.classList.toggle('collapsed');
+                sidebar.classList.toggle('expanded');
+            } else if (window.innerWidth < 600) {
+                const currentTop = parseInt(sidebar.style.top) || 0;
+                if (currentTop < -20) {
+                    sidebar.classList.add('collapsed');
+                    sidebar.classList.remove('expanded');
+                } else {
+                    sidebar.classList.remove('collapsed');
+                    sidebar.classList.add('expanded');
+                }
+                sidebar.style.top = '';
+            }
+        };
+
+        handle.addEventListener('mousedown', start);
+        handle.addEventListener('touchstart', start, { passive: true });
+
+        window.addEventListener('mousemove', move);
+        window.addEventListener('touchmove', (e) => {
+            if (isDragging) {
+                e.preventDefault(); // Stop scrolling while dragging the menu
+                move(e);
+            }
+        }, { passive: false });
+
+        window.addEventListener('mouseup', end);
+        window.addEventListener('touchend', end);
+    }
+    /**
+     * Centralized logic for background drawing position and scale.
+     * Ensures consistency between autoWrite and resize.
+     */
+    calculateBGPose(vw, vh) {
+        const baseWidth = 1000;
+        const targetWidth = Math.max(900, Math.min(vw * 0.9, 1400));
+        const scale = targetWidth / baseWidth;
+        const scaledHalfWidth = (baseWidth / 2) * scale;
+        
+        // STABLE ANCHORING: Bottom-Left peeking
+        const centerX = scaledHalfWidth - (vw < 600 ? 200 : 250);
+        const centerY = vh - (scaledHalfWidth * 0.75) + 80;
+
+        return { scale, centerX, centerY };
     }
 
     resize() {
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
+        const oldVH = this.lastVH;
+        const newVH = window.innerHeight;
+        const oldVW = this.canvas.width;
+        const newVW = window.innerWidth;
+
+        this.canvas.width = newVW;
+        this.canvas.height = newVH;
+
+        // UNIVERSAL SCALING & ANCHORING:
+        if (this.bgReferenceScale !== null) {
+            // Calculate what the "Ideal" new pose should be
+            const newPose = this.calculateBGPose(newVW, newVH);
+            
+            // Remap Points using the reference state to avoid cumulative drift
+            this.strokes.forEach(s => {
+                if (s.isBackground) {
+                    s.points.forEach(pt => {
+                        // Math: Convert current point back to "Local Space" using reference info
+                        // Then project it into the "New Space"
+                        const localX = (pt.x - this.bgReferenceCenterX) / this.bgReferenceScale;
+                        const localY = (pt.y - this.bgReferenceCenterY) / this.bgReferenceScale;
+                        
+                        pt.x = localX * newPose.scale + newPose.centerX;
+                        pt.y = localY * newPose.scale + newPose.centerY;
+                    });
+                    
+                    // Update stroke size based on relative scale change
+                    const relScale = newPose.scale / this.bgReferenceScale;
+                    s.size *= relScale;
+                    s.cachedPath = null; // Invalidate for redraw
+                }
+            });
+
+            // If we are currently animating a background stroke, update its points too
+            if (this.animatingStroke && this.animatingStroke.isBackground) {
+                // (Already covered by strokes.forEach if it's pushed, but safer to update reference values)
+            }
+
+            // Update Global Reference for next frame/resize
+            this.bgReferenceScale = newPose.scale;
+            this.bgReferenceCenterX = newPose.centerX;
+            this.bgReferenceCenterY = newPose.centerY;
+
+        } else if (oldVH > 0 && oldVH !== newVH) {
+            // Fallback for simple height shift
+            const dy = newVH - oldVH;
+            this.strokes.forEach(s => {
+                if (s.isBackground) {
+                    s.points.forEach(pt => pt.y += dy);
+                    s.cachedPath = null;
+                }
+            });
+        }
+        
+        this.lastVH = newVH;
+
         // If border is active, we need to redraw it to fit new size
         if (this.isBorderActive) {
-            // Debounce or just clear?
-            // Let's instant redraw for now (animateBorder clears old ones)
             this.animateBorder(); 
         }
     }
@@ -318,12 +451,10 @@ class DrawingSystem {
              if (isContent) return;
         }
 
-        // If auto-writing is happening, stop it so user can draw
-        if (this.isAutoWriting) {
-            this.stopAutoDraw();
-            // Optional: return here to just stop on first click, or proceed to draw. 
-            // Let's proceed to draw immediately for better responsiveness
-        }
+        // Simultaneous Drawing:
+        // We no longer call stopAutoDraw() here. This allows the user to draw 
+        // while the background animation is still running.
+
         
         const coords = this.getDocCoords(e);
         const x = coords.x;
@@ -531,42 +662,15 @@ class DrawingSystem {
         // Configuration
         // Configuration
         let isStacked = sketch.isStacked;
-        let scale = sketch.scale;
-        
-        // Always center on screen for "Whole Screen" effect
-        // Ignore the card gutter logic
-        // const targetVisualCenterX = vw / 2;
-        // const centerY = vh / 2; 
-        // User said "area de desenho automatico pra pegar a tela inteira"
-        // Let's center it.
-        
-        // Scale adjustment if needed
-        // Goal: Fill ~80% of the screen width on Desktop, or 100% on mobile.
-        // Base sketch width is ~1000px.
-        const baseWidth = 1000;
-        const targetWidth = Math.min(vw * 0.9, 1400); // 90% of screen, max 1400px
-        scale *= (targetWidth / baseWidth);
+        // Initial Pose
+        const pose = this.calculateBGPose(vw, vh);
+        const baseScale = sketch.scale; // Sketch's intended relative scale
 
-        // Logical center adjustment
-        // BOTTOM-LEFT Alignment Logic:
-        // Drawing coordinates (dx, dy) are relative to center (0,0). Range [-Width/2, Width/2].
-        // To verify: Left Edge = -Width/2. Bottom Edge = Height/2 (approx).
-        // We want Left Edge at Screen X=0 (or small padding).
-        // ScreenX = CenterX + (dx * scale). 
-        // 0 = CenterX + (-baseWidth/2 * scale)  =>  CenterX = (baseWidth/2) * scale
-        
-        // We want Bottom Edge at Screen Y=VH.
-        // ScreenY = CenterY + (dy * scale).
-        // VH = CenterY + (baseHeight/2 * scale). Assuming roughly square/landscape.
-        // Let's assume aspect ratio ~1.5 (landscape). Height ~ 600-700?
-        // Let's try anchoring CenterY relative to VH.
-        
-        const scaledHalfWidth = (baseWidth / 2) * scale;
-        // Move even further left: bleeding 15% off the edge
-        const centerX = scaledHalfWidth - (vw * 0.15); 
-        
-        // Anchor bottom
-        const centerY = vh - (scaledHalfWidth * 0.6); // Guesstimate height ratio as 0.6 of width
+        // Set Reference for Universal Scaling
+        this.bgReferenceScale = pose.scale * baseScale;
+        this.bgReferenceCenterX = pose.centerX;
+        this.bgReferenceCenterY = pose.centerY;
+
         
         let wordIndex = 0;
         const sessionStrokes = []; // Track strokes created in this pass for later consolidation
@@ -586,10 +690,11 @@ class DrawingSystem {
                 this.animatingStroke = {
                     points: [],
                     color: strokeData.color,
-                    size: (strokeData.size || 8) * scale,
+                    size: (strokeData.size || 8) * this.bgReferenceScale,
                     tool: 'pencil',
                     tipShape: 'round',
                     brushType: strokeData.brushType || 'fountain',
+                    isBackground: true, // Flag for anchoring logic
                     startTime: Date.now()
                 };
                 
@@ -603,13 +708,16 @@ class DrawingSystem {
                     if (this.stopSignal) break;
 
                     const p = path[i];
-                    const targetX = centerX + (p.dx + offX) * scale;
-                    const targetY = centerY + (p.dy + offY) * scale;
+                    
+                    // IMPORTANT: Use this.bgReference values DYNAMICALLY 
+                    // This ensures points added during a resize use the NEW center/scale.
+                    const targetX = this.bgReferenceCenterX + (p.dx + offX) * this.bgReferenceScale;
+                    const targetY = this.bgReferenceCenterY + (p.dy + offY) * this.bgReferenceScale;
 
                     if (i > 0) {
                         const prev = path[i - 1];
-                        const prevX = centerX + (prev.dx + offX) * scale;
-                        const prevY = centerY + (prev.dy + offY) * scale;
+                        const prevX = this.bgReferenceCenterX + (prev.dx + offX) * this.bgReferenceScale;
+                        const prevY = this.bgReferenceCenterY + (prev.dy + offY) * this.bgReferenceScale;
                         const steps = 1; 
                         for (let s = 1; s <= steps; s++) {
                             const interX = prevX + (targetX - prevX) * (s / steps);
@@ -656,6 +764,7 @@ class DrawingSystem {
             brushType: 'standard', 
             static: false, // Keep it false so it wiggles! One big stroke is fast enough.
             isBorder: false,
+            isBackground: base.isBackground, // Propagate flag
             startTime: base.startTime
         };
 
@@ -762,7 +871,7 @@ class DrawingSystem {
         
         const w = this.canvas.width;
         const h = this.canvas.height;
-        const color = '#ff6b6b'; // Pastel Red (User Request)
+        const color = '#ff2d55'; // LeetCode Pink (User Request)
         const padding = 20;
         const cornerSize = 48; // Size S
         const lineW = 4; // Thicker lines
@@ -849,58 +958,36 @@ class DrawingSystem {
         };
         
         const borderStrokes = [];
-        const pushStroke = (points) => {
-            borderStrokes.push({ ...strokeConfig, points: points });
+
+        // Wrapper to generate a complete border loop for a given padding
+        const generateLoop = (p) => {
+            const left = -w/2 + p;
+            const right = w/2 - p;
+            const top = p;
+            const bottom = h - p;
+
+            // Top Line
+            borderStrokes.push({ ...strokeConfig, points: createLine(left + cornerSize, top, right - cornerSize, top) });
+            // TR Corner
+            borderStrokes.push({ ...strokeConfig, points: createCornerPath(right, top, 1) });
+            // Right Line
+            borderStrokes.push({ ...strokeConfig, points: createLine(right, top + cornerSize, right, bottom - cornerSize) });
+            // BR Corner
+            borderStrokes.push({ ...strokeConfig, points: [...createCornerPath(right, bottom, 2)].reverse() });
+            // Bottom Line
+            borderStrokes.push({ ...strokeConfig, points: createLine(right - cornerSize, bottom, left + cornerSize, bottom) });
+            // BL Corner
+            borderStrokes.push({ ...strokeConfig, points: createCornerPath(left, bottom, 3) });
+            // Left Line
+            borderStrokes.push({ ...strokeConfig, points: createLine(left, bottom - cornerSize, left, top + cornerSize) });
+            // TL Corner
+            borderStrokes.push({ ...strokeConfig, points: [...createCornerPath(left, top, 0)].reverse() });
         };
 
-        // 1. Generate Corners with connected path logic
-        const tl = createCornerPath(left, top, 0); 
-        const tr = createCornerPath(right, top, 1);
-        const br = createCornerPath(right, bottom, 2);
-        const bl = createCornerPath(left, bottom, 3);
-        
-        // 2. Continuous Drawing Sequence (Clockwise from TL)
-        
-        // Top Line (Left+s -> Right-s)
-        pushStroke(createLine(left + cornerSize, top, right - cornerSize, top));
-        
-        // TR Corner (Enter Right, Exit Bottom)
-        // TR Rot 1: P1(-s,0) -> P3(0,s). Matches.
-        pushStroke(tr);
-        
-        // Right Line
-        pushStroke(createLine(right, top + cornerSize, right, bottom - cornerSize));
-        
-        // BR Corner (Enter Right, Exit Bottom relative??)
-        // BR Rot 2: P1(-s,0), P3(0,-s).
-        // Right ends at P3 location?? P3 rel is (0,-s). Abs is (Right, Bottom-s).
-        // Wait, BR Rot 2 P3 is top of bracket. Right Line comes from top.
-        // So we Enter P3 and Exit P1.
-        // Reverse BR.
-        pushStroke([...br].reverse());
-        
-        // Bottom Line
-        pushStroke(createLine(right - cornerSize, bottom, left + cornerSize, bottom));
-        
-        // BL Corner 
-        // BL Rot 3: P1(s,0) is Right. P3(0,s) relative??
-        // Rot 3 (Flip Y) on P3(0,s) -> (0,-s). Abs (Left, Bottom-s).
-        // Bottom Line ends at (Left+s, Bottom).
-        // BL Rot 3 P1 is (s,0) -> (s,0). Abs (Left+s, Bottom).
-        // Matches P1.
-        // Exit P3 (Left, Bottom-s).
-        // Forward BL.
-        pushStroke(bl);
-        
-        // Left Line
-        pushStroke(createLine(left, bottom - cornerSize, left, top + cornerSize));
-        
-        // TL Corner
-        // TL Rot 0: P1(s,0) Right. P3(0,s) Bottom.
-        // Left line ends at (Left, Top+s). Matches P3 location.
-        // Exit P1 (Left+s, Top).
-        // Reverse TL.
-        pushStroke([...tl].reverse());
+        // Inner and Outer loops for "Parallel Lines" effect
+        generateLoop(padding); // Outer (20px)
+        generateLoop(padding + 12); // Inner (32px)
+
 
         // Animate them
         await this.animateStrokesSequence(borderStrokes, myId);

@@ -161,7 +161,7 @@ body.hud-hidden .bottom-nav {
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     z-index: 10000;
-    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s, background 0.3s, width 0.3s;
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s, background 0.3s, width 0.3s, height 0.3s;
     box-shadow: 0 10px 40px rgba(0,0,0,0.6);
     display: flex;
     flex-direction: column;
@@ -170,6 +170,89 @@ body.hud-hidden .bottom-nav {
     opacity: 0;
     pointer-events: none;
     transform: translateX(-130px);
+}
+
+/* Collapsed State */
+.drawing-sidebar.collapsed {
+    height: 36px !important;
+    overflow: hidden;
+}
+
+.drawing-sidebar.collapsed .sidebar-content {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.drawing-sidebar.collapsed .tool-options-panel {
+    display: none;
+}
+
+/* Mobile Default: Top-Attached Menu Redesign */
+@media (max-width: 600px) {
+    .drawing-sidebar {
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 44px;
+        border-radius: 0 0 20px 20px !important;
+        transform: translateY(0); /* Default show if not collapsed */
+        flex-direction: column; /* Handle at TOP as requested */
+        box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+    }
+
+    .drawing-sidebar.collapsed {
+        /* If handle is at top (44px), we only want to show the handle */
+        /* Total height is approx 120-150px. Translating such that only 44px remains. */
+        /* Using a more robust clip or height for collapse? */
+        /* Let's use negative transform but keep 44px visible. */
+        /* We can use transform: translateY(calc(-100% + 44px)) */
+        transform: translateY(-75%) !important; 
+    }
+
+    /* Override the prev translateY(-92%) which was for bottom handle */
+    .drawing-sidebar.collapsed {
+        transform: translateY(-80%) !important;
+    }
+
+    .drawing-sidebar .sidebar-handle {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        border-top: none;
+        height: 44px;
+        width: 100%;
+        order: -1; /* Ensure handle is at top */
+    }
+
+    .drawing-sidebar .sidebar-content {
+        padding: 5px 15px 15px 15px;
+        flex-direction: row; 
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+        pointer-events: auto !important;
+    }
+
+    .drawing-sidebar .sidebar-divider {
+        display: none; /* Hide dividers to fit more colors same row */
+    }
+
+    .drawing-sidebar .tool-section {
+        flex-direction: row;
+        width: auto;
+    }
+
+    .drawing-sidebar .tool-grid, 
+    .drawing-sidebar .color-palette-grid,
+    .drawing-sidebar .options-grid {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        padding: 0;
+    }
+
+    .color-swatch, .drawing-sidebar button {
+        pointer-events: auto !important;
+    }
 }
 
 [data-theme="light"] .drawing-sidebar {
@@ -187,12 +270,19 @@ body.hud-hidden .bottom-nav {
 /* Sidebar Handle */
 .sidebar-handle {
     height: 36px;
+    flex-shrink: 0;
     background: rgba(255, 255, 255, 0.05);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: grab;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.2s;
+}
+
+.drawing-sidebar.collapsed .sidebar-handle {
+    border-bottom: none;
+    background: rgba(255, 255, 255, 0.1);
 }
 
 [data-theme="light"] .sidebar-handle {
@@ -210,6 +300,7 @@ body.hud-hidden .bottom-nav {
     background: rgba(255, 255, 255, 0.2);
     border-radius: 2px;
     position: relative;
+    transition: transform 0.3s;
 }
 
 [data-theme="light"] .handle-dots {
@@ -227,6 +318,10 @@ body.hud-hidden .bottom-nav {
 
 .handle-dots::before { top: -6px; }
 .handle-dots::after { top: 6px; }
+
+.drawing-sidebar.collapsed .handle-dots {
+    transform: scaleX(0.7);
+}
 
 /* Sidebar Content */
 .sidebar-content {
