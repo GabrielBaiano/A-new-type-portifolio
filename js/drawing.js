@@ -552,10 +552,8 @@ class DrawingSystem {
         scale *= Math.min(1.0, vw / 800); // Scale down on mobile
 
         // Logical center adjustment
-        const centerX = (targetVisualCenterX - vw/2);
-        const baseScrollX = window.scrollX;
-        const baseScrollY = window.scrollY;
-
+        const centerX = targetVisualCenterX; // vw / 2
+        
         let wordIndex = 0;
         for (const strokeData of sketch.strokes) {
             if (this.stopSignal || this.isDrawing) break;
@@ -587,13 +585,13 @@ class DrawingSystem {
                     if (this.stopSignal || this.isDrawing) break;
 
                     const p = path[i];
-                    const targetX = centerX + (p.dx + offX) * scale + baseScrollX;
-                    const targetY = centerY + (p.dy + offY) * scale + baseScrollY;
+                    const targetX = centerX + (p.dx + offX) * scale;
+                    const targetY = centerY + (p.dy + offY) * scale;
 
                     if (i > 0) {
                         const prev = path[i - 1];
-                        const prevX = centerX + (prev.dx + offX) * scale + baseScrollX;
-                        const prevY = centerY + (prev.dy + offY) * scale + baseScrollY;
+                        const prevX = centerX + (prev.dx + offX) * scale;
+                        const prevY = centerY + (prev.dy + offY) * scale;
                         const steps = Math.max(1, Math.floor(1 * scale));
                         for (let s = 1; s <= steps; s++) {
                             const interX = prevX + (targetX - prevX) * (s / steps);
