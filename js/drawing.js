@@ -402,8 +402,16 @@ class DrawingSystem {
         this.canvas.width = newVW;
         this.canvas.height = newVH;
 
+        const isMobile = newVW < 600;
+
+        // 1. Mobile restriction: Clear background sketches on small screens
+        if (isMobile) {
+            if (this.isAutoWriting) this.stopAutoDraw();
+            this.strokes = this.strokes.filter(s => !s.isBackground);
+        }
+
         // UNIVERSAL SCALING & ANCHORING:
-        if (this.bgReferenceScale !== null) {
+        if (this.bgReferenceScale !== null && !isMobile) {
             // Calculate what the "Ideal" new pose should be
             const newPose = this.calculateBGPose(newVW, newVH);
             
@@ -652,6 +660,7 @@ class DrawingSystem {
     }
 
     async autoWriteTryDrawing() {
+        if (window.innerWidth < 600) return;
         console.log("Loading generated sketch...");
         this.loadSketchFromJson('data/anime_sketch.json');
     }
@@ -681,12 +690,9 @@ class DrawingSystem {
 
         const vw = window.innerWidth;
         const vh = window.innerHeight;
-        const cardWidth = 640; 
         
-        const gutterWidth = (vw - cardWidth) / 2;
-        
-        // Safety check for mobile
-        if (gutterWidth < 60 && vw < 500) {
+        // Safety check for mobile: Remove background sketches on small screens
+        if (vw < 600) {
             this.isAutoWriting = false;
             return;
         }
@@ -904,9 +910,12 @@ class DrawingSystem {
         const w = this.canvas.width;
         const h = this.canvas.height;
         const color = '#ff2d55'; // LeetCode Pink (User Request)
-        const padding = 20;
-        const cornerSize = 48; // Size S
-        const lineW = 4; // Thicker lines
+        
+        const isMobile = w < 600;
+        const padding = isMobile ? 6 : 20;
+        const cornerSize = isMobile ? 32 : 48;
+        const lineW = isMobile ? 2.5 : 4;
+        const loopGap = isMobile ? 7 : 12;
 
         // Coordinates System:
         // X: 0 is center. Range: -w/2 to w/2
@@ -1017,8 +1026,8 @@ class DrawingSystem {
         };
 
         // Inner and Outer loops for "Parallel Lines" effect
-        generateLoop(padding); // Outer (20px)
-        generateLoop(padding + 12); // Inner (32px)
+        generateLoop(padding); 
+        generateLoop(padding + loopGap); 
 
 
         // Animate them
