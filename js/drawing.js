@@ -351,13 +351,37 @@ class DrawingSystem {
      */
     calculateBGPose(vw, vh) {
         const baseWidth = 1000;
+        
+        // 1. Calculate scale based on Width (Original logic)
+        // This ensures the drawing maintains the size the user liked.
         const targetWidth = Math.max(900, Math.min(vw * 0.9, 1400));
         const scale = targetWidth / baseWidth;
         const scaledHalfWidth = (baseWidth / 2) * scale;
         
         // STABLE ANCHORING: Bottom-Left peeking
         const centerX = scaledHalfWidth - (vw < 600 ? 200 : 250);
-        const centerY = vh - (scaledHalfWidth * 0.75) + 80;
+        
+        // 2. Refined Vertical Adjustment: 
+        // We want to keep it anchored to bottom, but enforce a "Minimum distance from Top".
+        // Base centerY:
+        let centerY = vh - (scaledHalfWidth * 0.75) + 80;
+
+        // Estimated top of the anime girl sketch is roughly centerY - (400 * scale).
+        // Let's ensure the top is at least 40px from the screen edge.
+        const minCenterYForTopVisibility = (400 * scale) + 40;
+        
+        if (centerY < minCenterYForTopVisibility) {
+            // Only shift down if really necessary, and just enough.
+            centerY = minCenterYForTopVisibility;
+            
+            // Safety Check: If shifting down makes it too big for the height, 
+            // THEN we slightly scale down, but only as a last resort.
+            const totalBottom = centerY + (200 * scale); // rough bottom estimate
+            if (totalBottom > vh + 100) {
+                 // If it's overflowing bottom too much, we could slightly reduce scale here
+                 // but user asked NOT to shrink too much. Let's prioritize visibility.
+            }
+        }
 
         return { scale, centerX, centerY };
     }
