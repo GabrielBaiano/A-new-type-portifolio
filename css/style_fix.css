@@ -202,17 +202,9 @@ body.hud-hidden .bottom-nav {
     }
 
     .drawing-sidebar.collapsed {
-        /* If handle is at top (44px), we only want to show the handle */
-        /* Total height is approx 120-150px. Translating such that only 44px remains. */
-        /* Using a more robust clip or height for collapse? */
-        /* Let's use negative transform but keep 44px visible. */
-        /* We can use transform: translateY(calc(-100% + 44px)) */
-        transform: translateY(-75%) !important; 
-    }
-
-    /* Override the prev translateY(-92%) which was for bottom handle */
-    .drawing-sidebar.collapsed {
-        transform: translateY(-80%) !important;
+        /* On mobile, we only want the handle to be visible at the top (approx 44px) */
+        /* Total height varies, but -80% usually leaves the handle peeking. */
+        transform: translateY(-82%) !important; 
     }
 
     .drawing-sidebar .sidebar-handle {
@@ -683,4 +675,36 @@ body.hud-hidden .bottom-nav {
 
 #auto-draw-trigger {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Fix for squashed logo symbols on mobile */
+.symbol-pink, .symbol-green, .symbol-yellow {
+    flex-shrink: 0 !important;
+}
+
+/* Collapsible Content Channels Card */
+.channel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 24px;
+    width: 100%;
+}
+
+.channel-header h2 {
+    margin-bottom: 0 !important;
+}
+
+.channel-card.collapsible-section:not(.expanded) .sidebar-section-content {
+    display: none;
+}
+
+.channel-card.collapsible-section:not(.expanded) .sidebar-toggle-icon {
+    transform: rotate(-180deg);
+}
+
+.channel-card.collapsible-section .sidebar-toggle-icon {
+    transition: transform 0.3s ease;
+    color: var(--text-muted);
 }

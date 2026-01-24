@@ -109,18 +109,32 @@ const FeedPage = {
             <div class="page-layout-grid">
                 <div class="main-content-area">
                     <!-- Card 1: Content Channels -->
-                    <div class="card projects-card channel-card">
-                        <h2 class="section-title">Content Channels</h2>
+                    <div class="card projects-card channel-card collapsible-section expanded">
+                        <div class="channel-header sidebar-toggle-btn">
+                            <h2 class="section-title">Content Channels</h2>
+                            <i class="fa-solid fa-chevron-up sidebar-toggle-icon"></i>
+                        </div>
                         
-                        <div id="article-types-grid" class="projects-grid-cards article-types-grid">
-                            ${articleTypes.map(type => `
-                                <div class="project-card type-card ${type.gradient} clickable-card-filter clickable-category" data-type-id="${type.id}">
-                                    <div class="type-card-header">
-                                        <i class="${type.icon}"></i>
-                                        <h3 class="project-title">${type.title}</h3>
+                        <div class="sidebar-section-content">
+                            <div id="article-types-grid" class="projects-grid-cards article-types-grid">
+                                ${articleTypes.map(type => `
+                                    <div class="project-card type-card ${type.gradient} clickable-card-filter clickable-category" data-type-id="${type.id}">
+                                        <div class="type-card-header">
+                                            <i class="${type.icon}"></i>
+                                            <h3 class="project-title">${type.title}</h3>
+                                        </div>
                                     </div>
+                                `).join('')}
+
+                                <!-- Newsletter Channel -->
+                                <div class="project-card type-card balloon-bg-orange clickable-newsletter" style="background: linear-gradient(135deg, #ff7816, #ff5500) !important; border-color: #ff9900 !important; cursor: pointer;">
+                                    <div class="type-card-header">
+                                        <i class="fa-solid fa-envelope" style="color: white !important;"></i>
+                                        <h3 class="project-title" style="color: white !important;">Newsletter</h3>
+                                    </div>
+                                    <div class="card-badge" style="position: absolute; top: 8px; right: 8px; background: white; color: #ff5500; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-weight: 800;">JOIN</div>
                                 </div>
-                            `).join('')}
+                            </div>
                         </div>
                     </div>
 
@@ -171,6 +185,15 @@ const FeedPage = {
                     router.navigate('reviews');
                 } else {
                     router.navigate(`detail/category/${typeId}`);
+                }
+            });
+        });
+
+        // Newsletter card click
+        document.querySelectorAll('.clickable-newsletter').forEach(card => {
+            card.addEventListener('click', () => {
+                if (window.balloonSystem) {
+                    window.balloonSystem.tryPlaceBalloon(window.balloonSystem.getNewsletter(), true);
                 }
             });
         });

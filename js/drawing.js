@@ -322,7 +322,7 @@ class DrawingSystem {
             document.body.style.cursor = 'default';
 
             const clickDuration = Date.now() - startTime;
-            if (clickDuration < 250 && totalDist < 10) {
+            if (clickDuration < 500 && totalDist < 25) {
                 sidebar.classList.toggle('collapsed');
                 sidebar.classList.toggle('expanded');
             } else if (window.innerWidth < 600) {
@@ -339,7 +339,10 @@ class DrawingSystem {
         };
 
         handle.addEventListener('mousedown', start);
-        handle.addEventListener('touchstart', start, { passive: true });
+        handle.addEventListener('touchstart', (e) => {
+            // No stopPropagation here to let standard clicks work if needed
+            start(e);
+        }, { passive: false });
 
         window.addEventListener('mousemove', move);
         window.addEventListener('touchmove', (e) => {
@@ -1126,7 +1129,7 @@ class DrawingSystem {
                 if (stroke.tool === 'rect') {
                     this.drawPixelRect(x, y, w, h, pixelSize, stroke.size);
                 } else {
-                    this.drawPixelCircle(x + w / 2, y + h / 2, Math.abs(w / 2), pixelSize, stroke.size);
+                    this.drawPixelEllipse(x + w / 2, y + h / 2, Math.abs(w / 2), Math.abs(h / 2), pixelSize, stroke.size);
                 }
             } else if (stroke.tool === 'spray') {
                 stroke.points.forEach(pt => {
@@ -1349,26 +1352,19 @@ class DrawingSystem {
     }
 
     drawPixelCircle(cx, cy, radius, pixelSize, brushSize) {
-        let x = radius;
-        let y = 0;
-        let err = 1 - x;
-        
-        while (x >= y) {
-            this.drawBrushTip(cx + x, cy + y, brushSize, 'square');
-            this.drawBrushTip(cx + y, cy + x, brushSize, 'square');
-            this.drawBrushTip(cx - y, cy + x, brushSize, 'square');
-            this.drawBrushTip(cx - x, cy + y, brushSize, 'square');
-            this.drawBrushTip(cx - x, cy - y, brushSize, 'square');
-            this.drawBrushTip(cx - y, cy - x, brushSize, 'square');
-            this.drawBrushTip(cx + y, cy - x, brushSize, 'square');
-            this.drawBrushTip(cx + x, cy - y, brushSize, 'square');
-            
-            y += pixelSize;
-            if (err < 0) {
-                err += 2 * y + 1;
-            } else {
-                x -= pixelSize;
-                err += 2 * (y - x) + 1;
+        this.drawPixelEllipse(cx, cy, radius, radius, pixelSize, brushSize);
+    }
+
+    drawPixelEllipse(cx, cy, rx, ry, pixelSize, brushSize) {
+        // Parametric or Midpoint Ellipse Algorithm
+        // For simplicity and matching the "pixel art" feel:
+        for (let y = -ry; y <= ry; y += pixelSize) {
+            for (let x = -rx; x <= rx; x += pixelSize) {
+                // Ellipse equation: (x/rx)^2 + (y/ry)^2 <= 1
+                // Optimized: (x*ry)^2 + (y*rx)^2 <= (rx*ry)^2
+                if ((x * ry) ** 2 + (y * rx) ** 2 <= (rx * ry) ** 2) {
+                    this.drawBrushTip(cx + x, cy + y, brushSize, 'square');
+                }
             }
         }
     }
