@@ -51,19 +51,26 @@ class DrawingSystem {
         
         // Touch Events - Window level
         window.addEventListener('touchstart', (e) => {
-             // We need to check if we should draw. 
-             // If canvas is z-index: -1, we rely on event bubbling or direct window capture.
-             // If we want to "draw on background", we shouldn't block buttons.
-             // So we check if the target is "interactive".
-            const target = e.target;
-            const isInteractive = target.closest('button') || target.closest('a') || target.closest('input') || target.closest('.card'); 
-            // Note: IF we want to draw "on background only", we should probably NOT draw if clicking on a card?
-            // User said: "não é pra dar pra desenhar por cima de nada da tela, só no background"
-            // So YES, we block drawing if clicking on a card.
+             // 1. Only allow manual drawing if the HUD is hidden (Drawing Mode active)
+             // This prevents accidental drawing while navigating the site.
+             if (!document.body.classList.contains('hud-hidden')) return;
+
+             // 2. Comprehensive check for interactive elements
+             const target = e.target;
+             const isInteractive = 
+                target.closest('button') || 
+                target.closest('a') || 
+                target.closest('input') || 
+                target.closest('.card') ||
+                target.closest('.color-swatch') ||
+                target.closest('.color-custom-btn') ||
+                target.closest('#drawing-sidebar') ||
+                target.closest('.bottom-nav'); 
             
             if (isInteractive) return;
 
-            e.preventDefault();
+            // If we are here, we are drawing on the background
+            e.preventDefault(); 
             this.startDrawing(e.touches[0]);
         }, { passive: false });
 
@@ -467,7 +474,8 @@ class DrawingSystem {
     startDrawing(e) {
         if (this.isDraggingSidebar) return;
         
-        // Background Drawing Check:
+        // 0. Only allow manual drawing if the HUD is hidden
+        if (!document.body.classList.contains('hud-hidden')) return;
         // Ensure we are NOT clicking on content if we only want to draw on background.
         const target = e.target;
         if (target) {

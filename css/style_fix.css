@@ -170,6 +170,7 @@ body.hud-hidden .bottom-nav {
     opacity: 0;
     pointer-events: none;
     transform: translateX(-130px);
+    display: none; /* Physical removal when hidden */
 }
 
 /* Collapsed State */
@@ -196,9 +197,8 @@ body.hud-hidden .bottom-nav {
         height: auto !important;
         min-height: 44px;
         border-radius: 0 0 20px 20px !important;
-        transform: translateY(0); /* Default show if not collapsed */
-        flex-direction: column; /* Handle at TOP as requested */
         box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+        transform: translateY(-100%); /* Start off-screen */
     }
 
     .drawing-sidebar.collapsed {
@@ -262,9 +262,16 @@ body.hud-hidden .bottom-nav {
 }
 
 .hud-hidden .drawing-sidebar {
+    display: flex; /* Restore physical presence */
     opacity: 1;
     pointer-events: auto;
     transform: translateX(0);
+}
+
+@media (max-width: 600px) {
+    .hud-hidden .drawing-sidebar {
+        transform: translateY(0);
+    }
 }
 
 /* Sidebar Handle */
