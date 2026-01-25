@@ -125,15 +125,6 @@ const FeedPage = {
                                         </div>
                                     </div>
                                 `).join('')}
-
-                                <!-- Newsletter Channel -->
-                                <div class="project-card type-card balloon-bg-orange clickable-newsletter" style="background: linear-gradient(135deg, #ff7816, #ff5500) !important; border-color: #ff9900 !important; cursor: pointer;">
-                                    <div class="type-card-header">
-                                        <i class="fa-solid fa-envelope" style="color: white !important;"></i>
-                                        <h3 class="project-title" style="color: white !important;">Newsletter</h3>
-                                    </div>
-                                    <div class="card-badge" style="position: absolute; top: 8px; right: 8px; background: white; color: #ff5500; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-weight: 800;">JOIN</div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -189,14 +180,7 @@ const FeedPage = {
             });
         });
 
-        // Newsletter card click
-        document.querySelectorAll('.clickable-newsletter').forEach(card => {
-            card.addEventListener('click', () => {
-                if (window.balloonSystem) {
-                    window.balloonSystem.tryPlaceBalloon(window.balloonSystem.getNewsletter(), true);
-                }
-            });
-        });
+
 
         // Feed Filter Logic
         const updateFeed = (filter, activeElement) => {
