@@ -18,7 +18,7 @@ const HomePage = {
                         </div>
                         <div class="user-details">
                             <h1>Gabriel Nascimento Gama</h1>
-                            <p>Full Stack Dev</p>
+                            <p>Full-Stack Web Dev</p>
                         </div>
                     </div>
                     <!-- Colorized 3-symbol logo -->
@@ -38,7 +38,7 @@ const HomePage = {
                 <!-- Bio -->
                 <div class="bio">
                     <p>
-Welcome, i'm a Brazilian<svg class="bio-location-pin" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" height="1em"><path fill="currentColor" d="M172.268 501.67C26.97 291.031 0 269.413 0 192 0 85.961 85.961 0 192 0s192 85.961 192 192c0 77.413-26.97 99.031-172.268 309.67-9.535 13.774-29.93 13.773-39.464 0zM192 272c44.183 0 80-35.817 80-80s-35.817-80-80-80-80 35.817-80 80 35.817 80 80 80z"/></svg> Full-Stack Developer with over 3 years of experience, and I'm also part of the <strong>YellowHood agency</strong>.
+Welcome, i'm a Brazilian<svg class="bio-location-pin" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" height="1em"><path fill="currentColor" d="M172.268 501.67C26.97 291.031 0 269.413 0 192 0 85.961 85.961 0 192 0s192 85.961 192 192c0 77.413-26.97 99.031-172.268 309.67-9.535 13.774-29.93 13.773-39.464 0zM192 272c44.183 0 80-35.817 80-80s-35.817-80-80-80-80 35.817-80 80 35.817 80 80 80z"/></svg> Full-Stack Web Developer with over 3 years of experience, and I'm also part of the <strong>YellowHood agency</strong>.
                     </p>
                     <br>
                     <p>
@@ -98,7 +98,7 @@ Welcome, i'm a Brazilian<svg class="bio-location-pin" xmlns="http://www.w3.org/2
                             <div class="company-logo bg-lime"></div>
                             <div class="job-details">
                                 <h3>Techsolutions</h3>
-                                <span>Full Stack Developer</span>
+                                <span>Full-Stack Web Developer</span>
                             </div>
                         </div>
                         <div class="job-date">2023 – 2024</div>
@@ -124,7 +124,7 @@ Welcome, i'm a Brazilian<svg class="bio-location-pin" xmlns="http://www.w3.org/2
                                 <div class="company-logo bg-green"></div>
                                 <div class="job-details">
                                     <h3>Shultz</h3>
-                                    <span>Full Stack Developer</span>
+                                    <span>Full-Stack Web Developer</span>
                                 </div>
                             </div>
                             <div class="job-date">2022</div>
@@ -192,17 +192,16 @@ Welcome, i'm a Brazilian<svg class="bio-location-pin" xmlns="http://www.w3.org/2
         const avatarFlipper = document.querySelector('.avatar-flipper');
 
         if (avatarContainer && avatarFlipper) {
-            // Animação automática ao carregar a página
-            setTimeout(() => {
-                avatarFlipper.classList.add('flip');
-                
-                // Volta depois de 2 segundos
-                setTimeout(() => {
-                    avatarFlipper.classList.remove('flip');
-                }, 2000);
-            }, 1000);
-
-            // Click manual para flipar
+            const applyAvatarFlip = () => {
+                const isCreative = document.documentElement.getAttribute('data-theme') !== 'light';
+                const flipper = document.querySelector('.avatar-flipper');
+                if (flipper) {
+                    if (isCreative) flipper.classList.add('flip');
+                    else flipper.classList.remove('flip');
+                }
+            };
+            applyAvatarFlip();
+            document.addEventListener('themeChanged', applyAvatarFlip);
             avatarContainer.addEventListener('click', () => {
                 avatarFlipper.classList.toggle('flip');
             });
@@ -217,11 +216,11 @@ Welcome, i'm a Brazilian<svg class="bio-location-pin" xmlns="http://www.w3.org/2
                     locationCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     // Optional: Highlight map slightly upon arrival
                     setTimeout(() => {
-                       locationCard.style.transition = 'box-shadow 0.5s ease';
-                       locationCard.style.boxShadow = '0 0 20px rgba(255, 45, 85, 0.3)';
-                       setTimeout(() => {
-                           locationCard.style.boxShadow = '';
-                       }, 1000);
+                        locationCard.style.transition = 'box-shadow 0.5s ease';
+                        locationCard.style.boxShadow = '0 0 20px rgba(255, 45, 85, 0.3)';
+                        setTimeout(() => {
+                            locationCard.style.boxShadow = '';
+                        }, 1000);
                     }, 500);
                 }
             });
@@ -237,7 +236,7 @@ Welcome, i'm a Brazilian<svg class="bio-location-pin" xmlns="http://www.w3.org/2
                     const originalText = emailBtn.innerHTML;
                     emailBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
                     emailBtn.style.backgroundColor = '#00a650';
-                    
+
                     setTimeout(() => {
                         emailBtn.innerHTML = originalText;
                         emailBtn.style.backgroundColor = '';
@@ -249,17 +248,17 @@ Welcome, i'm a Brazilian<svg class="bio-location-pin" xmlns="http://www.w3.org/2
         // Feature: Expand/Collapse Experience
         const toggleBtn = document.getElementById('toggle-experience-btn');
         const extraExp = document.getElementById('extra-experience');
-        
+
         // Initial State: Hidden
         if (extraExp) extraExp.style.display = 'none';
 
         if (toggleBtn && extraExp) {
             // Apply inline styles to force Right Align + Tech Font (User Request)
             toggleBtn.style.cssText = "display: flex; justify-content: flex-end; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; font-size: 0.8rem; width: 100%; border: none; background: transparent; color: var(--text-muted); cursor: pointer; margin-top: 8px;";
-            
+
             toggleBtn.addEventListener('click', () => {
                 const isHidden = extraExp.style.display === 'none';
-                
+
                 if (isHidden) {
                     extraExp.style.display = 'flex'; // Changed to flex to respect gap
                     toggleBtn.innerHTML = 'Show less <i class="fa-solid fa-chevron-up"></i>';
@@ -368,7 +367,7 @@ Welcome, i'm a Brazilian<svg class="bio-location-pin" xmlns="http://www.w3.org/2
                     [myLocation.lat, myLocation.lon],
                     [visitorLoc.lat, visitorLoc.lon]
                 ];
-                
+
                 const polyline = L.polyline(lineCoords, {
                     color: '#ff2d55',
                     weight: 2,
@@ -388,7 +387,7 @@ Welcome, i'm a Brazilian<svg class="bio-location-pin" xmlns="http://www.w3.org/2
 
     getTileUrl() {
         const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-        return isLight 
+        return isLight
             ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
             : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
     },
@@ -406,11 +405,11 @@ Welcome, i'm a Brazilian<svg class="bio-location-pin" xmlns="http://www.w3.org/2
         const R = 6371; // Earth's radius in km
         const dLat = (lat2 - lat1) * Math.PI / 180;
         const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = 
-            Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return Math.round(R * c);
     },
 

@@ -42,7 +42,8 @@
     margin-top: 8px;
     display: flex;
     align-items: center;
-    justify-content: flex-end !important; /* Force Right Align */
+    justify-content: flex-end !important;
+    /* Force Right Align */
     gap: 8px;
     font-family: 'JetBrains Mono', 'Courier New', monospace;
     text-transform: uppercase;
@@ -84,8 +85,15 @@
 /* Updated Balloon Colors */
 
 @keyframes marker-pulse {
-    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-    100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(2.5);
+        opacity: 0;
+    }
 }
 
 /* Optimization: Allow balloons to be slightly closer */
@@ -101,7 +109,8 @@
 #extra-experience {
     display: flex;
     flex-direction: column;
-    gap: 20px !important; /* Force same as parent */
+    gap: 20px !important;
+    /* Force same as parent */
 }
 
 body {
@@ -139,13 +148,14 @@ body {
     width: 100vw;
     height: 100vh;
     z-index: 0;
-    pointer-events: auto; /* Active by default or only when HUD hidden? */
+    pointer-events: auto;
+    /* Active by default or only when HUD hidden? */
     display: block;
 }
 
 /* 7. Drawing Sidebar Styles */
 /* Disable selection when drawing (HUD Hidden) */
-body.hud-hidden #app, 
+body.hud-hidden #app,
 body.hud-hidden .bottom-nav {
     user-select: none !important;
     -webkit-user-select: none !important;
@@ -155,22 +165,25 @@ body.hud-hidden .bottom-nav {
     position: fixed;
     top: 100px;
     left: 20px;
-    width: 110px; /* Wider for 2 columns */
+    width: 110px;
+    /* Wider for 2 columns */
     background: rgba(28, 28, 30, 0.95);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     z-index: 10000;
     transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s, background 0.3s, width 0.3s, height 0.3s;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
     display: flex;
     flex-direction: column;
-    overflow: visible; /* Changed from hidden to show pop-out panel */
+    overflow: visible;
+    /* Changed from hidden to show pop-out panel */
     user-select: none;
     opacity: 0;
     pointer-events: none;
     transform: translateX(-130px);
-    display: none; /* Physical removal when hidden */
+    display: none;
+    /* Physical removal when hidden */
 }
 
 /* Collapsed State */
@@ -197,14 +210,15 @@ body.hud-hidden .bottom-nav {
         height: auto !important;
         min-height: 44px;
         border-radius: 0 0 20px 20px !important;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.4);
-        transform: translateY(-100%); /* Start off-screen */
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+        transform: translateY(-100%);
+        /* Start off-screen */
     }
 
     .drawing-sidebar.collapsed {
         /* On mobile, we only want the handle to be visible at the top (approx 44px) */
         /* Total height varies, but -80% usually leaves the handle peeking. */
-        transform: translateY(-82%) !important; 
+        transform: translateY(-82%) !important;
     }
 
     .drawing-sidebar .sidebar-handle {
@@ -212,12 +226,13 @@ body.hud-hidden .bottom-nav {
         border-top: none;
         height: 44px;
         width: 100%;
-        order: -1; /* Ensure handle is at top */
+        order: -1;
+        /* Ensure handle is at top */
     }
 
     .drawing-sidebar .sidebar-content {
         padding: 5px 15px 15px 15px;
-        flex-direction: row; 
+        flex-direction: row;
         flex-wrap: wrap;
         justify-content: center;
         gap: 15px;
@@ -225,7 +240,8 @@ body.hud-hidden .bottom-nav {
     }
 
     .drawing-sidebar .sidebar-divider {
-        display: none; /* Hide dividers to fit more colors same row */
+        display: none;
+        /* Hide dividers to fit more colors same row */
     }
 
     .drawing-sidebar .tool-section {
@@ -233,7 +249,7 @@ body.hud-hidden .bottom-nav {
         width: auto;
     }
 
-    .drawing-sidebar .tool-grid, 
+    .drawing-sidebar .tool-grid,
     .drawing-sidebar .color-palette-grid,
     .drawing-sidebar .options-grid {
         display: flex;
@@ -242,7 +258,8 @@ body.hud-hidden .bottom-nav {
         padding: 0;
     }
 
-    .color-swatch, .drawing-sidebar button {
+    .color-swatch,
+    .drawing-sidebar button {
         pointer-events: auto !important;
     }
 }
@@ -250,11 +267,12 @@ body.hud-hidden .bottom-nav {
 [data-theme="light"] .drawing-sidebar {
     background: rgba(255, 255, 255, 0.9);
     border-color: rgba(0, 0, 0, 0.1);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 .hud-hidden .drawing-sidebar {
-    display: flex; /* Restore physical presence */
+    display: flex;
+    /* Restore physical presence */
     opacity: 1;
     pointer-events: auto;
     transform: translateX(0);
@@ -306,7 +324,8 @@ body.hud-hidden .bottom-nav {
     background: rgba(0, 0, 0, 0.2);
 }
 
-.handle-dots::before, .handle-dots::after {
+.handle-dots::before,
+.handle-dots::after {
     content: '';
     position: absolute;
     width: 24px;
@@ -315,8 +334,13 @@ body.hud-hidden .bottom-nav {
     border-radius: 2px;
 }
 
-.handle-dots::before { top: -6px; }
-.handle-dots::after { top: 6px; }
+.handle-dots::before {
+    top: -6px;
+}
+
+.handle-dots::after {
+    top: 6px;
+}
 
 .drawing-sidebar.collapsed .handle-dots {
     transform: scaleX(0.7);
@@ -361,8 +385,10 @@ body.hud-hidden .bottom-nav {
 .drawing-sidebar button {
     width: 38px;
     height: 38px;
-    background: transparent; /* Removed background square */
-    border: none; /* Removed border */
+    background: transparent;
+    /* Removed background square */
+    border: none;
+    /* Removed border */
     border-radius: 10px;
     color: #a0a0a0;
     font-size: 1rem;
@@ -382,7 +408,7 @@ body.hud-hidden .bottom-nav {
 .drawing-sidebar button:hover {
     background: rgba(255, 255, 255, 0.12);
     color: white;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 [data-theme="light"] .drawing-sidebar button:hover {
@@ -422,7 +448,7 @@ body.hud-hidden .bottom-nav {
     cursor: pointer;
     border: 2px solid transparent;
     transition: transform 0.2s, border-color 0.2s;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 .color-swatch:hover {
@@ -431,20 +457,40 @@ body.hud-hidden .bottom-nav {
 
 .color-swatch.active {
     border-color: white;
-    box-shadow: 0 0 12px rgba(255,255,255,0.2);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
 }
 
 [data-theme="light"] .color-swatch.active {
     border-color: #000;
 }
 
-.swatch-blue   { background-color: #3b82f6; }
-.swatch-green  { background-color: #22c55e; }
-.swatch-orange { background-color: #f97316; }
-.swatch-pink   { background-color: #ec4899; }
-.swatch-yellow { background-color: #eab308; }
-.swatch-purple { background-color: #a855f7; }
-.swatch-grey   { background-color: #333333; }
+.swatch-blue {
+    background-color: #3b82f6;
+}
+
+.swatch-green {
+    background-color: #22c55e;
+}
+
+.swatch-orange {
+    background-color: #f97316;
+}
+
+.swatch-pink {
+    background-color: #ec4899;
+}
+
+.swatch-yellow {
+    background-color: #eab308;
+}
+
+.swatch-purple {
+    background-color: #a855f7;
+}
+
+.swatch-grey {
+    background-color: #333333;
+}
 
 .color-custom-btn {
     width: 38px;
@@ -464,7 +510,7 @@ body.hud-hidden .bottom-nav {
 .color-custom-btn.active {
     border-color: white;
     background: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 0 12px rgba(255,255,255,0.2);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
 }
 
 [data-theme="light"] .color-custom-btn.active {
@@ -499,12 +545,13 @@ body.hud-hidden .bottom-nav {
     left: 100%;
     top: 0;
     margin-left: 12px;
-    width: 240px; /* Increased from 200px for even better control */
+    width: 240px;
+    /* Increased from 200px for even better control */
     background: rgba(28, 28, 30, 0.95);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
     display: flex;
     flex-direction: column;
     opacity: 0;
@@ -516,7 +563,7 @@ body.hud-hidden .bottom-nav {
 [data-theme="light"] .tool-options-panel {
     background: rgba(255, 255, 255, 0.9);
     border-color: rgba(0, 0, 0, 0.1);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 .tool-options-panel.active {
@@ -574,7 +621,8 @@ body.hud-hidden .bottom-nav {
 
 .range-with-val input[type="range"] {
     flex: 1;
-    height: 8px; /* Thicker track */
+    height: 8px;
+    /* Thicker track */
     background: rgba(255, 255, 255, 0.1);
     border-radius: 4px;
     outline: none;
@@ -587,7 +635,7 @@ body.hud-hidden .bottom-nav {
     height: 16px;
     background: #fff;
     border-radius: 50%;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
 .range-with-val span {
@@ -641,11 +689,13 @@ body.hud-hidden .bottom-nav {
 }
 
 .drawing-sidebar input[type='range'] {
-    writing-mode: bt-lr; /* Vertical range if supported */
+    writing-mode: bt-lr;
+    /* Vertical range if supported */
     width: 40px;
     height: 4px;
     -webkit-appearance: none;
-    appearance: none; /* Standard property for compatibility */
+    appearance: none;
+    /* Standard property for compatibility */
     background: rgba(255, 255, 255, 0.1);
     border-radius: 2px;
     outline: none;
@@ -658,7 +708,7 @@ body.hud-hidden .bottom-nav {
     background: white;
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* 8. Auto-Draw Navbar Toggle Visuals */
@@ -678,7 +728,9 @@ body.hud-hidden .bottom-nav {
 }
 
 /* Fix for squashed logo symbols on mobile */
-.symbol-pink, .symbol-green, .symbol-yellow {
+.symbol-pink,
+.symbol-green,
+.symbol-yellow {
     flex-shrink: 0 !important;
 }
 
@@ -707,4 +759,134 @@ body.hud-hidden .bottom-nav {
 .channel-card.collapsible-section .sidebar-toggle-icon {
     transition: transform 0.3s ease;
     color: var(--text-muted);
+}
+
+/* Theme Speech Bubble (Creative Mode Tooltip) */
+.theme-switch-wrapper {
+    position: relative;
+    /* Ensure context for absolute positioning */
+    overflow: visible !important;
+}
+
+.theme-speech-bubble {
+    position: absolute;
+    bottom: 170%;
+    /* Raised higher as requested */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #eab308;
+    /* API Yellow color */
+    color: #000;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-family: 'Inter', sans-serif;
+    /* Same as system font */
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1.4;
+    box-shadow: 0 8px 20px rgba(234, 179, 8, 0.3);
+    /* Yellow glow */
+    width: max-content;
+    max-width: 200px;
+    text-align: center;
+    z-index: 9999;
+    pointer-events: auto;
+    /* Enable clicking */
+    cursor: pointer;
+    animation: bubblePop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.theme-speech-bubble:hover {
+    transform: translateX(-50%) translateY(-2px);
+}
+
+.theme-speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 8px 8px 0;
+    border-style: solid;
+    border-color: #eab308 transparent transparent transparent;
+    /* Match yellow */
+}
+
+.theme-speech-bubble .bubble-arrow {
+    display: none;
+}
+
+.theme-speech-bubble.hide {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+}
+
+/* Popped state animation */
+.theme-speech-bubble.popped {
+    opacity: 0;
+    transform: translateX(-50%) scale(1.5);
+    /* Pop effect */
+    transition: transform 0.15s ease-out, opacity 0.1s ease-out;
+}
+
+@keyframes bubblePop {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.5) translateY(20px);
+    }
+
+    80% {
+        transform: translateX(-50%) scale(1.1) translateY(-5px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1) translateY(0);
+    }
+}
+
+/* Explosion Particles */
+.pop-particle {
+    position: fixed;
+    width: 24px;
+    height: 4px;
+    background-color: #eab308;
+    border-radius: 2px;
+    z-index: 10000;
+    pointer-events: none;
+
+    /* Center the particle physically */
+    top: 0;
+    left: 0;
+
+    /* Animation logic using CSS var */
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateX(10px);
+    opacity: 1;
+    animation: particleExplode 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes particleExplode {
+    0% {
+        transform: translate(-50%, -50%) rotate(var(--angle)) translateX(10px);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) rotate(var(--angle)) translateX(80px) scaleX(0.5);
+        /* Move out and shrink length */
+        opacity: 0;
+    }
+}
+
+/* Pink Toggle for Creative Mode */
+.theme-switch input:checked+.slider {
+    background-color: #ec4899 !important;
+    /* Pink overrides Accent Blue */
+    box-shadow: 0 0 10px rgba(236, 72, 153, 0.4);
+}
+
+/* Hide drawing toggle in Professional (Light) mode */
+[data-theme="light"] #hud-toggle {
+    display: none !important;
 }

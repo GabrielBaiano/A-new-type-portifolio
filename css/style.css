@@ -355,6 +355,7 @@ body,
     height: 64px;
     perspective: 1000px;
     cursor: pointer;
+    flex-shrink: 0;
 }
 
 .avatar-flipper {
@@ -912,20 +913,48 @@ input:checked+.slider .fa-moon {
 }
 
 /* Responsividade para a navbar */
-@media (max-width: 500px) {
+@media (max-width: 600px) {
     .bottom-nav {
         bottom: 16px;
-        width: 90%;
-        justify-content: space-between;
+        width: fit-content;
+        max-width: 90%;
+        margin: 0 auto;
+        justify-content: center;
         padding: 8px 16px;
+        gap: 8px;
     }
 
     .nav-item {
         padding: 8px;
+        min-width: 44px;
     }
 
     .nav-item.active {
         padding: 8px 16px;
+    }
+
+    /* Hide creative controls for a raw professional mobile experience */
+    .controls-nav,
+    .nav-divider,
+    #bg-drawing-canvas,
+    #drawing-sidebar,
+    #balloon-container {
+        display: none !important;
+    }
+
+    .nav-group.main-nav {
+        width: auto;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .nav-item span {
+        display: none;
+        /* Hide text on mobile for main nav too if needed, or keep for clarity? User said "raw", usually icons only is cleaner */
+    }
+
+    .nav-item i {
+        font-size: 1.2rem;
     }
 }
 
