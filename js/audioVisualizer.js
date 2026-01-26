@@ -8,7 +8,7 @@ class AudioVisualizer {
         // Visualizer settings
         this.pointCount = 120;
         this.points = [];
-        this.baseRadius = 60;
+        this.baseRadius = 160;
         this.strokes = 4;
 
         // Audio Engine
@@ -141,23 +141,22 @@ class AudioVisualizer {
             // REAL Spikes Logic
             let spike = 0;
             if (this.isPlaying && freqData.length > 0) {
-                // Map point index to frequency bins
-                // Frequencies are 0 (bass) to 128 (high)
-                // We mirror the data around the circle for symmetry
-                const binIndex = Math.floor(Math.abs(Math.sin(p.angle)) * (freqData.length - 1) * 0.5);
+                // Linear mapping around the circle (no mirroring)
+                const normalizedAngle = p.angle / (Math.PI * 2);
+                const binIndex = Math.floor(normalizedAngle * (freqData.length - 1));
                 const rawFreq = freqData[binIndex] / 255; // 0 to 1
 
                 // Frequency bands
                 const isBass = binIndex < freqData.length * 0.2;
                 const isMid = binIndex >= freqData.length * 0.2 && binIndex < freqData.length * 0.6;
 
-                // Enhance sharpness with Math.pow and EXAGGERATE multipliers
+                // Enhance sharpness but keep visibility for lower volumes
                 if (isBass) {
-                    spike += Math.pow(rawFreq, 2.5) * 120; // Dramatic bass jumps
+                    spike += Math.pow(rawFreq, 2) * 150;   // Powerful bass
                 } else if (isMid) {
-                    spike += Math.pow(rawFreq, 3) * 85;    // Strong mid spikes
+                    spike += Math.pow(rawFreq, 1.5) * 100; // Visible mids
                 } else {
-                    spike += Math.pow(rawFreq, 4) * 60;    // Visible high spikes
+                    spike += Math.pow(rawFreq, 1.2) * 80;  // Active highs
                 }
             } else if (!this.isPlaying && this.isAnimating) {
                 // Subtle idle movement
