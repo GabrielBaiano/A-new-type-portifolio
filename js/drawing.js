@@ -12,8 +12,8 @@ class DrawingSystem {
         this.strokes = [];
 
         // Initialize Audio Visualizer integrated into this canvas
-        const playlistId = 'PLAhU1Mlzmttg7ugon0-vps5ELvH12EK7V';
-        this.audioVisualizer = new AudioVisualizer(this.canvas, playlistId);
+        const audioSrc = 'assets/audio/eidolon.mp3';
+        this.audioVisualizer = new AudioVisualizer(this.canvas, audioSrc);
 
         this.currentStroke = null;
 
