@@ -10,6 +10,11 @@ class DrawingSystem {
         this.ctx = this.canvas.getContext('2d');
         this.isDrawing = false;
         this.strokes = [];
+
+        // Initialize Audio Visualizer integrated into this canvas
+        const playlistId = 'PLAhU1Mlzmttg7ugon0-vps5ELvH12EK7V';
+        this.audioVisualizer = new AudioVisualizer(this.canvas, playlistId);
+
         this.currentStroke = null;
 
         this.color = '#ffffff';
@@ -1171,6 +1176,12 @@ class DrawingSystem {
 
     render() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // 1. Draw Audio Visualizer as a background element
+        // Since it's drawn first, subsequent eraser strokes (destination-out) will erase it.
+        if (this.audioVisualizer) {
+            this.audioVisualizer.draw(this.ctx);
+        }
 
         const time = Date.now();
         const pixelSize = 2; // Pixel art grid size

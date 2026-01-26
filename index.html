@@ -67,6 +67,8 @@
     <!-- Background Drawing Canvas -->
     <canvas id="bg-drawing-canvas"></canvas>
 
+
+
     <!-- Drawing Sidebar (Draggable, Hidden by default, shown when HUD is hidden) -->
     <div id="drawing-sidebar" class="drawing-sidebar">
         <div class="sidebar-handle" id="sidebar-handle">
@@ -186,6 +188,24 @@
         </div>
     </div>
 
+    <!-- Cookie Popup -->
+    <div id="cookie-popup" class="cookie-popup hidden">
+        <div class="cookie-content">
+            <div class="cookie-icon">
+                <img src="assets/images/cookie.png" alt="Cookie">
+            </div>
+            <div class="cookie-text">
+                <h3>Cookie Consent</h3>
+                <p>We use cookies to enhance your experience. By accepting, you also enable the audio aesthetic of this
+                    site.</p>
+            </div>
+            <div class="cookie-actions">
+                <button id="accept-cookies">Accept All</button>
+                <button id="decline-cookies">Not Now</button>
+            </div>
+        </div>
+    </div>
+
     <!-- SPA Container -->
     <main id="app" class="main-container">
         <!-- Content will be dynamically loaded here -->
@@ -276,14 +296,25 @@
 
 
 
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <!-- Hidden Video Container (Required for API) -->
+    <div id="youtube-player"
+        style="position: fixed; top: -1000px; left: -1000px; width: 1px; height: 1px; pointer-events: none; opacity: 0;">
+    </div>
+
     <!-- Main Scripts -->
     <script src="js/theme.js"></script>
     <script src="js/balloons.js"></script>
     <script src="js/sketches.js"></script>
     <script src="js/anime_sketch_data.js"></script>
     <script src="js/drawing.js"></script>
+    <script src="js/audioVisualizer.js"></script>
     <script src="js/script.js"></script>
     <script src="js/router.js"></script>
+
+
 </body>
 
 </html>

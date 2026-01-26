@@ -17,6 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (loader) {
                 loader.classList.add('hidden');
             }
+
+            // Note: Visualizer is already initialized inside DrawingSystem
+            // attached to 'bg-drawing-canvas'.
         }, remainingTime);
     }).catch(err => {
         console.error("Data preload failed:", err);
@@ -34,12 +37,96 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 5. Sound Toggle Logic
     const soundToggle = document.getElementById('sound-toggle');
+
+    const triggerVisualizer = () => {
+        const viz = window.drawingSystem?.audioVisualizer;
+        if (!viz) return;
+        const state = viz.toggle();
+        if (soundToggle) {
+            state ? soundToggle.classList.remove('muted') : soundToggle.classList.add('muted');
+        }
+    };
+
     if (soundToggle) {
-        soundToggle.addEventListener('click', () => {
-            soundToggle.classList.toggle('muted');
-            // Sound implementation will be added here in the future
+        soundToggle.addEventListener('click', triggerVisualizer);
+    }
+
+    // "Prime" Audio on first user interaction to bypass browser policies
+    const primeAudio = () => {
+        const viz = window.drawingSystem?.audioVisualizer;
+        if (viz && viz.isInitialized) {
+            console.log("System: Audio primed by user interaction");
+            if (document.documentElement.getAttribute('data-theme') !== 'light') {
+                viz.play();
+            }
+            window.removeEventListener('click', primeAudio);
+            window.removeEventListener('touchstart', primeAudio);
+        }
+    };
+    window.addEventListener('click', primeAudio);
+    window.addEventListener('touchstart', primeAudio);
+
+    // Auto-play/pause based on theme
+    document.addEventListener('themeChanged', (e) => {
+        const isCreative = e.detail.theme !== 'light';
+        const viz = window.drawingSystem?.audioVisualizer;
+        if (!viz) return;
+
+        if (isCreative) {
+            viz.play();
+            if (soundToggle) soundToggle.classList.remove('muted');
+        } else {
+            viz.pause();
+            if (soundToggle) soundToggle.classList.add('muted');
+        }
+    });
+    // 6. Cookie Popup Logic
+    const cookiePopup = document.getElementById('cookie-popup');
+    const acceptCookies = document.getElementById('accept-cookies');
+    const declineCookies = document.getElementById('decline-cookies');
+
+    const showCookiePopup = () => {
+        if (!cookiePopup) return;
+        cookiePopup.classList.remove('hidden');
+        // Small delay to allow CSS transitions to trigger after display change
+        requestAnimationFrame(() => {
+            cookiePopup.classList.add('visible');
+        });
+    };
+
+    const hideCookiePopup = () => {
+        if (!cookiePopup) return;
+        cookiePopup.classList.remove('visible');
+        setTimeout(() => cookiePopup.classList.add('hidden'), 800);
+    };
+
+    if (cookiePopup && !localStorage.getItem('cookies-accepted')) {
+        setTimeout(showCookiePopup, 2000);
+    }
+
+    if (acceptCookies) {
+        acceptCookies.addEventListener('click', () => {
+            localStorage.setItem('cookies-accepted', 'true');
+            hideCookiePopup();
+
+            // Interaction achieved! Prime audio.
+            primeAudio();
         });
     }
+
+    if (declineCookies) {
+        declineCookies.addEventListener('click', () => {
+            hideCookiePopup();
+            // We DON'T set cookies-accepted, so it shows up next time
+        });
+    }
+
+    // Manual test trigger
+    window.testCookieAnimation = () => {
+        console.log("Testing Cookie Animation...");
+        localStorage.removeItem('cookies-accepted');
+        showCookiePopup();
+    };
 
 });
 
