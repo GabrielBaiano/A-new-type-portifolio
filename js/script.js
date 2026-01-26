@@ -35,20 +35,76 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 5. Sound Toggle Logic
+    // 5. Sound Toggle & Volume Balloon Logic
     const soundToggle = document.getElementById('sound-toggle');
+    const volumeBalloon = document.getElementById('volume-balloon');
+    const volumeSlider = document.getElementById('volume-slider');
+    const muteBtn = document.getElementById('mute-btn');
 
-    const triggerVisualizer = () => {
-        const viz = window.drawingSystem?.audioVisualizer;
-        if (!viz) return;
-        const state = viz.toggle();
-        if (soundToggle) {
-            state ? soundToggle.classList.remove('muted') : soundToggle.classList.add('muted');
+    // Toggle Balloon Visibility
+    if (soundToggle && volumeBalloon) {
+        soundToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            volumeBalloon.classList.toggle('hide');
+            // Allow initializing audio context on first click if needed, but don't force play unless desired
+            // primeAudio() call is separate.
+        });
+
+        // Close balloon when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!volumeBalloon.classList.contains('hide') &&
+                !volumeBalloon.contains(e.target) &&
+                !soundToggle.contains(e.target)) {
+                volumeBalloon.classList.add('hide');
+            }
+        });
+    }
+
+    // Volume Slider Control
+    if (volumeSlider) {
+        // Initialize from storage or default
+        const savedVolume = localStorage.getItem('site-volume');
+        const defaultVolume = 0.2; // 20% default as requested
+
+        let initialVolume;
+        if (savedVolume !== null) {
+            initialVolume = parseFloat(savedVolume);
+        } else {
+            initialVolume = defaultVolume;
         }
-    };
 
-    if (soundToggle) {
-        soundToggle.addEventListener('click', triggerVisualizer);
+        volumeSlider.value = initialVolume;
+
+        // Apply immediately if system is ready
+        const viz = window.drawingSystem?.audioVisualizer;
+        if (viz) viz.setVolume(initialVolume);
+
+        volumeSlider.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            localStorage.setItem('site-volume', val); // Persist volume
+            const viz = window.drawingSystem?.audioVisualizer;
+            if (viz) viz.setVolume(val);
+        });
+    }
+
+    // Mute Checkbox Control
+    // Mute Button Control
+    if (muteBtn) {
+        muteBtn.addEventListener('click', (e) => {
+            const viz = window.drawingSystem?.audioVisualizer;
+            const icon = muteBtn.querySelector('i');
+            const isMuted = icon.classList.contains('fa-volume-high');
+
+            if (isMuted) {
+                icon.classList.replace('fa-volume-high', 'fa-volume-xmark');
+                if (viz) viz.setMute(true);
+                if (soundToggle) soundToggle.classList.add('muted');
+            } else {
+                icon.classList.replace('fa-volume-xmark', 'fa-volume-high');
+                if (viz) viz.setMute(false);
+                if (soundToggle) soundToggle.classList.remove('muted');
+            }
+        });
     }
 
     // "Prime" Audio on first user interaction to bypass browser policies
@@ -72,9 +128,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const viz = window.drawingSystem?.audioVisualizer;
         if (!viz) return;
 
+        // Auto-handle mute visual state
+        // We need to keep mute button in sync if theme changes auto-play
+
         if (isCreative) {
             viz.play();
-            if (soundToggle) soundToggle.classList.remove('muted');
+            // Don't unmute if user explicitly muted, but update icon
+
+            const isMuted = muteBtn && muteBtn.querySelector('i').classList.contains('fa-volume-xmark');
+            if (soundToggle) {
+                isMuted ? soundToggle.classList.add('muted') : soundToggle.classList.remove('muted');
+            }
         } else {
             viz.pause();
             if (soundToggle) soundToggle.classList.add('muted');

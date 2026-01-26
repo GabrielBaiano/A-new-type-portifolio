@@ -241,12 +241,24 @@
             </a>
         </div>
 
-        <div class="nav-divider"></div>
-
         <div class="nav-group controls-nav">
-            <button id="sound-toggle" class="nav-item icon-only" title="Ativar/Desativar som">
-                <i class="fa-solid fa-music"></i>
-            </button>
+            <div class="volume-wrapper"
+                style="position: relative; display: flex; align-items: center; justify-content: center;">
+                <!-- Volume Balloon -->
+                <div id="volume-balloon" class="volume-balloon hide">
+                    <div class="volume-controls">
+                        <button id="mute-btn" class="icon-btn" title="Mute/Unmute">
+                            <i class="fa-solid fa-volume-high"></i>
+                        </button>
+                        <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1" title="Volume">
+                    </div>
+                    <div class="bubble-arrow"></div>
+                </div>
+
+                <button id="sound-toggle" class="nav-item icon-only" title="Volume Controls">
+                    <i class="fa-solid fa-music"></i>
+                </button>
+            </div>
             <button id="hud-toggle" class="nav-item icon-only" title="Toggle HUD visibility">
                 <i class="fa-solid fa-paintbrush"></i>
             </button>

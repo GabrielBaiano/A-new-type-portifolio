@@ -60,6 +60,18 @@ class AudioVisualizer {
         });
     }
 
+    setVolume(value) {
+        if (this.audioElement) {
+            this.audioElement.volume = Math.max(0, Math.min(1, value));
+        }
+    }
+
+    setMute(isMuted) {
+        if (this.audioElement) {
+            this.audioElement.muted = isMuted;
+        }
+    }
+
     setupAudioContext() {
         if (this.audioContext) return;
 
