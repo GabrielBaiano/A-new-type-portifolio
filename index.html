@@ -64,108 +64,8 @@
 </head>
 
 <body>
-    <!-- Background Drawing Canvas -->
-    <canvas id="bg-drawing-canvas"></canvas>
-
-    <!-- Drawing Sidebar (Draggable, Hidden by default, shown when HUD is hidden) -->
-    <div id="drawing-sidebar" class="drawing-sidebar">
-        <div class="sidebar-handle" id="sidebar-handle">
-            <div class="handle-dots"></div>
-        </div>
-
-        <div class="sidebar-content">
-            <div class="tool-section">
-                <span class="section-label">Tools</span>
-                <div class="tool-grid">
-                    <button id="tool-pencil" class="active" title="Brush Tool"><i
-                            class="fa-solid fa-pen-clip"></i></button>
-                    <button id="tool-spray" title="Spray Tool"><i class="fa-solid fa-spray-can"></i></button>
-                    <button id="tool-eraser" title="Eraser Tool"><i class="fa-solid fa-eraser"></i></button>
-                    <button id="tool-bucket" title="Bucket Tool (Recolor)"><i
-                            class="fa-solid fa-fill-drip"></i></button>
-                    <button id="tool-rect" title="Rectangle Tool"><i class="fa-regular fa-square"></i></button>
-                    <button id="tool-circle" title="Circle Tool"><i class="fa-regular fa-circle"></i></button>
-                    <button id="tool-eyedropper" title="Eyedropper Tool"><i
-                            class="fa-solid fa-eye-dropper"></i></button>
-                </div>
-            </div>
-
-            <div class="sidebar-divider"></div>
-
-            <div class="tool-section">
-                <span class="section-label">Colors</span>
-                <div class="color-palette-grid">
-                    <div class="color-swatch swatch-blue" data-color="#3b82f6" title="Feed Blue"></div>
-                    <div class="color-swatch swatch-green" data-color="#22c55e" title="Green"></div>
-                    <div class="color-swatch swatch-orange" data-color="#f97316" title="Orange"></div>
-                    <div class="color-swatch swatch-pink" data-color="#ec4899" title="Pink"></div>
-                    <div class="color-swatch swatch-yellow" data-color="#eab308" title="Yellow"></div>
-                    <div class="color-swatch swatch-purple" data-color="#a855f7" title="Purple"></div>
-                    <div class="color-swatch swatch-grey" data-color="#333333" title="Grey"></div>
-                    <div class="color-custom-btn" id="custom-color-trigger" title="Custom Color">
-                        <i class="fa-solid fa-palette"></i>
-                        <input type="color" id="draw-color" value="#ffffff">
-                    </div>
-                </div>
-            </div>
-
-            <div class="sidebar-divider"></div>
-
-            <div class="tool-section">
-                <div class="options-grid">
-                    <button id="draw-undo" title="Undo (Desfazer)" class="undo-btn">
-                        <i class="fa-solid fa-rotate-left"></i>
-                    </button>
-                    <button id="draw-clear" title="Clear Canvas" class="clear-btn">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pop-out Tool Options Panel -->
-        <div id="tool-options-panel" class="tool-options-panel">
-            <div class="options-header">
-                <span id="active-tool-name">Pencil</span>
-            </div>
-            <div class="options-content">
-                <div class="option-group" id="brush-type-option">
-                    <label>Brush Type</label>
-                    <div class="options-grid" style="padding: 0;">
-                        <button id="brush-standard" class="active" title="Standard Pen">
-                            <i class="fa-solid fa-pen-clip"></i>
-                        </button>
-                        <button id="brush-fountain" title="Fountain Pen (Calligraphy)">
-                            <i class="fa-solid fa-pen-fancy"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="option-group" id="tip-shape-option">
-                    <label>Tip Shape</label>
-                    <div class="options-grid" style="padding: 0;">
-                        <button id="tip-square" class="active" title="Square Tip">
-                            <i class="fa-solid fa-square"></i>
-                        </button>
-                        <button id="tip-round" title="Round Tip">
-                            <i class="fa-solid fa-circle"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="option-group">
-                    <label>Size</label>
-                    <div class="range-with-val">
-                        <input type="range" id="draw-size" min="1" max="100" value="4">
-                        <span id="size-val">4</span>
-                    </div>
-                </div>
-                <div class="option-group" id="wiggle-option">
-                    <label>Wiggle</label>
-                    <button id="draw-wiggle-toggle" class="active"><i class="fa-solid fa-wave-square"></i></button>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    <!-- Background Drawing Canvas REMOVED -->
+    <!-- Drawing Sidebar REMOVED -->
     <!-- Premium Site Loader -->
     <div id="site-loader" class="site-loader">
         <div class="loader-content">
@@ -224,9 +124,7 @@
         <div class="nav-divider"></div>
 
         <div class="nav-group controls-nav">
-            <button id="hud-toggle" class="nav-item icon-only" title="Toggle HUD visibility">
-                <i class="fa-solid fa-paintbrush"></i>
-            </button>
+            <!-- HUD Toggle REMOVED -->
             <button id="theme-toggle" class="nav-item icon-only">
                 <i class="fa-regular fa-sun"></i>
             </button>
@@ -269,7 +167,7 @@
     <script src="js/balloons.js"></script>
     <script src="js/sketches.js"></script>
     <script src="js/anime_sketch_data.js"></script>
-    <script src="js/drawing.js"></script>
+    <!-- Drawing Script REMOVED -->
     <script src="js/script.js"></script>
     <script src="js/router.js"></script>
 </body>

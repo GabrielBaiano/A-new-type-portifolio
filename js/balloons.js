@@ -8,7 +8,7 @@ class BalloonSystem {
     constructor() {
         this.container = null;
         this.isRunning = false;
-        
+
         // Tracks balloons currently on screen
         // Map of balloon element -> { data, side, x, y, rect }
         this.activeBalloons = new Map();
@@ -16,7 +16,7 @@ class BalloonSystem {
 
         // Page context for filtering
         this.currentContext = 'home';
-        
+
         // Replenishment timer
         this.replenishmentTimer = null;
 
@@ -70,7 +70,7 @@ class BalloonSystem {
             if (document.visibilityState === "visible") {
                 // Force restart loop if it was running before
                 if (this.isRunning) {
-                   this.startReplenishment(); // Restart loop (slow)
+                    this.startReplenishment(); // Restart loop (slow)
                 } else {
                     this.start();
                 }
@@ -81,7 +81,7 @@ class BalloonSystem {
     }
 
     hasEnoughSpace() {
-        if (window.innerWidth <= 1200) return false;
+        // Just check if we can select main container to calculate margins
         const mainContainer = document.querySelector('.main-container');
         if (!mainContainer) return true;
         const margin = (window.innerWidth - mainContainer.offsetWidth) / 2;
@@ -89,8 +89,17 @@ class BalloonSystem {
     }
 
     async start() {
-        return; // Temporarily disabled
-        if (this.isRunning || !this.hasEnoughSpace()) return;
+        console.log("BalloonSystem: Attempting to start...");
+        if (this.isRunning) {
+            console.log("BalloonSystem: Already running.");
+            return;
+        }
+        if (!this.hasEnoughSpace()) {
+            console.log("BalloonSystem: Not enough space.");
+            return;
+        }
+
+        console.log("BalloonSystem: Starting!");
         this.isRunning = true;
         await this.initialFill();
         this.startReplenishment();
@@ -103,9 +112,8 @@ class BalloonSystem {
     }
 
     async initialFill() {
-        return; // Temporarily disabled
         this.clearBalloons();
-        
+
         // 1. Get all available data
         const dataSet = await this.getAvailableData();
         if (!dataSet || dataSet.length === 0) return;
@@ -158,7 +166,7 @@ class BalloonSystem {
     startReplenishment() {
         this.stopReplenishment();
         // 2 to 10 minutes (Extreme delay)
-        const nextTime = 120000 + Math.random() * 480000; 
+        const nextTime = 120000 + Math.random() * 480000;
         this.replenishmentTimer = setTimeout(async () => {
             await this.replenish();
             this.startReplenishment();
@@ -174,7 +182,7 @@ class BalloonSystem {
 
     async replenish() {
         if (!this.isRunning || !this.hasEnoughSpace()) return;
-        
+
         const dataSet = await this.getAvailableData();
         const unused = dataSet.filter(item => {
             if (item.id === 'ad-yellowhood-standard' || item.id === 'newsletter-orange') return false;
@@ -210,7 +218,7 @@ class BalloonSystem {
             // Update x limits but keep y
             const side = context.side;
             const currentX = context.x;
-            
+
             // Re-clamp X in case margin changed
             const newX = Math.min(xMax, Math.max(xMin, currentX));
             context.x = newX;
@@ -242,7 +250,7 @@ class BalloonSystem {
         const side = Math.random() < 0.5 ? 'left' : 'right';
         const mainContainer = document.querySelector('.main-container');
         const margin = mainContainer ? (window.innerWidth - mainContainer.offsetWidth) / 2 : 500;
-        
+
         const balloonWidth = 418;
         const xMin = 20;
         const xMax = margin - balloonWidth - 40;
@@ -262,10 +270,10 @@ class BalloonSystem {
             const xMaxFull = window.innerWidth - balloonWidth - 20;
             const yMinFull = 50;
             const yMaxFull = window.innerHeight - height - 20;
-            
+
             const x = xMinFull + Math.random() * (xMaxFull - xMinFull);
             const y = yMinFull + Math.random() * (yMaxFull - yMinFull);
-            
+
             const rect = { x, y, w: balloonWidth, h: height };
             const side = x < window.innerWidth / 2 ? 'left' : 'right';
             this.spawnBalloon(data, side, x, y, rect);
@@ -276,7 +284,7 @@ class BalloonSystem {
         for (let i = 0; i < maxAttempts; i++) {
             const x = xMin + Math.random() * (xMax - xMin);
             const y = yMin + Math.random() * (yMax - yMin);
-            
+
             // Allow slight overlapping (negative margin) for initial density if needed
             // But let's stick to strict first.
             const rect = {
@@ -291,19 +299,19 @@ class BalloonSystem {
                 return true;
             }
         }
-        
+
         // Final fallback: Try to force it in a known clear zone if it's the first few
         if (this.activeBalloons.size < 3) {
-             // Force placement at random Y with side check? 
-             // Let's just return false to avoid overlapping mess, but 50 attempts should be enough.
+            // Force placement at random Y with side check? 
+            // Let's just return false to avoid overlapping mess, but 50 attempts should be enough.
         }
-        
+
         return false;
     }
 
     checkCollision(rect) {
         // Reduced collision padding for denser packing
-        const padding = 10; 
+        const padding = 10;
         for (const other of this.placedRects) {
             if (rect.x < other.x + other.w + padding &&
                 rect.x + rect.w > other.x - padding &&
@@ -319,7 +327,7 @@ class BalloonSystem {
         const balloon = document.createElement("div");
         balloon.className = "floating-balloon";
         balloon.innerHTML = this.buildBalloonHTML(data);
-        
+
         const rotation = (Math.random() - 0.5) * 6;
         const delay = Math.random() * 0.8;
 
@@ -341,11 +349,21 @@ class BalloonSystem {
             if (balloon.parentElement) balloon.classList.add('is-ready');
         }, (delay + 0.8) * 1000);
 
-        // Close button logic
+        // Close button logic (Only for newsletters now)
         const closeBtn = balloon.querySelector('.balloon-close-btn');
         if (closeBtn) {
             closeBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
+                balloon.classList.add(side === 'left' ? 'balloon-exit-left' : 'balloon-exit-right');
+                this.activeBalloons.delete(balloon);
+                setTimeout(() => balloon.remove(), 800);
+            });
+        }
+
+        // Standard Balloons: Click anywhere to dismiss
+        if (data.type !== 'newsletter') {
+            balloon.style.cursor = 'pointer'; // Indicate interactivity
+            balloon.addEventListener('click', () => {
                 balloon.classList.add(side === 'left' ? 'balloon-exit-left' : 'balloon-exit-right');
                 this.activeBalloons.delete(balloon);
                 setTimeout(() => balloon.remove(), 800);
@@ -357,7 +375,7 @@ class BalloonSystem {
             const btn = balloon.querySelector('.balloon-subscribe-btn');
             const input = balloon.querySelector('input');
             const form = balloon.querySelector('.newsletter-form');
-            
+
             if (btn && input && form) {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation(); // Prevent propagation
@@ -375,7 +393,7 @@ class BalloonSystem {
                             Welcome to the loop! check your inbox.
                         </div>
                     `;
-                    
+
                 });
             }
         }
@@ -386,20 +404,20 @@ class BalloonSystem {
     buildBalloonHTML(data) {
         const colors = ['blue', 'green', 'yellow', 'orange', 'pink', 'purple'];
         const color = data.color || colors[Math.floor(Math.random() * colors.length)];
-        
+
         // Parse markdown if marked is available
-        const formattedMessage = (typeof marked !== 'undefined' && data.message) 
-            ? marked.parse(data.message) 
+        const formattedMessage = (typeof marked !== 'undefined' && data.message)
+            ? marked.parse(data.message)
             : data.message;
 
         // Determine visibility and labels based on color/type
         const isRelease = color === 'green';
         const isLeetCode = color === 'pink';
-        const showAvatar = !isRelease && !isLeetCode && data.image; 
+        const showAvatar = !isRelease && !isLeetCode && data.image;
 
         return `
             <div class="balloon-card organic-balloon balloon-bg-${color} ${isRelease ? 'balloon-type-release' : ''} ${isLeetCode ? 'balloon-type-leetcode' : ''} ${data.type === 'newsletter' ? 'balloon-type-newsletter' : ''}">
-                <button class="balloon-close-btn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+                ${data.type === 'newsletter' ? '<button class="balloon-close-btn" title="Close"><i class="fa-solid fa-xmark"></i></button>' : ''}
                 <div class="balloon-inner">
                     <div class="balloon-header">
                         ${showAvatar ? `<img src="${data.image}" class="balloon-avatar" alt="">` : ''}
@@ -418,8 +436,8 @@ class BalloonSystem {
 
                     ${data.link && data.type !== 'newsletter' ? `
                          <a href="${data.link}" ${isLeetCode ? '' : 'target="_blank"'} class="balloon-link">
-                            ${isRelease ? 'VIEW PATCH NOTES →' : 
-                               (isLeetCode ? 'VIEW RESOLUTION →' : (data.linkText || 'LEARN MORE →'))}
+                            ${isRelease ? 'VIEW PATCH NOTES →' :
+                    (isLeetCode ? 'VIEW RESOLUTION →' : (data.linkText || 'LEARN MORE →'))}
                          </a>
                     ` : ''}
                 </div>
@@ -433,10 +451,10 @@ class BalloonSystem {
             const result = await response.json();
             const ad = this.getAd();
             const newsletter = this.getNewsletter();
-            
+
             if (result.success && result.data) {
                 // Filter to show green releases and pink leetcode challenges
-                let dynamicBalloons = result.data.filter(item => 
+                let dynamicBalloons = result.data.filter(item =>
                     item.color === 'green' || item.color === 'pink'
                 );
 
@@ -452,12 +470,12 @@ class BalloonSystem {
                     return true;
                 });
 
-                return [ad, newsletter, ...dynamicBalloons];
+                return [ad, ...dynamicBalloons];
             }
         } catch (error) {
             console.error('🎈 Balloon System Error:', error);
         }
-        return [this.getAd(), this.getNewsletter(), ...this.getFallbackData()];
+        return [this.getAd(), ...this.getFallbackData()];
     }
 
     getNewsletter() {
@@ -507,7 +525,7 @@ class BalloonSystem {
         else if (hash === '#/academic') this.currentContext = 'academic';
         else if (hash === '#/home' || hash === '#/tools') this.currentContext = 'home';
         else this.currentContext = 'home';
-        
+
         // Instead of refreshing everything, we just reposition existing ones
         // Balloons that aren't in context in the future could be removed gradually
         this.repositionBalloons();

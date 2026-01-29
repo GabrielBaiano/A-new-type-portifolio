@@ -23,17 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (loader) loader.classList.add('hidden');
     });
 
-    // 4. HUD Toggle Logic
-    const hudToggle = document.getElementById('hud-toggle');
-    if (hudToggle) {
-        hudToggle.addEventListener('click', () => {
-            document.body.classList.toggle('hud-hidden');
-            hudToggle.classList.toggle('active');
-            
-            // Icon is now managed dynamically by drawingSystem to match selected tool theme
-        });
-    }
-
+    // 4. HUD Toggle Logic REMOVED
+    // (Drawing system removed)
 });
 
 /**
@@ -59,22 +50,22 @@ function initializeSPA() {
         pageManager.loadPage('home');
         updateNavigation('home');
     });
-    
+
     router.register('projects', () => {
         pageManager.loadPage('projects');
         updateNavigation('projects');
     });
-    
+
     router.register('feed', () => {
         pageManager.loadPage('feed');
         updateNavigation('feed');
     });
-    
+
     router.register('academic', () => {
         pageManager.loadPage('academic');
         updateNavigation('academic');
     });
-    
+
     router.register('photos', () => {
         pageManager.loadPage('photos');
         updateNavigation('photos');
@@ -138,7 +129,7 @@ function initializeSPA() {
  */
 function initializeNavigation() {
     const navItems = document.querySelectorAll('.nav-item:not(.icon-only)');
-    
+
     // Event listeners para navegação
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
@@ -158,7 +149,7 @@ function initializeNavigation() {
  */
 function updateNavigation(activeRoute) {
     const navItems = document.querySelectorAll('.nav-item:not(.icon-only)');
-    
+
     navItems.forEach(item => {
         const route = item.getAttribute('data-route');
         if (route === activeRoute) {
