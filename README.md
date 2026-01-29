@@ -1,6 +1,24 @@
 # 🛠️ Portfolio Dashboard & Admin Panel
 
 <!-- START_PORTFOLIO -->
+## 🚀 Latest Updates
+
+<div align="center">
+  <a href="#" title="electric girl - sketch"><img src="https://vdegtlphahkkduoymzlr.supabase.co/storage/v1/object/public/images/1769174629271-752ca38fe5ddab465f298812ff19e256.jpg" width="180" height="180" style="object-fit: cover; border-radius: 12px; margin: 5px;" /></a>
+  <a href="#" title="null"><img src="https://vdegtlphahkkduoymzlr.supabase.co/storage/v1/object/public/images/1768723697732-a595e3cd48e38fd8c87edbd2214440e0.jpg" width="180" height="180" style="object-fit: cover; border-radius: 12px; margin: 5px;" /></a>
+  <a href="#" title="null"><img src="https://vdegtlphahkkduoymzlr.supabase.co/storage/v1/object/public/images/1768506382214-yellowhoodSprite_test2.png" width="180" height="180" style="object-fit: cover; border-radius: 12px; margin: 5px;" /></a>
+</div>
+
+### 📝 Recent Thoughts
+- [From St. Augustine to Personal Blogging: How I Found My Own Catharsis](https://a-new-type-portifolio.vercel.app/feed?id=from-st-augustine-to-personal-blogging-how-i-found-my-own-catharsis-3492) - *18/01/2026*
+- [# Super Busy with Project 2026](https://a-new-type-portifolio.vercel.app/feed?id=-super-busy-with-project-2026-8426) - *10/01/2026*
+- [From Block to Art: Why Creativity Is the Technical Skill You Are Ignoring](https://a-new-type-portifolio.vercel.app/feed?id=from-block-to-art-why-creativity-is-the-technical-skill-you-are-ignoring-1574) - *03/01/2026*
+
+### 📚 Currently Reading
+- **Documenting Software Architectures: Views and Beyond**
+- **The Family**
+
+See more at [My Portfolio](https://a-new-type-portifolio.vercel.app)
 <!-- END_PORTFOLIO -->
 
 Quick access guide for managing the portfolio automations and external services.
