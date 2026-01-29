@@ -1,5 +1,8 @@
 # 🛠️ Portfolio Dashboard & Admin Panel
 
+<!-- START_PORTFOLIO -->
+<!-- END_PORTFOLIO -->
+
 Quick access guide for managing the portfolio automations and external services.
 
 ---
