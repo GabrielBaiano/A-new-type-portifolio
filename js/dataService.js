@@ -106,7 +106,7 @@ const DataService = {
                 // Try fetching from API (Supabase)
                 const response = await fetch('/api/photos');
                 const result = await response.json();
-                
+
                 if (result.success) {
                     console.log('📸 Photos loaded:', result.data.length);
                     this.photosData = result.data.map(p => ({
@@ -123,7 +123,7 @@ const DataService = {
                 }
             } catch (error) {
                 console.error('⚠️ API Error (Photos):', error);
-                
+
                 // Fallback to local JSON if it exists and has content
                 try {
                     const fallback = await fetch('data/photos.json').then(r => r.json());
@@ -152,7 +152,7 @@ const DataService = {
                 this.loadNotesData(),
                 this.loadReviewsData(),
                 // Pre-warm the unified feed cache by triggering a load if needed
-                this.getUnifiedFeed(true) 
+                this.getUnifiedFeed(true)
             ]);
             console.log('✅ All data preloaded successfully');
         } catch (error) {
@@ -181,17 +181,17 @@ const DataService = {
     async getProjectById(id) {
         const data = await this.loadProjectsData();
         const project = data.topProjects.find(p => p.id === id);
-        
+
         if (project) {
             // If project has github_repo, fetch README from API
             if (project.github_repo) {
                 try {
                     const response = await fetch(`/api/projects?repo=${project.github_repo}`);
                     const result = await response.json();
-                    
+
                     if (result.success && result.readme) {
-                        return { 
-                            ...project, 
+                        return {
+                            ...project,
                             content: result.readme,
                             source: 'github'
                         };
@@ -201,14 +201,14 @@ const DataService = {
                     // Fall through to use contentFile as fallback
                 }
             }
-            
+
             // Fallback: Load markdown content from static file
             if (project.contentFile) {
                 const response = await fetch(project.contentFile);
                 const content = await response.text();
                 return { ...project, content, source: 'file' };
             }
-            
+
             return project;
         } else {
             throw new Error('Project not found');
@@ -223,7 +223,7 @@ const DataService = {
     async getProjectRepoSlug(id) {
         const data = await this.loadProjectsData();
         const project = data.topProjects.find(p => p.id === id);
-        
+
         if (project && project.github_repo) {
             // Extract slug from "User/Repo" format
             return project.github_repo.split('/').pop();
@@ -247,7 +247,7 @@ const DataService = {
      */
     async getToolById(id) {
         const data = await this.loadToolsData();
-        
+
         // Search through all categories
         for (const category of data.categories) {
             const tool = category.tools.find(t => t.id === id);
@@ -259,7 +259,7 @@ const DataService = {
                 };
             }
         }
-        
+
         throw new Error('Tool not found');
 
         // Future backend integration:
@@ -283,7 +283,7 @@ const DataService = {
     async getBlogPostById(id) {
         const data = await this.loadAcademicData();
         const post = data.publications.find(p => p.id === id);
-        
+
         if (post) {
             // Load markdown content from file
             if (post.contentFile) {
@@ -309,7 +309,7 @@ const DataService = {
         // Get all items to search the correct one
         const allItems = await this.getUnifiedFeed();
         const item = allItems.find(i => i.id === id);
-        
+
         if (item) {
             // Generate content for items that don't have it (static, api)
             if (!item.content) {
@@ -322,7 +322,7 @@ const DataService = {
             }
             return item;
         }
-        
+
         throw new Error('Feed item not found');
     },
 
@@ -338,7 +338,7 @@ const DataService = {
         const academicData = await this.loadAcademicData();
         const toolsData = await this.loadToolsData();
         const type = toolsData.articleTypes.find(t => t.id === typeId);
-        
+
         // Filter academic publications
         let items = [];
         if (typeId === 'articles') {
@@ -394,8 +394,8 @@ const DataService = {
             date: review.date || '2024-01-01',
             tag: 'Book Review',
             title: review.title,
-            description: review.status === 'Reading' 
-                ? `Starting reading this book: ${review.title}` 
+            description: review.status === 'Reading'
+                ? `Starting reading this book: ${review.title}`
                 : (review.content ? review.content.substring(0, 150).replace(/[#*]/g, '') + '...' : `Finished and reviewed: ${review.title}`),
             content: review.content || null,
             link: review.id ? `#/review-view/${review.id}` : (review.link || '#'),
@@ -419,7 +419,7 @@ const DataService = {
                     _source: 'api'
                 };
             } else if (item.type === 'notification' || item.type === 'release') {
-                 return {
+                return {
                     id: item.id,
                     type: 'projects-labs',
                     date: item.date || item.created_at,
@@ -428,7 +428,7 @@ const DataService = {
                     description: item.message,
                     link: item.link,
                     image: null,
-                     _source: 'api'
+                    _source: 'api'
                 };
             }
             return null;
@@ -443,6 +443,7 @@ const DataService = {
             title: post.title,
             description: post.content ? post.content.substring(0, 150).replace(/[#*]/g, '') + '...' : '',
             content: post.content,
+            image: post.image || null,
             show_in_feed: post.show_in_feed,
             is_popular: post.is_popular,
             show_toc: post.show_toc,

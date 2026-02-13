@@ -67,11 +67,11 @@ const FeedPage = {
             <div class="feed-item feed-item-btn" data-id="${item.id}">
                 <div class="feed-item-header">
                     <span class="feed-date">${(() => {
-                        try {
-                            const d = new Date(item.date);
-                            return isNaN(d) ? item.date : d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
-                        } catch (e) { return item.date; }
-                    })()}</span>
+                    try {
+                        const d = new Date(item.date);
+                        return isNaN(d) ? item.date : d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+                    } catch (e) { return item.date; }
+                })()}</span>
                     <span class="feed-tag ${tagClass}" data-tag="${item.tag}">${item.tag}</span>
                 </div>
                 
@@ -80,8 +80,8 @@ const FeedPage = {
                 </div>
 
                 ${item.image ? `
-                    <div class="feed-item-image ${item.type === 'full-reviews' ? 'book-feed-container' : ''} ${item.type === 'feed-photo' ? 'feed-photo-container' : ''}">
-                        <img src="${item.image}" alt="${item.title}" class="${item.type === 'full-reviews' ? 'book-feed-img' : ''} ${item.type === 'feed-photo' ? 'feed-photo-img' : ''}">
+                    <div class="feed-item-image ${item.type === 'full-reviews' ? 'book-feed-container' : ''} ${item.type === 'feed-photo' ? 'feed-photo-container' : ''} ${item.type === 'feed-post' || item.type === 'deep-tutorials' ? 'article-feed-container' : ''}">
+                        <img src="${item.image}" alt="${item.title}" class="${item.type === 'full-reviews' ? 'book-feed-img' : ''} ${item.type === 'feed-photo' ? 'feed-photo-img' : ''} ${item.type === 'feed-post' || item.type === 'deep-tutorials' ? 'article-feed-img' : ''}">
                     </div>
                 ` : ''}
                 
@@ -149,7 +149,7 @@ const FeedPage = {
             </aside>
         </div>
     `;
-},
+    },
 
     onMount() {
         console.log('Tools page mounted');
@@ -177,10 +177,10 @@ const FeedPage = {
 
         // Feed Filter Logic
         const updateFeed = (filter, activeElement) => {
-            const filtered = filter 
+            const filtered = filter
                 ? allItems.filter(item => (item.tag || '').toLowerCase() === filter.toLowerCase())
                 : allItems;
-            
+
             feedContainer.innerHTML = this.renderFeedItems(filtered);
             clearBtn.style.display = filter ? 'block' : 'none';
 
@@ -200,7 +200,7 @@ const FeedPage = {
                     const id = item.getAttribute('data-id');
                     const itemData = allItems.find(i => i.id === id);
                     if (!id || !itemData) return;
-                    
+
                     if (id.startsWith('leetcode-')) {
                         router.navigate(`leetcode/${id.replace('leetcode-', '')}`);
                     } else if (itemData.type === 'full-reviews') {

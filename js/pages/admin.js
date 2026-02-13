@@ -13,6 +13,9 @@ const AdminPage = {
     allBalloons: [],
     editingItem: null,
     isUploading: false,
+    isEditingPost: false,
+    isPreviewMode: false,
+    autoSaveInterval: null,
 
     async render() {
         if (this.isVerifying) {
@@ -111,7 +114,7 @@ const AdminPage = {
             case 'balloons':
                 return this.renderBalloonsModule();
             case 'posts':
-                return this.renderFeedModule();
+                return this.isEditingPost ? this.renderPostEditor() : this.renderFeedModule();
             case 'guides':
                 return this.renderGuidesModule();
             case 'leetcode':
@@ -303,66 +306,110 @@ const AdminPage = {
                     <button class="btn-action" id="btn-new-post">+ New Post</button>
                 </div>
             </div>
-            <div class="admin-three-panel">
-                <div class="panel-inventory">
-                    <h3>History</h3>
-                    <div class="inventory-list" id="posts-inventory">
-                        ${this.allPosts.length > 0 ? this.allPosts.map(p => `
-                            <div class="inventory-item ${this.editingItem?.id === p.id ? 'active' : ''}" data-id="${p.id}">
-                                <div class="item-info">
-                                    <span class="item-title">${p.title}</span>
-                                    <span class="item-meta">${p.tag} • ${new Date(p.date).toLocaleDateString()}</span>
+            
+            <div class="admin-inventory-full">
+                <div class="inventory-list-header">
+                    <span>Title</span>
+                    <span>Tag</span>
+                    <span>Date</span>
+                    <span>Status</span>
+                </div>
+                <div class="inventory-list" id="posts-inventory-full">
+                    ${this.allPosts.length > 0 ? this.allPosts.map(p => `
+                        <div class="inventory-item-row" data-id="${p.id}">
+                            <span class="item-title">${p.title}</span>
+                            <span class="item-tag">${p.tag}</span>
+                            <span class="item-date">${new Date(p.date).toLocaleDateString()}</span>
+                            <span class="item-visibility">${p.show_in_feed !== false ? 'Public' : 'Hidden'}</span>
+                        </div>
+                    `).join('') : '<p style="padding: 20px; color: grey; text-align: center;">No posts yet. Start by creating your first article!</p>'}
+                </div>
+            </div>
+        `;
+    },
+
+    renderPostEditor() {
+        const post = this.editingItem || { title: '', content: '', tag: 'Thoughts', image: '', show_in_feed: true, is_popular: false, show_toc: false };
+
+        return `
+            <div class="admin-editor-shell">
+                <header class="editor-header">
+                    <button class="btn-back" id="btn-editor-back"><i class="fa-solid fa-arrow-left"></i> Back to List</button>
+                    <div class="editor-title-container">
+                        <h2>${this.editingItem ? 'Edit Article' : 'New Article'}</h2>
+                        <span id="autosave-status" class="autosave-status">Draft saved locally</span>
+                    </div>
+                    <div class="editor-header-actions">
+                        <button class="btn-preview-toggle ${this.isPreviewMode ? 'active' : ''}" id="btn-preview-toggle">
+                            <i class="fa-solid ${this.isPreviewMode ? 'fa-pen' : 'fa-eye'}"></i> ${this.isPreviewMode ? 'Edit' : 'Preview'}
+                        </button>
+                        <button class="btn-save-final" id="btn-publish-post">Publish</button>
+                        ${this.editingItem?.id ? `<button class="btn-delete-editor" id="btn-delete-post-editor"><i class="fa-solid fa-trash"></i></button>` : ''}
+                    </div>
+                </header>
+
+                <div class="editor-container ${this.isPreviewMode ? 'preview-active' : ''}">
+                    <!-- Main Form / Editor -->
+                    <div class="editor-main">
+                        <div class="editor-form-grid">
+                            <div class="form-group full-width">
+                                <label>Article Title</label>
+                                <input type="text" id="post-title" class="input-title-large" value="${post.title}" placeholder="Enter an engaging title..." required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Category / Tag</label>
+                                <select id="post-tag">
+                                    <option value="Thoughts" ${post.tag === 'Thoughts' ? 'selected' : ''}>Thoughts</option>
+                                    <option value="Updates" ${post.tag === 'Updates' ? 'selected' : ''}>Updates</option>
+                                    <option value="Guides" ${post.tag === 'Guides' ? 'selected' : ''}>Guides</option>
+                                    <option value="Study Notes" ${post.tag === 'Study Notes' ? 'selected' : ''}>Study Notes</option>
+                                    <option value="LeetCode" ${post.tag === 'LeetCode' ? 'selected' : ''}>LeetCode</option>
+                                    <option value="Book Review" ${post.tag === 'Book Review' ? 'selected' : ''}>Book Review</option>
+                                    <option value="Release" ${post.tag === 'Release' ? 'selected' : ''}>Release</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Cover Image URL</label>
+                                <div class="upload-row">
+                                    <input type="url" id="post-image" value="${post.image || ''}" placeholder="https://unsplash.com/...">
+                                    <label for="post-image-upload" class="btn-upload-label" title="Upload Cover">
+                                        <i class="fa-solid ${this.isUploading ? 'fa-spinner fa-spin' : 'fa-cloud-arrow-up'}"></i>
+                                        <input type="file" id="post-image-upload" accept="image/*" style="display: none;">
+                                    </label>
                                 </div>
                             </div>
-                        `).join('') : '<p style="padding: 10px; color: grey;">No posts yet.</p>'}
+                        </div>
+
+                        <div class="editor-textarea-wrapper">
+                            <label>Content (Markdown)</label>
+                            <textarea id="post-content" class="editor-textarea" placeholder="Start writing your masterpiece here... Support for bold, lists, code blocks, etc.">${post.content || ''}</textarea>
+                        </div>
+
+                        <div class="editor-settings-row">
+                            <div class="form-group checkbox-group">
+                                <input type="checkbox" id="post-show-in-feed" ${post.show_in_feed !== false ? 'checked' : ''}>
+                                <label for="post-show-in-feed">Public Feed</label>
+                            </div>
+                            <div class="form-group checkbox-group">
+                                <input type="checkbox" id="post-is-popular" ${post.is_popular === true ? 'checked' : ''}>
+                                <label for="post-is-popular">Popular Content</label>
+                            </div>
+                            <div class="form-group checkbox-group">
+                                <input type="checkbox" id="post-show-toc" ${post.show_toc === true ? 'checked' : ''}>
+                                <label for="post-show-toc">Show TOC</label>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="panel-editor">
-                    <h3>Editor</h3>
-                    <form id="post-form" class="admin-form">
-                        <input type="hidden" id="post-id" value="${this.editingItem?.id || ''}">
-                        <div class="form-group">
-                            <label>Title</label>
-                            <input type="text" id="post-title" value="${this.editingItem?.title || ''}" placeholder="What's on your mind?" required>
+
+                    <!-- Live Preview Panel -->
+                    <div class="editor-preview">
+                        <div class="preview-content-scroller">
+                            <div id="post-preview-container">
+                                ${this.renderPostPreview(post)}
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Content (Markdown Support)</label>
-                            <textarea id="post-content" style="height: 300px; font-family: monospace;" placeholder="Write your thoughts..." required>${this.editingItem?.content || ''}</textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Category / Tag</label>
-                            <select id="post-tag">
-                                <option value="Thoughts" ${this.editingItem?.tag === 'Thoughts' ? 'selected' : ''}>Thoughts</option>
-                                <option value="Updates" ${this.editingItem?.tag === 'Updates' ? 'selected' : ''}>Updates</option>
-                                <option value="Guides" ${this.editingItem?.tag === 'Guides' ? 'selected' : ''}>Guides</option>
-                                <option value="Study Notes" ${this.editingItem?.tag === 'Study Notes' ? 'selected' : ''}>Study Notes</option>
-                                <option value="LeetCode" ${this.editingItem?.tag === 'LeetCode' ? 'selected' : ''}>LeetCode</option>
-                                <option value="Book Review" ${this.editingItem?.tag === 'Book Review' ? 'selected' : ''}>Book Review</option>
-                                <option value="Release" ${this.editingItem?.tag === 'Release' ? 'selected' : ''}>Release</option>
-                            </select>
-                        </div>
-                        <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                            <input type="checkbox" id="post-show-in-feed" ${this.editingItem?.show_in_feed !== false ? 'checked' : ''} style="width: auto;">
-                            <label for="post-show-in-feed" style="margin-bottom: 0;">Show in Public Feed</label>
-                        </div>
-                        <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                            <input type="checkbox" id="post-is-popular" ${this.editingItem?.is_popular === true ? 'checked' : ''} style="width: auto;">
-                            <label for="post-is-popular" style="margin-bottom: 0;">Mark as Popular Content (Sidebar)</label>
-                        </div>
-                        <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
-                            <input type="checkbox" id="post-show-toc" ${this.editingItem?.show_toc === true ? 'checked' : ''} style="width: auto;">
-                            <label for="post-show-toc" style="margin-bottom: 0;">Show Table of Contents (TOC)</label>
-                        </div>
-                        <div style="display: flex; gap: 10px; margin-top: 20px;">
-                            <button type="submit" class="btn-save" style="flex: 1;">Publish to Feed</button>
-                            ${this.editingItem?.id ? `<button type="button" class="btn-delete" id="btn-delete-post" style="background: var(--accent-red); color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer;">Delete</button>` : ''}
-                        </div>
-                    </form>
-                </div>
-                <div class="panel-preview">
-                    <h3>Preview</h3>
-                    <div id="post-preview-container">
-                        ${this.renderPostPreview(this.editingItem)}
                     </div>
                 </div>
             </div>
@@ -605,14 +652,14 @@ const AdminPage = {
     async verifyAndLogin(secret) {
         this.isVerifying = true;
         pageManager.loadPage('admin'); // Trigger render state
-        
+
         try {
             const res = await fetch('/api/feed', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ secret, checkOnly: true })
             });
-            
+
             if (res.ok) {
                 this.isAuthenticated = true;
                 sessionStorage.setItem('admin_authenticated', 'true');
@@ -640,7 +687,7 @@ const AdminPage = {
             fetch(`/api/feed?secret=${secret}`).then(r => r.json()).catch(() => ({ data: [] })),
             fetch(`/api/leetcode?secret=${secret}`).then(r => r.json()).catch(() => ({ data: [] }))
         ]);
-        
+
         this.allBooks = books.data || [];
         this.allPhotos = (photos.data || []).map(p => ({
             id: p.id,
@@ -673,7 +720,7 @@ const AdminPage = {
         const secretInput = document.getElementById('admin-secret');
         const capsWarning = document.getElementById('caps-warning');
         const error = document.getElementById('login-error');
-        
+
         if (!form) return;
 
         // Caps Lock detection
@@ -692,26 +739,26 @@ const AdminPage = {
                 capsWarning.style.display = 'none';
             }
         });
-        
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const secret = secretInput.value;
-            
+
             if (secret) {
                 error.innerText = 'Checking credentials...';
-                
+
                 try {
                     const res = await fetch('/api/feed', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ secret, checkOnly: true })
                     });
-                    
+
                     if (res.ok) {
                         // Store in session
                         sessionStorage.setItem('admin_authenticated', 'true');
                         sessionStorage.setItem('admin_secret', secret);
-                        
+
                         // Update local state and re-render
                         this.isAuthenticated = true;
                         pageManager.loadPage('admin');
@@ -757,101 +804,166 @@ const AdminPage = {
     },
 
     setupFeedLogic() {
-        const form = document.getElementById('post-form');
-        if (!form) return;
+        if (!this.isEditingPost) {
+            // List View Logic
+            const listItems = document.querySelectorAll('#posts-inventory-full .inventory-item-row');
+            const newBtn = document.getElementById('btn-new-post');
 
-        const listItems = document.querySelectorAll('#posts-inventory .inventory-item');
-        const newBtn = document.getElementById('btn-new-post');
-        const previewContainer = document.getElementById('post-preview-container');
-
-        const updateLivePreview = () => {
-            if (!previewContainer) return;
-
-            // Sync with state
-            if (!this.editingItem) {
-                this.editingItem = { id: null, tags: [] };
+            if (newBtn) {
+                newBtn.addEventListener('click', () => {
+                    this.editingItem = null;
+                    this.isEditingPost = true;
+                    this.isPreviewMode = false;
+                    pageManager.loadPage('admin');
+                });
             }
-            
-            this.editingItem.title = document.getElementById('post-title').value;
-            this.editingItem.content = document.getElementById('post-content').value;
-            this.editingItem.tag = document.getElementById('post-tag').value;
 
-            previewContainer.innerHTML = this.renderPostPreview(this.editingItem);
-        };
-
-        ['post-title', 'post-content', 'post-tag'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.addEventListener('input', updateLivePreview);
-                if (el.tagName === 'SELECT') el.addEventListener('change', updateLivePreview);
-            }
-        });
-
-        if (newBtn) {
-            newBtn.addEventListener('click', () => {
-                this.editingItem = null;
-                pageManager.loadPage('admin');
+            listItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const id = item.dataset.id;
+                    this.editingItem = this.allPosts.find(p => p.id === id);
+                    this.isEditingPost = true;
+                    this.isPreviewMode = false;
+                    pageManager.loadPage('admin');
+                });
             });
-        }
+        } else {
+            // Editor View Logic
+            const backBtn = document.getElementById('btn-editor-back');
+            const previewToggle = document.getElementById('btn-preview-toggle');
+            const publishBtn = document.getElementById('btn-publish-post');
+            const deleteBtn = document.getElementById('btn-delete-post-editor');
+            const uploadInput = document.getElementById('post-image-upload');
+            const uploadIcon = document.querySelector('label[for="post-image-upload"] i');
 
-        listItems.forEach(item => {
-            item.addEventListener('click', () => {
-                const id = item.dataset.id;
-                this.editingItem = this.allPosts.find(p => p.id === id);
-                pageManager.loadPage('admin');
-            });
-        });
+            const titleInput = document.getElementById('post-title');
+            const contentInput = document.getElementById('post-content');
+            const tagSelect = document.getElementById('post-tag');
+            const imageInput = document.getElementById('post-image');
+            const previewContainer = document.getElementById('post-preview-container');
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const payload = {
-                id: document.getElementById('post-id').value || null,
-                title: document.getElementById('post-title').value,
-                content: document.getElementById('post-content').value,
-                tag: document.getElementById('post-tag').value,
-                show_in_feed: document.getElementById('post-show-in-feed').checked,
-                is_popular: document.getElementById('post-is-popular').checked,
-                show_toc: document.getElementById('post-show-toc').checked,
-                secret: sessionStorage.getItem('admin_secret')
+            const updateLivePreview = () => {
+                if (!previewContainer) return;
+
+                const currentData = {
+                    title: titleInput.value,
+                    content: contentInput.value,
+                    tag: tagSelect.value,
+                    image: imageInput.value,
+                    date: this.editingItem?.date || new Date().toISOString()
+                };
+
+                previewContainer.innerHTML = this.renderPostPreview(currentData);
+                this.saveDraftToLocalStorage(currentData);
             };
 
-            const res = await fetch('/api/feed', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+            [titleInput, contentInput, imageInput].forEach(el => {
+                if (el) el.addEventListener('input', updateLivePreview);
             });
+            if (tagSelect) tagSelect.addEventListener('change', updateLivePreview);
 
-            if (res.ok) {
-                alert('Post published!');
-                this.loadInitialData();
-            } else {
-                const errData = await res.json();
-                alert('Error saving post: ' + (errData.error || 'Unknown error'));
-            }
-        });
-
-        const deleteBtn = document.getElementById('btn-delete-post');
-        if (deleteBtn) {
-            deleteBtn.addEventListener('click', async () => {
-                if (!confirm('Are you sure you want to delete this post?')) return;
-                
-                const secret = sessionStorage.getItem('admin_secret');
-                const id = document.getElementById('post-id').value;
-
-                const res = await fetch('/api/feed', {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id, secret })
+            if (backBtn) {
+                backBtn.addEventListener('click', () => {
+                    if (confirm('Leave editor? Any unsaved changes in the database will be lost (draft is still local).')) {
+                        this.isEditingPost = false;
+                        this.isPreviewMode = false;
+                        this.stopAutoSave();
+                        pageManager.loadPage('admin');
+                    }
                 });
+            }
 
-                if (res.ok) {
-                    alert('Post deleted!');
-                    this.editingItem = null;
-                    this.loadInitialData();
-                } else {
-                    alert('Delete failed.');
-                }
-            });
+            if (previewToggle) {
+                previewToggle.addEventListener('click', () => {
+                    this.isPreviewMode = !this.isPreviewMode;
+                    pageManager.loadPage('admin');
+                });
+            }
+
+            if (uploadInput && uploadIcon) {
+                uploadInput.addEventListener('change', async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        this.isUploading = true;
+                        uploadIcon.className = 'fa-solid fa-spinner fa-spin';
+                        try {
+                            const url = await this.uploadImage(file, 'post-image', updateLivePreview);
+                            if (this.editingItem) this.editingItem.image = url;
+                        } finally {
+                            this.isUploading = false;
+                            uploadIcon.className = 'fa-solid fa-cloud-arrow-up';
+                        }
+                    }
+                });
+            }
+
+            if (publishBtn) {
+                publishBtn.addEventListener('click', async () => {
+                    const payload = {
+                        id: this.editingItem?.id || null,
+                        title: titleInput.value,
+                        content: contentInput.value,
+                        tag: tagSelect.value,
+                        image: imageInput.value,
+                        show_in_feed: document.getElementById('post-show-in-feed').checked,
+                        is_popular: document.getElementById('post-is-popular').checked,
+                        show_toc: document.getElementById('post-show-toc').checked,
+                        secret: sessionStorage.getItem('admin_secret')
+                    };
+
+                    publishBtn.disabled = true;
+                    publishBtn.innerText = 'Publishing...';
+
+                    try {
+                        const res = await fetch('/api/feed', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (res.ok) {
+                            alert('Post published successfully!');
+                            localStorage.removeItem('admin_post_draft');
+                            this.isEditingPost = false;
+                            this.editingItem = null;
+                            this.loadInitialData();
+                        } else {
+                            const errData = await res.json();
+                            alert('Error: ' + (errData.error || 'Failed to publish'));
+                        }
+                    } finally {
+                        publishBtn.disabled = false;
+                        publishBtn.innerText = 'Publish';
+                    }
+                });
+            }
+
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', async () => {
+                    if (!confirm('Permanently delete this article?')) return;
+
+                    const secret = sessionStorage.getItem('admin_secret');
+                    const id = this.editingItem.id;
+
+                    const res = await fetch('/api/feed', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id, secret })
+                    });
+
+                    if (res.ok) {
+                        alert('Deleted.');
+                        this.isEditingPost = false;
+                        this.editingItem = null;
+                        this.loadInitialData();
+                    } else {
+                        alert('Delete failed.');
+                    }
+                });
+            }
+
+            this.startAutoSave();
+            this.loadDraftFromLocalStorage();
         }
     },
 
@@ -866,8 +978,8 @@ const AdminPage = {
         const updateLivePreview = () => {
             if (!previewContainer) return;
 
-             // Sync with state
-             if (!this.editingItem) {
+            // Sync with state
+            if (!this.editingItem) {
                 this.editingItem = { id: null };
             }
 
@@ -968,7 +1080,7 @@ const AdminPage = {
                     this.isUploading = true;
                     // Update UI manually for better speed/state preservation
                     uploadIcon.className = 'fa-solid fa-spinner fa-spin';
-                    
+
                     try {
                         const url = await this.uploadImage(file, 'book-image', updateLivePreview);
                         if (this.editingItem) this.editingItem.image = url;
@@ -1029,7 +1141,7 @@ const AdminPage = {
         if (deleteBtn) {
             deleteBtn.addEventListener('click', async () => {
                 if (!confirm('Are you sure you want to delete this book? This will also remove Github assets.')) return;
-                
+
                 const secret = sessionStorage.getItem('admin_secret');
                 const id = document.getElementById('book-id').value;
 
@@ -1213,7 +1325,7 @@ const AdminPage = {
         if (deleteBtn) {
             deleteBtn.addEventListener('click', async () => {
                 if (!confirm('Are you sure you want to delete this photo?')) return;
-                
+
                 const secret = sessionStorage.getItem('admin_secret');
                 const id = document.getElementById('photo-id').value;
 
@@ -1240,18 +1352,81 @@ const AdminPage = {
         // For now, onMount handles the initial load.
     },
 
+    saveDraftToLocalStorage(data) {
+        localStorage.setItem('admin_post_draft', JSON.stringify({
+            ...data,
+            lastSaved: new Date().getTime(),
+            editingId: this.editingItem?.id || null
+        }));
+
+        const status = document.getElementById('autosave-status');
+        if (status) {
+            status.innerText = 'Draft saved locally at ' + new Date().toLocaleTimeString();
+            status.classList.add('saved');
+            setTimeout(() => status.classList.remove('saved'), 2000);
+        }
+    },
+
+    loadDraftFromLocalStorage() {
+        const draftJson = localStorage.getItem('admin_post_draft');
+        if (!draftJson) return;
+
+        const draft = JSON.parse(draftJson);
+        const editingId = this.editingItem?.id || null;
+
+        // Only offer to restore if it's the same item (or both are new)
+        if (draft.editingId === editingId) {
+            const timeDiff = (new Date().getTime() - draft.lastSaved) / 1000;
+            if (timeDiff < 3600) { // Only if less than 1 hour old
+                if (confirm('Found a recent local draft. Restore it?')) {
+                    document.getElementById('post-title').value = draft.title || '';
+                    document.getElementById('post-content').value = draft.content || '';
+                    if (document.getElementById('post-tag')) document.getElementById('post-tag').value = draft.tag || 'Thoughts';
+                    if (document.getElementById('post-image')) document.getElementById('post-image').value = draft.image || '';
+
+                    // Trigger preview update
+                    const preview = document.getElementById('post-preview-container');
+                    if (preview) preview.innerHTML = this.renderPostPreview(draft);
+                }
+            }
+        }
+    },
+
+    startAutoSave() {
+        this.stopAutoSave();
+        this.autoSaveInterval = setInterval(() => {
+            const titleEl = document.getElementById('post-title');
+            const contentEl = document.getElementById('post-content');
+            if (titleEl || contentEl) {
+                this.saveDraftToLocalStorage({
+                    title: titleEl?.value || '',
+                    content: contentEl?.value || '',
+                    tag: document.getElementById('post-tag')?.value || 'Thoughts',
+                    image: document.getElementById('post-image')?.value || ''
+                });
+            }
+        }, 30000); // Auto-save every 30s
+    },
+
+    stopAutoSave() {
+        if (this.autoSaveInterval) {
+            clearInterval(this.autoSaveInterval);
+            this.autoSaveInterval = null;
+        }
+    },
+
     async uploadImage(file, targetInputId, previewCallback) {
         if (!file) return;
-        
+
         const secret = sessionStorage.getItem('admin_secret');
         const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
-        
+
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
             reader.onload = async () => {
                 const base64Data = reader.result.split(',')[1];
-                
+
                 try {
                     const res = await fetch('/api/upload', {
                         method: 'POST',
@@ -1263,7 +1438,7 @@ const AdminPage = {
                             secret
                         })
                     });
-                    
+
                     const data = await res.json();
                     if (data.success) {
                         const input = document.getElementById(targetInputId);

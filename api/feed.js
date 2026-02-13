@@ -20,7 +20,7 @@ export default async function handler(req, res) {
     const { secret } = req.query;
     const isAuth = API_SECRET && secret && secret === API_SECRET;
     const filter = isAuth ? '' : '&show_in_feed=eq.true';
-    
+
     try {
       const response = await fetch(`${SUPABASE_URL}/rest/v1/feed_posts?select=*&order=date.desc${filter}`, { headers: supabaseHeaders });
       if (!response.ok) return res.status(200).json({ success: true, data: [] });
@@ -32,12 +32,12 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    const { id: manualId, title, content, tag, show_in_feed, is_popular, show_toc, secret, checkOnly } = req.body;
-    
+    const { id: manualId, title, content, tag, image, show_in_feed, is_popular, show_toc, secret, checkOnly } = req.body;
+
     if (!API_SECRET || !secret || secret !== API_SECRET) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
-    
+
     if (checkOnly) {
       return res.status(200).json({ success: true, message: 'Authenticated' });
     }
@@ -46,19 +46,19 @@ export default async function handler(req, res) {
 
     try {
       const id = manualId || title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now().toString().slice(-4);
-      
+
       const upsertHeaders = {
         ...supabaseHeaders,
         'Prefer': 'return=representation, resolution=merge-duplicates'
       };
 
-      const payload = { 
-        id, title, content, tag, 
+      const payload = {
+        id, title, content, tag, image,
         show_in_feed: show_in_feed !== false ? true : false,
         is_popular: is_popular === true ? true : false,
         show_toc: show_toc === true ? true : false
       };
-      
+
       // Only set date on new posts if we can detect it, but for a simple API 
       // we'll just keep the existing date if possible. 
       // In Supabase REST/PostgREST, we can use UPSERT logic.
@@ -71,7 +71,7 @@ export default async function handler(req, res) {
         headers: upsertHeaders,
         body: JSON.stringify(payload)
       });
-      
+
       if (!response.ok) {
         const err = await response.json();
         throw new Error(err.message || 'Supabase error');
