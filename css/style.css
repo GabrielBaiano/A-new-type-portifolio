@@ -647,21 +647,19 @@ body,
     /* Slightly more opaque */
     backdrop-filter: blur(12px);
     border: 1px solid var(--border-color);
-    padding: 8px 10px;
-    /* Increased for substance */
+    padding: 4px 6px;
+    /* Back to tighter padding to allow pill to be "grossa" */
     border-radius: 16px;
-    /* Slightly more rounded */
     display: flex;
     align-items: center;
-    gap: 12px;
-    /* More air between items */
+    gap: 8px;
+    /* Tighter gap */
     z-index: 1000;
     box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5);
     width: auto;
     max-width: 95vw;
     flex-shrink: 0;
     min-height: 56px;
-    /* Back to a more substantial height */
     transition: all 0.4s ease-in-out;
 }
 
@@ -720,11 +718,13 @@ body,
     background-color: var(--accent-blue);
     /* Blue Active State */
     color: #fff;
-    padding: 12px 20px;
+    padding: 14px 22px;
+    /* Even taller and wider */
     gap: 10px;
     border-radius: 12px;
-    font-weight: 600;
-    font-size: 0.9rem;
+    font-weight: 700;
+    /* Bolder text for visibility */
+    font-size: 0.95rem;
 }
 
 /* Light Theme Navbar Override */
@@ -5913,8 +5913,8 @@ body.detail-mode {
 .admin-editor-shell {
     position: fixed;
     inset: 0;
-    background: var(--bg-color);
-    /* Use site-wide bg variable */
+    background: #050505;
+    /* Force solid dark background to hide grid */
     z-index: 10000;
     display: flex;
     flex-direction: column;
@@ -5927,8 +5927,8 @@ body.detail-mode {
     justify-content: space-between;
     padding: 0 24px;
     border-bottom: 1px solid var(--border-color);
-    background: rgba(10, 10, 10, 0.8);
-    backdrop-filter: blur(16px);
+    background: #0a0a0a;
+    /* Solid background for header */
     z-index: 10;
 }
 
@@ -5948,12 +5948,15 @@ body.detail-mode {
     font-size: 0.95rem;
     font-weight: 700;
     margin: 0;
+    color: #ffffff;
+    /* Explicitly white for visibility */
     letter-spacing: -0.01em;
 }
 
 .autosave-status {
     font-size: 0.75rem;
-    color: var(--text-muted);
+    color: #888888;
+    /* Explicitly grey but readable */
     display: flex;
     align-items: center;
     gap: 6px;
@@ -5962,7 +5965,8 @@ body.detail-mode {
 
 .autosave-status i {
     font-size: 0.8rem;
-    color: var(--accent-blue);
+    color: #4facfe;
+    /* Brighter blue for the checkmark */
 }
 
 .editor-header-actions {
