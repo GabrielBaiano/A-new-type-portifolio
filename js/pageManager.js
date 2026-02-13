@@ -6,7 +6,7 @@ class PageManager {
         this.currentPage = null;
         this.isTransitioning = false;
         this.pendingPage = null;
-        
+
         if (!this.container) {
             console.error(`Container with id "${containerId}" not found`);
         }
@@ -35,7 +35,7 @@ class PageManager {
         }
 
         const page = this.pages[pageName];
-        
+
         if (!page) {
             console.error(`Page "${pageName}" not registered`);
             return;
@@ -75,22 +75,22 @@ class PageManager {
 
             this.currentPage = pageName;
             this.currentParams = params;
-            
+
             // Ensure Ornamental Border is active (User wants it to persist)
             if (window.drawingSystem) {
                 if (pageName === 'home') {
                     window.drawingSystem.setOrnamentalBorder(true);
                 }
             }
-            
+
         } catch (error) {
             console.error(`[PageManager] Error loading page ${pageName}:`, error);
             // Emergency restore: show container if it failed during fade
             this.container.style.opacity = '1';
-            this.container.style.transform = 'translateY(0)';
+            this.container.style.transform = 'none';
         } finally {
             this.isTransitioning = false;
-            
+
             // Se há uma página pendente, carrega ela
             if (this.pendingPage && this.pendingPage.name !== pageName) {
                 const nextPage = this.pendingPage;
@@ -120,9 +120,9 @@ class PageManager {
         return new Promise(resolve => {
             // Force reflow
             this.container.offsetHeight;
-            
+
             this.container.style.opacity = '1';
-            this.container.style.transform = 'translateY(0)';
+            this.container.style.transform = 'none';
             setTimeout(resolve, 300);
         });
     }

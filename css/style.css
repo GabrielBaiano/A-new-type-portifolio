@@ -786,7 +786,7 @@ body,
 /* App container transitions */
 #app {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
@@ -5913,9 +5913,12 @@ body.detail-mode {
 .admin-editor-shell {
     position: fixed;
     inset: 0;
-    background: #050505;
-    /* Force solid dark background to hide grid */
-    z-index: 10000;
+    width: 100vw;
+    height: 100vh;
+    background: #050505 !important;
+    /* Force solid dark background */
+    z-index: 99999;
+    /* Max priority */
     display: flex;
     flex-direction: column;
 }
@@ -6058,8 +6061,11 @@ body.detail-mode {
     flex: 1;
     display: grid;
     grid-template-columns: 1fr 1fr;
+    min-height: 0;
+    /* Important for flex children */
     overflow: hidden;
-    /* Prevent the container itself from scrolling */
+    background: #050505;
+    /* Solid background for lanes too */
 }
 
 .editor-container.preview-active {
@@ -6069,6 +6075,7 @@ body.detail-mode {
 .editor-main-lane,
 .editor-preview-lane {
     height: 100%;
+    min-height: 100%;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--border-color) transparent;
