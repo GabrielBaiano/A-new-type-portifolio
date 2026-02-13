@@ -5915,8 +5915,8 @@ body.detail-mode {
     inset: 0;
     width: 100vw;
     height: 100vh;
-    background: #050505 !important;
-    /* Force solid dark background */
+    background: var(--bg-color);
+    /* Dynamically follow theme */
     z-index: 99999;
     /* Max priority */
     display: flex;
@@ -5930,8 +5930,8 @@ body.detail-mode {
     justify-content: space-between;
     padding: 0 24px;
     border-bottom: 1px solid var(--border-color);
-    background: #0a0a0a;
-    /* Solid background for header */
+    background: var(--card-bg);
+    /* Use theme card-bg */
     z-index: 10;
 }
 
@@ -5951,15 +5951,15 @@ body.detail-mode {
     font-size: 0.95rem;
     font-weight: 700;
     margin: 0;
-    color: #ffffff;
-    /* Explicitly white for visibility */
+    color: var(--text-main);
+    /* Dynamically follow theme */
     letter-spacing: -0.01em;
 }
 
 .autosave-status {
     font-size: 0.75rem;
-    color: #888888;
-    /* Explicitly grey but readable */
+    color: var(--text-muted);
+    /* Theme aware grey */
     display: flex;
     align-items: center;
     gap: 6px;
@@ -6064,8 +6064,8 @@ body.detail-mode {
     min-height: 0;
     /* Important for flex children */
     overflow: hidden;
-    background: #050505;
-    /* Solid background for lanes too */
+    background: var(--bg-color);
+    /* Dynamically follow theme */
 }
 
 .editor-container.preview-active {
