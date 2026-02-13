@@ -268,15 +268,38 @@ const AdminPage = {
 
     renderPostPreview(post) {
         if (!post) return '<p style="color: grey; padding: 20px;">Draft a post to preview.</p>';
+
+        let htmlContent = '';
+        try {
+            if (typeof marked !== 'undefined') {
+                htmlContent = marked.parse(post.content || '');
+            } else {
+                htmlContent = (post.content || '').replace(/\n/g, '<br>');
+            }
+        } catch (e) {
+            htmlContent = post.content || '';
+        }
+
         return `
-            <div class="post-card-preview" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <span style="font-size: 0.7rem; color: var(--text-muted);">${new Date().toLocaleDateString()}</span>
-                    <span style="font-size: 0.65rem; background: var(--accent-blue); color: white; padding: 2px 8px; border-radius: 4px;">${post.tag || 'Pensamentos'}</span>
+            <div class="detail-card organic-detail" style="padding: 0; background: transparent; border: none; box-shadow: none;">
+                <div class="detail-header">
+                    <h1 class="detail-title">${post.title || 'Post Title'}</h1>
+                    <div class="detail-date">${(() => {
+                try {
+                    const d = new Date(post.date || new Date());
+                    return isNaN(d) ? post.date : d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+                } catch (e) { return post.date || ''; }
+            })()} • <span style="color: var(--accent-blue)">${post.tag || 'Thoughts'}</span></div>
                 </div>
-                <h4 style="margin: 0 0 10px 0; font-family: 'Sora', sans-serif;">${post.title || 'Post Title'}</h4>
-                <div class="markdown-body" style="font-size: 0.85rem; line-height: 1.6; color: var(--text-normal);">
-                    ${post.content ? post.content.substring(0, 300) + (post.content.length > 300 ? '...' : '') : 'Write something to see the preview...'}
+
+                ${post.image ? `
+                    <div class="detail-image-container" style="margin-bottom: 2rem; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); background: rgba(0,0,0,0.2);">
+                        <img src="${post.image}" alt="${post.title}" style="width: 100%; height: auto; display: block; object-fit: contain; max-height: 70vh;">
+                    </div>
+                ` : ''}
+                
+                <div class="markdown-content">
+                    ${htmlContent || '<p style="color: grey;">Start writing to see the preview...</p>'}
                 </div>
             </div>
         `;
@@ -341,7 +364,7 @@ const AdminPage = {
                     </div>
                     <div class="editor-header-actions">
                         <button class="btn-preview-toggle ${this.isPreviewMode ? 'active' : ''}" id="btn-preview-toggle">
-                            <i class="fa-solid ${this.isPreviewMode ? 'fa-pen' : 'fa-eye'}"></i> ${this.isPreviewMode ? 'Edit' : 'Preview'}
+                            <i class="fa-solid ${this.isPreviewMode ? 'fa-eye' : 'fa-laptop-code'}"></i> ${this.isPreviewMode ? 'Preview Mode' : 'Editor Mode'}
                         </button>
                         <button class="btn-save-final" id="btn-publish-post">Publish</button>
                         ${this.editingItem?.id ? `<button class="btn-delete-editor" id="btn-delete-post-editor"><i class="fa-solid fa-trash"></i></button>` : ''}
@@ -350,61 +373,63 @@ const AdminPage = {
 
                 <div class="editor-container ${this.isPreviewMode ? 'preview-active' : ''}">
                     <!-- Main Form / Editor -->
-                    <div class="editor-main">
-                        <div class="editor-form-grid">
-                            <div class="form-group full-width">
-                                <label>Article Title</label>
-                                <input type="text" id="post-title" class="input-title-large" value="${post.title}" placeholder="Enter an engaging title..." required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>Category / Tag</label>
-                                <select id="post-tag">
-                                    <option value="Thoughts" ${post.tag === 'Thoughts' ? 'selected' : ''}>Thoughts</option>
-                                    <option value="Updates" ${post.tag === 'Updates' ? 'selected' : ''}>Updates</option>
-                                    <option value="Guides" ${post.tag === 'Guides' ? 'selected' : ''}>Guides</option>
-                                    <option value="Study Notes" ${post.tag === 'Study Notes' ? 'selected' : ''}>Study Notes</option>
-                                    <option value="LeetCode" ${post.tag === 'LeetCode' ? 'selected' : ''}>LeetCode</option>
-                                    <option value="Book Review" ${post.tag === 'Book Review' ? 'selected' : ''}>Book Review</option>
-                                    <option value="Release" ${post.tag === 'Release' ? 'selected' : ''}>Release</option>
-                                </select>
-                            </div>
+                    <div class="editor-main-lane">
+                        <div class="editor-content-scroller">
+                            <div class="editor-form-grid">
+                                <div class="form-group full-width">
+                                    <label>Article Title</label>
+                                    <input type="text" id="post-title" class="input-title-large" value="${post.title}" placeholder="Enter an engaging title..." required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Category / Tag</label>
+                                    <select id="post-tag">
+                                        <option value="Thoughts" ${post.tag === 'Thoughts' ? 'selected' : ''}>Thoughts</option>
+                                        <option value="Updates" ${post.tag === 'Updates' ? 'selected' : ''}>Updates</option>
+                                        <option value="Guides" ${post.tag === 'Guides' ? 'selected' : ''}>Guides</option>
+                                        <option value="Study Notes" ${post.tag === 'Study Notes' ? 'selected' : ''}>Study Notes</option>
+                                        <option value="LeetCode" ${post.tag === 'LeetCode' ? 'selected' : ''}>LeetCode</option>
+                                        <option value="Book Review" ${post.tag === 'Book Review' ? 'selected' : ''}>Book Review</option>
+                                        <option value="Release" ${post.tag === 'Release' ? 'selected' : ''}>Release</option>
+                                    </select>
+                                </div>
 
-                            <div class="form-group">
-                                <label>Cover Image URL</label>
-                                <div class="upload-row">
-                                    <input type="url" id="post-image" value="${post.image || ''}" placeholder="https://unsplash.com/...">
-                                    <label for="post-image-upload" class="btn-upload-label" title="Upload Cover">
-                                        <i class="fa-solid ${this.isUploading ? 'fa-spinner fa-spin' : 'fa-cloud-arrow-up'}"></i>
-                                        <input type="file" id="post-image-upload" accept="image/*" style="display: none;">
-                                    </label>
+                                <div class="form-group">
+                                    <label>Cover Image URL</label>
+                                    <div class="upload-row">
+                                        <input type="url" id="post-image" value="${post.image || ''}" placeholder="https://unsplash.com/...">
+                                        <label for="post-image-upload" class="btn-upload-label" title="Upload Cover">
+                                            <i class="fa-solid ${this.isUploading ? 'fa-spinner fa-spin' : 'fa-cloud-arrow-up'}"></i>
+                                            <input type="file" id="post-image-upload" accept="image/*" style="display: none;">
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="editor-textarea-wrapper">
-                            <label>Content (Markdown)</label>
-                            <textarea id="post-content" class="editor-textarea" placeholder="Start writing your masterpiece here... Support for bold, lists, code blocks, etc.">${post.content || ''}</textarea>
-                        </div>
+                            <div class="editor-textarea-wrapper">
+                                <label>Content (Markdown)</label>
+                                <textarea id="post-content" class="editor-textarea" placeholder="Start writing your masterpiece here... Support for bold, lists, code blocks, etc.">${post.content || ''}</textarea>
+                            </div>
 
-                        <div class="editor-settings-row">
-                            <div class="form-group checkbox-group">
-                                <input type="checkbox" id="post-show-in-feed" ${post.show_in_feed !== false ? 'checked' : ''}>
-                                <label for="post-show-in-feed">Public Feed</label>
-                            </div>
-                            <div class="form-group checkbox-group">
-                                <input type="checkbox" id="post-is-popular" ${post.is_popular === true ? 'checked' : ''}>
-                                <label for="post-is-popular">Popular Content</label>
-                            </div>
-                            <div class="form-group checkbox-group">
-                                <input type="checkbox" id="post-show-toc" ${post.show_toc === true ? 'checked' : ''}>
-                                <label for="post-show-toc">Show TOC</label>
+                            <div class="editor-settings-row">
+                                <div class="form-group checkbox-group">
+                                    <input type="checkbox" id="post-show-in-feed" ${post.show_in_feed !== false ? 'checked' : ''}>
+                                    <label for="post-show-in-feed">Public Feed</label>
+                                </div>
+                                <div class="form-group checkbox-group">
+                                    <input type="checkbox" id="post-is-popular" ${post.is_popular === true ? 'checked' : ''}>
+                                    <label for="post-is-popular">Popular Content</label>
+                                </div>
+                                <div class="form-group checkbox-group">
+                                    <input type="checkbox" id="post-show-toc" ${post.show_toc === true ? 'checked' : ''}>
+                                    <label for="post-show-toc">Show TOC</label>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Live Preview Panel -->
-                    <div class="editor-preview">
+                    <div class="editor-preview-lane">
                         <div class="preview-content-scroller">
                             <div id="post-preview-container">
                                 ${this.renderPostPreview(post)}
