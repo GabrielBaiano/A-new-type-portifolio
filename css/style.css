@@ -647,21 +647,21 @@ body,
     /* Slightly more opaque */
     backdrop-filter: blur(12px);
     border: 1px solid var(--border-color);
-    padding: 6px 8px;
-    /* Compact padding */
-    border-radius: 12px;
-    /* Less round (sharper) */
+    padding: 8px 10px;
+    /* Increased for substance */
+    border-radius: 16px;
+    /* Slightly more rounded */
     display: flex;
     align-items: center;
-    gap: 8px;
-    /* Tighter gap */
+    gap: 12px;
+    /* More air between items */
     z-index: 1000;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5);
     width: auto;
     max-width: 95vw;
     flex-shrink: 0;
-    min-height: 48px;
-    /* More compact height */
+    min-height: 56px;
+    /* Back to a more substantial height */
     transition: all 0.4s ease-in-out;
 }
 
@@ -679,8 +679,8 @@ body,
     align-items: center;
     justify-content: center;
     gap: 0;
-    padding: 8px;
-    border-radius: 0.5rem;
+    padding: 10px 12px;
+    border-radius: 12px;
     transition: all 0.4s ease-in-out;
     border: none;
     background: none;
@@ -720,9 +720,9 @@ body,
     background-color: var(--accent-blue);
     /* Blue Active State */
     color: #fff;
-    padding: 8px 16px;
-    gap: 8px;
-    border-radius: var(--radius);
+    padding: 10px 20px;
+    gap: 10px;
+    border-radius: 12px;
     font-weight: 600;
     font-size: 0.9rem;
 }
@@ -5913,91 +5913,141 @@ body.detail-mode {
 .admin-editor-shell {
     position: fixed;
     inset: 0;
-    background: var(--bg-main);
-    z-index: 9999;
-    /* Ensure it covers EVERYTHING, including the sidebar */
+    background: var(--bg-color);
+    /* Use site-wide bg variable */
+    z-index: 10000;
     display: flex;
     flex-direction: column;
 }
 
 .editor-header {
-    height: 70px;
+    height: 64px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 30px;
+    padding: 0 24px;
     border-bottom: 1px solid var(--border-color);
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(20px);
+    background: rgba(10, 10, 10, 0.8);
+    backdrop-filter: blur(16px);
     z-index: 10;
+}
+
+.editor-header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
 }
 
 .editor-title-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
 }
 
 .editor-title-container h2 {
-    font-size: 1rem;
+    font-size: 0.95rem;
+    font-weight: 700;
     margin: 0;
+    letter-spacing: -0.01em;
 }
 
 .autosave-status {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     color: var(--text-muted);
-    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     transition: all 0.3s ease;
 }
 
-.autosave-status.saved {
-    color: var(--accent-green);
-    opacity: 1;
+.autosave-status i {
+    font-size: 0.8rem;
+    color: var(--accent-blue);
 }
 
 .editor-header-actions {
     display: flex;
+    align-items: center;
     gap: 12px;
+}
+
+.divider-v {
+    width: 1px;
+    height: 24px;
+    background: var(--border-color);
+    margin: 0 4px;
 }
 
 .btn-back,
 .btn-preview-toggle,
 .btn-save-final,
 .btn-delete-editor {
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 0.9rem;
+    height: 38px;
+    padding: 0 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     border: 1px solid var(--border-color);
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.04);
     color: var(--text-main);
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
 }
 
+.btn-back {
+    width: 38px;
+    padding: 0;
+    border-radius: 50%;
+    background: transparent;
+    opacity: 0.6;
+}
+
+.btn-back:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--text-muted);
+}
+
+.btn-preview-toggle:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--text-muted);
+}
+
 .btn-preview-toggle.active {
-    background: var(--accent-blue);
+    background: rgba(0, 112, 243, 0.1);
     border-color: var(--accent-blue);
-    color: white;
+    color: var(--accent-blue);
 }
 
 .btn-save-final {
     background: var(--accent-blue);
     border-color: var(--accent-blue);
     color: white;
+    box-shadow: 0 4px 12px rgba(0, 112, 243, 0.2);
+}
+
+.btn-save-final:hover {
+    background: #0060df;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 112, 243, 0.3);
 }
 
 .btn-delete-editor {
-    background: rgba(255, 0, 0, 0.1);
-    border-color: rgba(255, 0, 0, 0.2);
-    color: #ff4d4d;
+    width: 38px;
+    padding: 0;
+    background: rgba(255, 69, 58, 0.05);
+    border-color: rgba(255, 69, 58, 0.2);
+    color: #ff453a;
 }
 
 .btn-delete-editor:hover {
-    background: rgba(255, 0, 0, 0.2);
+    background: #ff453a;
+    border-color: #ff453a;
+    color: white;
 }
 
 .editor-container {

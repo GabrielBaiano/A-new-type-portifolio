@@ -34,6 +34,10 @@ const AdminPage = {
             return this.renderLogin();
         }
 
+        if (this.isEditingPost) {
+            return this.renderPostEditor();
+        }
+
         return `
             <div class="admin-dashboard card">
                 <div class="admin-layout">
@@ -357,17 +361,32 @@ const AdminPage = {
         return `
             <div class="admin-editor-shell">
                 <header class="editor-header">
-                    <button class="btn-back" id="btn-editor-back"><i class="fa-solid fa-arrow-left"></i> Back to List</button>
-                    <div class="editor-title-container">
-                        <h2>${this.editingItem ? 'Edit Article' : 'New Article'}</h2>
-                        <span id="autosave-status" class="autosave-status">Draft saved locally</span>
+                    <div class="editor-header-left">
+                        <button class="btn-back" id="btn-editor-back" title="Discard and Exit">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                        <div class="editor-title-container">
+                            <h2>${this.editingItem ? 'Editing Article' : 'New Article'}</h2>
+                            <span id="autosave-status" class="autosave-status">
+                                <i class="fa-solid fa-cloud-check"></i> Draft ready
+                            </span>
+                        </div>
                     </div>
+
                     <div class="editor-header-actions">
                         <button class="btn-preview-toggle ${this.isPreviewMode ? 'active' : ''}" id="btn-preview-toggle">
-                            <i class="fa-solid ${this.isPreviewMode ? 'fa-eye' : 'fa-laptop-code'}"></i> ${this.isPreviewMode ? 'Preview Mode' : 'Editor Mode'}
+                            <i class="fa-solid ${this.isPreviewMode ? 'fa-eye' : 'fa-laptop-code'}"></i> 
+                            <span>${this.isPreviewMode ? 'Switch to Editor' : 'Switch to Preview'}</span>
                         </button>
-                        <button class="btn-save-final" id="btn-publish-post">Publish</button>
-                        ${this.editingItem?.id ? `<button class="btn-delete-editor" id="btn-delete-post-editor"><i class="fa-solid fa-trash"></i></button>` : ''}
+                        <div class="divider-v"></div>
+                        <button class="btn-save-final" id="btn-publish-post">
+                            <i class="fa-solid fa-paper-plane"></i> Publish
+                        </button>
+                        ${this.editingItem?.id ? `
+                            <button class="btn-delete-editor" id="btn-delete-post-editor" title="Delete Post">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        ` : ''}
                     </div>
                 </header>
 
