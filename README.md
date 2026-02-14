@@ -10,6 +10,7 @@
 </div>
 
 ### 📝 Recent Thoughts
+- [Beyond the Hype: Why I’m Choosing Public Utility Over Quick Profits](https://a-new-type-portifolio.vercel.app/feed?id=-beyond-the-hype-why-im-choosing-public-utility-over-quick-profits-9018) - *13/02/2026*
 - [From St. Augustine to Personal Blogging: How I Found My Own Catharsis](https://a-new-type-portifolio.vercel.app/feed?id=from-st-augustine-to-personal-blogging-how-i-found-my-own-catharsis-3492) - *18/01/2026*
 - [# Super Busy with Project 2026](https://a-new-type-portifolio.vercel.app/feed?id=-super-busy-with-project-2026-8426) - *10/01/2026*
 - [From Block to Art: Why Creativity Is the Technical Skill You Are Ignoring](https://a-new-type-portifolio.vercel.app/feed?id=from-block-to-art-why-creativity-is-the-technical-skill-you-are-ignoring-1574) - *03/01/2026*
