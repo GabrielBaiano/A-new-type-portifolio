@@ -352,7 +352,10 @@ const AdminPage = {
                 <div class="inventory-list" id="posts-inventory-full">
                     ${this.allPosts.length > 0 ? this.allPosts.map(p => `
                         <div class="inventory-item-row" data-id="${p.id}">
-                            <span class="item-title">${p.title}</span>
+                            <span class="item-title">
+                                ${p.title}
+                                ${p.tag === 'TabNews' ? '<span class="badge-tabnews-inline">TabNews</span>' : ''}
+                            </span>
                             <span class="item-tag">${p.tag}</span>
                             <span class="item-date">${new Date(p.date).toLocaleDateString()}</span>
                             <span class="item-visibility">${p.show_in_feed !== false ? 'Public' : 'Hidden'}</span>

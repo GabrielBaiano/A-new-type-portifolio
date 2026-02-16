@@ -3,7 +3,7 @@ const DetailPage = {
     currentType: null,
     currentId: null,
     currentData: null,
-    currentLang: 'en', // Default to English
+    currentLang: 'en', // Default to English if available
 
     /**
      * Render the detail page
