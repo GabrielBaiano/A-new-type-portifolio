@@ -3,7 +3,7 @@ const DetailPage = {
     currentType: null,
     currentId: null,
     currentData: null,
-    currentLang: 'pt', // 'pt' or 'en'
+    currentLang: 'en', // Default to English
 
     /**
      * Render the detail page
@@ -235,8 +235,12 @@ const DetailPage = {
 
             ${data.source_url ? `
                 <div class="original-source">
-                    <a href="${data.source_url}" target="_blank" class="source-link">
-                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Original at TabNews
+                    <div class="tabnews-disclaimer">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <p>This article was originally published in Portuguese on <strong>TabNews</strong>, a community for high-value content for programmers. It has been automatically translated to English using Google Gemini AI.</p>
+                    </div>
+                    <a href="${data.source_url}" target="_blank" class="btn-source-tabnews">
+                        <i class="fa-brands fa-github"></i> View Original on TabNews
                     </a>
                 </div>
             ` : ''}

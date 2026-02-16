@@ -91,12 +91,12 @@ export default async function handler(req, res) {
                 title_en: translatedTitle,
                 content: detail.body,
                 content_en: translatedContent,
-                tag: 'Artigo',
+                tag: 'TabNews',
                 date: new Date(post.created_at).toISOString(),
                 show_in_feed: true,
                 source_url: `https://www.tabnews.com.br/${TABNEWS_USERNAME}/${post.slug}`,
                 external_id: post.slug,
-                image: 'assets/images/tabnews-logo.png'
+                image: null
             };
 
             const saveRes = await fetch(`${SUPABASE_URL}/rest/v1/feed_posts`, {

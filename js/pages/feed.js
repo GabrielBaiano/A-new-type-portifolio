@@ -61,6 +61,7 @@ const FeedPage = {
             else if (type === 'projects-labs' || tag.includes('project') || tag.includes('release')) tagClass = 'tag-green';
             else if (tag === 'photos' || tag === 'gallery' || tag === 'fotos') tagClass = 'tag-green';
             else if (tag === 'updates' || tag === 'thoughts' || tag === 'feed-post' || tag === 'atualizações' || tag === 'pensamentos') tagClass = 'tag-blue';
+            else if (tag === 'tabnews') tagClass = 'tag-tabnews';
             else tagClass = 'tag-blue';
 
             return `
@@ -77,7 +78,7 @@ const FeedPage = {
                 </div>
                 
                 <div class="feed-item-content">
-                    <h3 class="feed-title">${item.title}</h3>
+                    <h3 class="feed-title">${item.title_en || item.title}</h3>
                 </div>
 
                 ${item.image ? `
