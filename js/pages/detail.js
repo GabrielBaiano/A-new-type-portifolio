@@ -119,12 +119,11 @@ const DetailPage = {
                 throw new Error("Markdown parser (marked) not loaded");
             }
 
-            // Convert markdown to HTML using marked.js
-            const htmlContent = marked.parse(data.content || '');
+            const title = this.currentLang === 'en' && data.title_en ? data.title_en : data.title;
 
             contentDiv.innerHTML = `
                 <div class="detail-header">
-                    <h1 class="detail-title">${data.title}</h1>
+                    <h1 class="detail-title">${title}</h1>
                     ${data.subtitle ? `<p class="detail-subtitle">${data.subtitle}</p>` : ''}
                     ${data.date ? `<div class="detail-date">${(() => {
                     try {
@@ -145,55 +144,41 @@ const DetailPage = {
                 <div id="detail-dynamic-content">
                     ${this.renderBody(data)}
                 </div>
-
-                ${data.image ? `
-                    <div class="detail-image-container" style="margin-bottom: 2rem; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); background: rgba(0,0,0,0.2);">
-                        <img src="${data.image}" alt="${data.title}" style="width: 100%; height: auto; display: block; object-fit: contain; max-height: 70vh;">
-                    </div>
-                ` : ''}
-                
-                <div class="markdown-content">
-                    ${data.items ? `
-                        <div class="pub-grid">
-                            ${data.items.map(pub => `
-                                <div class="pub-card" onclick="location.hash='#/detail/academic/${pub.id}'">
-                                    <h3>${pub.title}</h3>
-                                    <p>${pub.excerpt || 'Explore the full content of this publication.'}</p>
-                                    <span class="read-more-btn">Read more</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : htmlContent}
-                </div>
-
-                ${data.show_toc || data.tag === 'Guides' ? this.renderTOC() : ''}
             `;
+
+            // Setup Language Switcher logic
+            contentDiv.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const lang = btn.dataset.lang;
+                    if (lang === this.currentLang) return;
+
+                    this.currentLang = lang;
+                    console.log('[Detail] Switching language to:', lang);
+
+                    // Update Title
+                    const detailTitle = contentDiv.querySelector('.detail-title');
+                    if (detailTitle) {
+                        detailTitle.innerText = (lang === 'en' && data.title_en) ? data.title_en : data.title;
+                    }
+
+                    // Update Dynamic Content
+                    const dynamicContent = contentDiv.querySelector('#detail-dynamic-content');
+                    if (dynamicContent) {
+                        dynamicContent.innerHTML = this.renderBody(data);
+                        this.enhanceCodeBlocks();
+                    }
+
+                    // Update active button state
+                    contentDiv.querySelectorAll('.lang-btn').forEach(b =>
+                        b.classList.toggle('active', b.dataset.lang === lang)
+                    );
+                });
+            });
 
             // If TOC is needed, generate it
             if (data.show_toc || data.tag === 'Guides') {
                 this.generateTOC();
             }
-
-            // Language switcher logic
-            document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const lang = btn.dataset.lang;
-                    if (lang === this.currentLang) return;
-                    this.currentLang = lang;
-
-                    // Update UI
-                    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-
-                    // Update contents
-                    const dynamicArea = document.getElementById('detail-dynamic-content');
-                    if (dynamicArea) {
-                        dynamicArea.innerHTML = this.renderBody(this.currentData);
-                        this.enhanceCodeBlocks();
-                        if (data.show_toc || data.tag === 'Guides') this.generateTOC();
-                    }
-                });
-            });
 
             // Syntax Highlighting
             this.enhanceCodeBlocks();
@@ -213,6 +198,18 @@ const DetailPage = {
         if (titleEl) titleEl.innerText = title;
 
         return `
+            ${data.source_url ? `
+                <div class="original-source-top">
+                    <div class="tabnews-disclaimer">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <p>This article was originally published in Portuguese on <strong>TabNews</strong>. Automatically translated to English using Google Gemini AI.</p>
+                    </div>
+                    <a href="${data.source_url}" target="_blank" class="btn-source-tabnews">
+                        View on TabNews ↗
+                    </a>
+                </div>
+            ` : ''}
+
             ${data.image ? `
                 <div class="detail-image-container" style="margin-bottom: 2rem; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); background: rgba(0,0,0,0.2);">
                     <img src="${data.image}" alt="${title}" style="width: 100%; height: auto; display: block; object-fit: contain; max-height: 70vh;">
@@ -232,18 +229,6 @@ const DetailPage = {
                     </div>
                 ` : htmlContent}
             </div>
-
-            ${data.source_url ? `
-                <div class="original-source">
-                    <div class="tabnews-disclaimer">
-                        <i class="fa-solid fa-circle-info"></i>
-                        <p>This article was originally published in Portuguese on <strong>TabNews</strong>, a community for high-value content for programmers. It has been automatically translated to English using Google Gemini AI.</p>
-                    </div>
-                    <a href="${data.source_url}" target="_blank" class="btn-source-tabnews">
-                        <i class="fa-brands fa-github"></i> View Original on TabNews
-                    </a>
-                </div>
-            ` : ''}
 
             ${data.show_toc || data.tag === 'Guides' ? this.renderTOC() : ''}
         `;

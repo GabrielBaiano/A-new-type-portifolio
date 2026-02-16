@@ -52,12 +52,12 @@ const FeedPage = {
         return items.map(item => {
             let tagClass = '';
             const type = item.type || '';
-            const tag = (item.tag || '').toLowerCase();
+            const tag = item.tag ? item.tag.toLowerCase() : '';
 
-            if (type === 'leetcode-resolutions' || tag.includes('leetcode')) tagClass = 'tag-pink';
-            else if (type === 'full-reviews' || tag.includes('book') || tag.includes('review')) tagClass = 'tag-purple';
-            else if (type === 'deep-tutorials' || tag.includes('tutorial') || tag.includes('mastery') || tag.includes('guide')) tagClass = 'tag-orange';
-            else if (type === 'study-notes' || tag.includes('note')) tagClass = 'tag-cyan';
+            if (tag === 'leetcode') tagClass = 'tag-pink';
+            else if (tag === 'book review' || tag === 'reviews' || tag === 'lit') tagClass = 'tag-purple';
+            else if (tag === 'deep-tutorials' || tag === 'guides') tagClass = 'tag-orange';
+            else if (tag === 'study notes' || tag === 'notes') tagClass = 'tag-yellow';
             else if (type === 'projects-labs' || tag.includes('project') || tag.includes('release')) tagClass = 'tag-green';
             else if (tag === 'photos' || tag === 'gallery' || tag === 'fotos') tagClass = 'tag-green';
             else if (tag === 'updates' || tag === 'thoughts' || tag === 'feed-post' || tag === 'atualizações' || tag === 'pensamentos') tagClass = 'tag-blue';
