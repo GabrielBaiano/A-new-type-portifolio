@@ -23,11 +23,52 @@ const githubHeaders = {
 };
 
 export default async function handler(req, res) {
-  // Allow cron or manual trigger via GET/POST
   const isCron = req.headers['x-vercel-cron'] === '1';
-  const isUpdateTrigger = (req.method === 'POST') || (req.method === 'GET' && req.query.update === 'true');
   const secret = req.method === 'POST' ? req.body.secret : req.query.secret;
 
+  // 1. Specific GET Action: List Monitored Repos
+  if (req.method === 'GET' && req.query.update === 'list') {
+    const isAuthorized = (API_SECRET && secret && secret === API_SECRET);
+    if (!isAuthorized) return res.status(401).json({ error: 'Unauthorized' });
+
+    try {
+      const resp = await fetch(`${SUPABASE_URL}/rest/v1/github_monitored_repos?select=*`, { headers: supabaseHeaders });
+      const data = await resp.json();
+      return res.status(200).json({ success: true, data });
+    } catch (error) {
+      return res.status(500).json({ success: false, error: error.message });
+    }
+  }
+
+  // 2. Specific POST Actions: CRUD for Monitored Repos
+  if (req.method === 'POST' && req.body && req.body.action) {
+    const isAuthorized = (API_SECRET && secret && secret === API_SECRET);
+    if (!isAuthorized) return res.status(401).json({ error: 'Unauthorized' });
+
+    try {
+      const { action, repo, id } = req.body;
+      if (action === 'add') {
+        const resAdd = await fetch(`${SUPABASE_URL}/rest/v1/github_monitored_repos`, {
+          method: 'POST', headers: supabaseHeaders, body: JSON.stringify({ repo_full_name: repo })
+        });
+        if (!resAdd.ok) throw new Error('Failed to add repo');
+        return res.status(200).json({ success: true });
+      }
+
+      if (action === 'remove') {
+        const resRem = await fetch(`${SUPABASE_URL}/rest/v1/github_monitored_repos?id=eq.${id}`, {
+          method: 'DELETE', headers: supabaseHeaders
+        });
+        if (!resRem.ok) throw new Error('Failed to remove repo');
+        return res.status(200).json({ success: true });
+      }
+    } catch (error) {
+      return res.status(500).json({ success: false, error: error.message });
+    }
+  }
+
+  // 3. Sync Action: GitHub Release Update
+  const isUpdateTrigger = (req.method === 'POST') || (req.method === 'GET' && req.query.update === 'true');
   if (isUpdateTrigger) {
     const isAuthorized = isCron || (API_SECRET && secret && secret === API_SECRET);
     if (!isAuthorized) return res.status(401).json({ error: 'Unauthorized' });
@@ -95,6 +136,7 @@ export default async function handler(req, res) {
     }
   }
 
+  // 4. General GET: Fetch balloons for display
   if (req.method === 'GET') {
     try {
       const { context, project } = req.query;
@@ -119,48 +161,6 @@ export default async function handler(req, res) {
       }));
 
       return res.status(200).json({ success: true, count: mappedReleases.length + mappedLeetcode.length, data: [...mappedReleases, ...mappedLeetcode] });
-    } catch (error) {
-      return res.status(500).json({ success: false, error: error.message });
-    }
-  }
-
-  // Handle Admin CRUD actions for monitored repos
-  if (req.method === 'POST') {
-    const { action, repo, id, secret: bodySecret } = req.body;
-    const finalSecret = bodySecret || secret;
-    const isAuthorized = (API_SECRET && finalSecret && finalSecret === API_SECRET);
-    if (!isAuthorized) return res.status(401).json({ error: 'Unauthorized' });
-
-    try {
-      if (action === 'add') {
-        const resAdd = await fetch(`${SUPABASE_URL}/rest/v1/github_monitored_repos`, {
-          method: 'POST', headers: supabaseHeaders, body: JSON.stringify({ repo_full_name: repo })
-        });
-        if (!resAdd.ok) throw new Error('Failed to add repo');
-        return res.status(200).json({ success: true });
-      }
-
-      if (action === 'remove') {
-        const resRem = await fetch(`${SUPABASE_URL}/rest/v1/github_monitored_repos?id=eq.${id}`, {
-          method: 'DELETE', headers: supabaseHeaders
-        });
-        if (!resRem.ok) throw new Error('Failed to remove repo');
-        return res.status(200).json({ success: true });
-      }
-    } catch (error) {
-      return res.status(500).json({ success: false, error: error.message });
-    }
-  }
-
-  // Specific GET for list
-  if (req.method === 'GET' && req.query.update === 'list') {
-    const isAuthorized = (API_SECRET && secret && secret === API_SECRET);
-    if (!isAuthorized) return res.status(401).json({ error: 'Unauthorized' });
-
-    try {
-      const resp = await fetch(`${SUPABASE_URL}/rest/v1/github_monitored_repos?select=*`, { headers: supabaseHeaders });
-      const data = await resp.json();
-      return res.status(200).json({ success: true, data });
     } catch (error) {
       return res.status(500).json({ success: false, error: error.message });
     }
