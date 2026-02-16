@@ -66,27 +66,21 @@ export default async function handler(req, res) {
             // 3. Check if already exists in Supabase
             const checkRes = await fetch(`${SUPABASE_URL}/rest/v1/feed_posts?external_id=eq.${post.slug}&select=id`, { headers: supabaseHeaders });
             const existing = await checkRes.json();
-
-            if (existing.length > 0) {
-                results.skipped++;
-                continue;
-            }
-
             // 3. Fetch full content
             const detailRes = await fetch(`https://www.tabnews.com.br/api/v1/contents/${TABNEWS_USERNAME}/${post.slug}`);
             const detail = await detailRes.json();
 
-            // 4. Translate using Gemini
+            // 4. Generate deterministic ID (tabnews- + slug)
+            const deterministicId = `tabnews-${post.slug}`.substring(0, 100);
+
+            // 5. Translate using Gemini
             console.log(`Translating: ${post.title}`);
             const translatedTitle = await translateWithGemini(post.title, true);
             const translatedContent = await translateWithGemini(detail.body, false);
 
-            // 5. Generate ID (slug-based like in feed.js)
-            const id = post.slug.substring(0, 100) + '-' + Date.now().toString().slice(-4);
-
-            // 6. Save to Supabase
+            // 6. Save to Supabase (UPSERT mode)
             const payload = {
-                id,
+                id: deterministicId,
                 title: post.title,
                 title_en: translatedTitle,
                 content: detail.body,
@@ -99,9 +93,12 @@ export default async function handler(req, res) {
                 image: null
             };
 
-            const saveRes = await fetch(`${SUPABASE_URL}/rest/v1/feed_posts`, {
+            const saveRes = await fetch(`${SUPABASE_URL}/rest/v1/feed_posts?on_conflict=external_id`, {
                 method: 'POST',
-                headers: { ...supabaseHeaders, 'Prefer': 'return=representation' },
+                headers: {
+                    ...supabaseHeaders,
+                    'Prefer': 'resolution=merge-duplicates,return=representation'
+                },
                 body: JSON.stringify(payload)
             });
 
