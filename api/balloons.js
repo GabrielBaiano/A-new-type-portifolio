@@ -31,14 +31,33 @@ export default async function handler(req, res) {
   if (isUpdateTrigger) {
     const isAuthorized = isCron || (API_SECRET && secret && secret === API_SECRET);
     if (!isAuthorized) return res.status(401).json({ error: 'Unauthorized' });
-    // Cache update logic...
+
     try {
       const username = (req.method === 'POST' ? req.body.username : req.query.username) || 'GabrielBaiano';
-      const reposRes = await fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`, { headers: githubHeaders });
-      const repos = await reposRes.json();
-      const priorityReposNames = ['shii-study-assistant', 'awesome-readme', 'A-new-type-portifolio'];
-      const reposToProcess = Array.isArray(repos) ? repos.filter(r => priorityReposNames.includes(r.name) || true).slice(0, 10) : [];
-      
+
+      // 1. Fetch monitored repos from Supabase
+      const monitoredReposRes = await fetch(`${SUPABASE_URL}/rest/v1/github_monitored_repos?select=repo_full_name`, { headers: supabaseHeaders });
+      const monitoredReposData = await monitoredReposRes.json();
+
+      let reposToProcess = [];
+
+      if (Array.isArray(monitoredReposData) && monitoredReposData.length > 0) {
+        // Use configured repos
+        const repoNames = monitoredReposData.map(r => r.repo_full_name);
+
+        // Fetch all repos for the user to get IDs and basic info
+        const reposRes = await fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`, { headers: githubHeaders });
+        const allRepos = await reposRes.json();
+
+        if (Array.isArray(allRepos)) {
+          reposToProcess = allRepos.filter(r => repoNames.includes(r.full_name));
+        }
+      } else {
+        // Fallback or early exit if nothing is configured
+        // For now, let's just return success but no work done if no repos are configured
+        return res.status(200).json({ success: true, message: 'No repositories configured for monitoring.' });
+      }
+
       const allProjectData = [];
       for (const repo of reposToProcess) {
         // Fetch Releases
@@ -72,7 +91,7 @@ export default async function handler(req, res) {
       await fetch(`${SUPABASE_URL}/rest/v1/github_cache_metadata`, { method: 'POST', headers: supabaseHeaders, body: JSON.stringify({ username, last_updated: new Date().toISOString(), project_data_count: allProjectData.length }) });
       return res.status(200).json({ success: true, updated_at: new Date().toISOString() });
     } catch (error) {
-       return res.status(500).json({ success: false, error: error.message });
+      return res.status(500).json({ success: false, error: error.message });
     }
   }
 
@@ -85,7 +104,7 @@ export default async function handler(req, res) {
       ]);
       const projectData = await projectDataRes.json();
       const leetcodeData = await leetcodeRes.json();
-      
+
       const mappedReleases = (Array.isArray(projectData) ? projectData : []).filter(item => item.type === 'release').map(item => ({
         id: item.id, type: 'notification', name: item.repo_name, title: `New release ${item.release_tag}`,
         message: item.release_notes, badge: item.release_tag, image: item.avatar_url, color: 'green',
@@ -100,6 +119,48 @@ export default async function handler(req, res) {
       }));
 
       return res.status(200).json({ success: true, count: mappedReleases.length + mappedLeetcode.length, data: [...mappedReleases, ...mappedLeetcode] });
+    } catch (error) {
+      return res.status(500).json({ success: false, error: error.message });
+    }
+  }
+
+  // Handle Admin CRUD actions for monitored repos
+  if (req.method === 'POST') {
+    const { action, repo, id, secret: bodySecret } = req.body;
+    const finalSecret = bodySecret || secret;
+    const isAuthorized = (API_SECRET && finalSecret && finalSecret === API_SECRET);
+    if (!isAuthorized) return res.status(401).json({ error: 'Unauthorized' });
+
+    try {
+      if (action === 'add') {
+        const resAdd = await fetch(`${SUPABASE_URL}/rest/v1/github_monitored_repos`, {
+          method: 'POST', headers: supabaseHeaders, body: JSON.stringify({ repo_full_name: repo })
+        });
+        if (!resAdd.ok) throw new Error('Failed to add repo');
+        return res.status(200).json({ success: true });
+      }
+
+      if (action === 'remove') {
+        const resRem = await fetch(`${SUPABASE_URL}/rest/v1/github_monitored_repos?id=eq.${id}`, {
+          method: 'DELETE', headers: supabaseHeaders
+        });
+        if (!resRem.ok) throw new Error('Failed to remove repo');
+        return res.status(200).json({ success: true });
+      }
+    } catch (error) {
+      return res.status(500).json({ success: false, error: error.message });
+    }
+  }
+
+  // Specific GET for list
+  if (req.method === 'GET' && req.query.update === 'list') {
+    const isAuthorized = (API_SECRET && secret && secret === API_SECRET);
+    if (!isAuthorized) return res.status(401).json({ error: 'Unauthorized' });
+
+    try {
+      const resp = await fetch(`${SUPABASE_URL}/rest/v1/github_monitored_repos?select=*`, { headers: supabaseHeaders });
+      const data = await resp.json();
+      return res.status(200).json({ success: true, data });
     } catch (error) {
       return res.status(500).json({ success: false, error: error.message });
     }

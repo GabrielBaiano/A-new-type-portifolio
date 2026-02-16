@@ -11,6 +11,7 @@ const AdminPage = {
     allPosts: [],
     allLeetCode: [],
     allBalloons: [],
+    allMonitoredRepos: [],
     editingItem: null,
     isUploading: false,
     isEditingPost: false,
@@ -649,6 +650,9 @@ const AdminPage = {
                 <div class="header-main">
                     <h1>Balloon System</h1>
                     <div class="header-actions">
+                        <button id="btn-sync-github" class="btn-action primary">
+                            <i class="fa-solid fa-sync"></i> Sync GitHub
+                        </button>
                         <a href="balloons-preview.html" target="_blank" class="btn-action secondary">
                             <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Preview
                         </a>
@@ -656,20 +660,42 @@ const AdminPage = {
                 </div>
                 <p>Balloons are dynamically generated from GitHub and LeetCode activity.</p>
             </div>
-            
-            <div class="balloon-feed-container">
-                <h3>Live Feed (Active Balloons)</h3>
-                <div class="balloon-list-admin" id="balloons-inventory">
-                    ${this.allBalloons.length > 0 ? this.allBalloons.map(b => `
-                        <div class="balloon-item-admin">
-                            <div class="balloon-badge-mini ${b.color}">${b.badge}</div>
-                            <div class="balloon-info-admin">
-                                <span class="balloon-title-admin">${b.name}</span>
-                                <span class="balloon-msg-admin">${b.message || (b.title ? b.title : 'GitHub Activity')}</span>
+
+            <div class="admin-grid">
+                <div class="admin-card">
+                    <h3>Monitored Repositories</h3>
+                    <p class="card-subtitle">Release notes will be pulled from these repos.</p>
+                    
+                    <div class="repo-form-mini">
+                        <input type="text" id="repo-input" placeholder="owner/repo (ex: GabrielBaiano/shii-app)">
+                        <button id="btn-add-repo" class="btn-add-mini"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+
+                    <div class="monitored-repos-list">
+                        ${this.allMonitoredRepos.length > 0 ? this.allMonitoredRepos.map(r => `
+                            <div class="repo-item-admin">
+                                <i class="fa-brands fa-github"></i>
+                                <span>${r.repo_full_name}</span>
+                                <button class="btn-delete-repo" data-id="${r.id}"><i class="fa-solid fa-trash"></i></button>
                             </div>
-                            <div class="balloon-date-admin">${new Date(b.date).toLocaleDateString()}</div>
-                        </div>
-                    `).join('') : '<p style="color: grey; padding: 20px;">No active balloons in the last 7 days.</p>'}
+                        `).join('') : '<p class="empty-state">No repos monitored yet.</p>'}
+                    </div>
+                </div>
+
+                <div class="admin-card">
+                    <h3>Live Feed (Active Balloons)</h3>
+                    <div class="balloon-list-admin" id="balloons-inventory">
+                        ${this.allBalloons.length > 0 ? this.allBalloons.map(b => `
+                            <div class="balloon-item-admin">
+                                <div class="balloon-badge-mini ${b.color}">${b.badge}</div>
+                                <div class="balloon-info-admin">
+                                    <span class="balloon-title-admin">${b.name}</span>
+                                    <span class="balloon-msg-admin">${b.message || (b.title ? b.title : 'GitHub Activity')}</span>
+                                </div>
+                                <div class="balloon-date-admin">${new Date(b.date).toLocaleDateString()}</div>
+                            </div>
+                        `).join('') : '<p class="empty-state">No active balloons in the last 7 days.</p>'}
+                    </div>
                 </div>
             </div>
         `;
@@ -724,12 +750,13 @@ const AdminPage = {
 
     async loadInitialData() {
         const secret = sessionStorage.getItem('admin_secret');
-        const [books, photos, balloons, posts, leetcode] = await Promise.all([
+        const [books, photos, balloons, posts, leetcode, repos] = await Promise.all([
             fetch(`/api/books?secret=${secret}`).then(r => r.json()).catch(() => ({ data: [] })),
             fetch(`/api/photos?secret=${secret}`).then(r => r.json()).catch(() => ({ data: [] })),
             fetch(`/api/balloons?context=all&secret=${secret}`).then(r => r.json()).catch(() => ({ data: [] })),
             fetch(`/api/feed?secret=${secret}`).then(r => r.json()).catch(() => ({ data: [] })),
-            fetch(`/api/leetcode?secret=${secret}`).then(r => r.json()).catch(() => ({ data: [] }))
+            fetch(`/api/leetcode?secret=${secret}`).then(r => r.json()).catch(() => ({ data: [] })),
+            fetch(`/api/balloons?update=list&secret=${secret}`).then(r => r.json()).catch(() => ({ data: [] }))
         ]);
 
         this.allBooks = books.data || [];
@@ -743,6 +770,7 @@ const AdminPage = {
         this.allBalloons = balloons.data || [];
         this.allPosts = posts.data || [];
         this.allLeetCode = leetcode.data || [];
+        this.allMonitoredRepos = repos.data || [];
 
         // Determine if we need to refresh overview stats if that's the current tab
         if (this.activeTab === 'overview') {
@@ -844,7 +872,8 @@ const AdminPage = {
         if (this.activeTab === 'books') this.setupBooksLogic();
         if (this.activeTab === 'photos') this.setupPhotosLogic();
         if (this.activeTab === 'posts') this.setupFeedLogic();
-        if (this.activeTab === 'leetcode') this.setupLeetCodeLogic();
+        if (this.activeTab === 'guides') this.setupGuidesLogic();
+        if (this.activeTab === 'balloons') this.setupBalloonsLogic();
     },
 
     setupFeedLogic() {
@@ -1388,6 +1417,80 @@ const AdminPage = {
                 }
             });
         }
+    },
+
+    setupBalloonsLogic() {
+        // Sync Button
+        const syncBtn = document.getElementById('btn-sync-github');
+        if (syncBtn) {
+            syncBtn.addEventListener('click', async () => {
+                const secret = sessionStorage.getItem('admin_secret');
+                syncBtn.disabled = true;
+                syncBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Syncing...';
+
+                try {
+                    const res = await fetch(`/api/balloons?update=true&secret=${secret}`);
+                    if (res.ok) {
+                        alert('GitHub Sync complete! New releases cached.');
+                        this.loadInitialData();
+                    } else {
+                        alert('Sync failed.');
+                    }
+                } catch (e) {
+                    alert('Error during sync.');
+                } finally {
+                    syncBtn.disabled = false;
+                    syncBtn.innerHTML = '<i class="fa-solid fa-sync"></i> Sync GitHub';
+                }
+            });
+        }
+
+        // Add Repo
+        const addBtn = document.getElementById('btn-add-repo');
+        const repoInput = document.getElementById('repo-input');
+        if (addBtn && repoInput) {
+            addBtn.addEventListener('click', async () => {
+                const repo = repoInput.value.trim();
+                const secret = sessionStorage.getItem('admin_secret');
+                if (!repo || !repo.includes('/')) return alert('Use format: owner/repo');
+
+                try {
+                    const res = await fetch('/api/balloons', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'add', repo, secret })
+                    });
+                    if (res.ok) {
+                        repoInput.value = '';
+                        this.loadInitialData();
+                    } else {
+                        alert('Add failed.');
+                    }
+                } catch (e) { alert('Error adding repo.'); }
+            });
+        }
+
+        // Delete Repo Buttons
+        document.querySelectorAll('.btn-delete-repo').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const id = btn.dataset.id;
+                const secret = sessionStorage.getItem('admin_secret');
+                if (!confirm('Stop monitoring this repo?')) return;
+
+                try {
+                    const res = await fetch('/api/balloons', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'remove', id, secret })
+                    });
+                    if (res.ok) {
+                        this.loadInitialData();
+                    } else {
+                        alert('Delete failed.');
+                    }
+                } catch (e) { alert('Error deleting repo.'); }
+            });
+        });
     },
 
     refreshInventory() {
