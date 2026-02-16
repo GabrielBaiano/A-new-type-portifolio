@@ -21,8 +21,12 @@ async function translateWithGemini(text, isTitle = false) {
     if (!GEMINI_API_KEY) return text; // Fallback
 
     const prompt = isTitle
-        ? `Translate the following technical article title from Portuguese to English. Return only the translated text: "${text}"`
-        : `Translate the following technical article content from Portuguese to English. Keep the Markdown formatting exactly as it is, only translate the text content. Return only the translated markdown:\n\n${text}`;
+        ? `Translate the following technical article title from Portuguese to English. Ensure it sounds natural and professional for a tech portfolio. Return only the translated text: "${text}"`
+        : `Translate the following technical article content from Portuguese to English. 
+           Maintain the Markdown formatting exactly as it is. 
+           Preserve code blocks, links, and bold text. 
+           Ensure technical terms (like 'cloud', 'deployment', 'feature') are correctly handled in a tech context. 
+           Return only the translated markdown:\n\n${text}`;
 
     try {
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {

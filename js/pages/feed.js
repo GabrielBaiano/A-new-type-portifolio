@@ -6,7 +6,7 @@ const FeedPage = {
                 <div class="sidebar-section">
                     <span class="sidebar-label">Browse by Category</span>
                     <div class="tag-cloud">
-                        ${sidebarData.categories.map(cat => `<span class="sidebar-tag clickable-filter" data-filter="${cat}" data-tag="${cat}">${cat}</span>`).join('')}
+                        ${sidebarData.categories.map(cat => `<span class="sidebar-tag clickable-filter ${cat === 'Bilingual' ? 'bilingual' : ''}" data-filter="${cat}" data-tag="${cat}">${cat}</span>`).join('')}
                     </div>
                 </div>
 
@@ -100,6 +100,8 @@ const FeedPage = {
         const toolsData = await DataService.loadToolsData();
         const articleTypes = toolsData?.articleTypes || [];
         const sidebarData = toolsData?.sidebar || { categories: [], popularContent: [] };
+        if (!sidebarData.categories.includes('TabNews')) sidebarData.categories.push('TabNews');
+        if (!sidebarData.categories.includes('Bilingual')) sidebarData.categories.push('Bilingual');
 
         // 1. Fetch Unified Feed (Handles Static, LeetCode, Notes, Reviews)
         const combinedFeed = await DataService.getUnifiedFeed();
@@ -180,7 +182,13 @@ const FeedPage = {
         // Feed Filter Logic
         const updateFeed = (filter, activeElement) => {
             const filtered = filter
-                ? allItems.filter(item => (item.tag || '').toLowerCase() === filter.toLowerCase())
+                ? allItems.filter(item => {
+                    const tagMatch = (item.tag || '').toLowerCase() === filter.toLowerCase();
+                    if (filter === 'Bilingual') {
+                        return (item.title_en || item.content_en);
+                    }
+                    return tagMatch;
+                })
                 : allItems;
 
             feedContainer.innerHTML = this.renderFeedItems(filtered);

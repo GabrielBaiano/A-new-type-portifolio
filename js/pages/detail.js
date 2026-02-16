@@ -203,10 +203,10 @@ const DetailPage = {
                     <div class="tabnews-disclaimer">
                         <i class="fa-solid fa-circle-info"></i>
                         <p>This article was originally published in Portuguese on <strong>TabNews</strong>. Automatically translated to English using Google Gemini AI.</p>
+                        <a href="${data.source_url}" target="_blank" class="btn-source-tabnews">
+                            View on TabNews ↗
+                        </a>
                     </div>
-                    <a href="${data.source_url}" target="_blank" class="btn-source-tabnews">
-                        View on TabNews ↗
-                    </a>
                 </div>
             ` : ''}
 
