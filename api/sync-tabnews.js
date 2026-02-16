@@ -18,15 +18,19 @@ const supabaseHeaders = {
 };
 
 async function translateWithGemini(text, isTitle = false) {
-    if (!GEMINI_API_KEY) return text; // Fallback
+    if (!GEMINI_API_KEY) {
+        console.error('[Gemini] Missing API KEY');
+        return null;
+    }
 
     const prompt = isTitle
-        ? `Translate the following technical article title from Portuguese to English. Ensure it sounds natural and professional for a tech portfolio. Return only the translated text: "${text}"`
+        ? `Translate the following technical article title from Portuguese to English. Ensure it sounds natural and professional for a tech portfolio. Return only the translated text. Original: "${text}"`
         : `Translate the following technical article content from Portuguese to English. 
            Maintain the Markdown formatting exactly as it is. 
            Preserve code blocks, links, and bold text. 
-           Ensure technical terms (like 'cloud', 'deployment', 'feature') are correctly handled in a tech context. 
-           Return only the translated markdown:\n\n${text}`;
+           Ensure technical terms are correctly handled. 
+           Return only the translated markdown. 
+           Content to translate:\n\n${text}`;
 
     try {
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
@@ -37,11 +41,24 @@ async function translateWithGemini(text, isTitle = false) {
             })
         });
 
+        if (!response.ok) {
+            const errorBody = await response.text();
+            console.error(`[Gemini] API Error ${response.status}:`, errorBody);
+            return null;
+        }
+
         const data = await response.json();
-        return data.candidates[0].content.parts[0].text.trim();
+        const translated = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
+        if (!translated) {
+            console.error('[Gemini] Empty response from API');
+            return null;
+        }
+
+        return translated;
     } catch (error) {
-        console.error('Gemini Translation Error:', error);
-        return text;
+        console.error('[Gemini] Translation Exception:', error);
+        return null;
     }
 }
 
@@ -61,36 +78,27 @@ export default async function handler(req, res) {
         const results = { synced: 0, skipped: 0, errors: 0 };
 
         for (const post of posts) {
-            // 2. Skip deleted, drafts or comments (comments don't have titles in the list)
             if (post.status !== 'published' || !post.title) {
                 results.skipped++;
                 continue;
             }
 
-            // 3. Check if already exists in Supabase
-            const checkRes = await fetch(`${SUPABASE_URL}/rest/v1/feed_posts?external_id=eq.${post.slug}&select=id`, { headers: supabaseHeaders });
-            const existing = await checkRes.json();
-            // 3. Fetch full content
             const detailRes = await fetch(`https://www.tabnews.com.br/api/v1/contents/${TABNEWS_USERNAME}/${post.slug}`);
+            if (!detailRes.ok) {
+                results.errors++;
+                continue;
+            }
             const detail = await detailRes.json();
 
-            // 4. Generate deterministic ID (tabnews- + slug)
+            // Translate
             const deterministicId = `tabnews-${post.slug}`.substring(0, 100);
-
-            // 5. Translate using Gemini
-            console.log(`[Sync] Translating: ${post.title}`);
             const translatedTitle = await translateWithGemini(post.title, true);
             const translatedContent = await translateWithGemini(detail.body, false);
 
-            console.log(`[Sync] Title EN: ${translatedTitle ? translatedTitle.substring(0, 30) + '...' : 'FAILED'}`);
-
-            // 6. Save to Supabase (UPSERT mode)
             const payload = {
                 id: deterministicId,
                 title: post.title,
-                title_en: translatedTitle,
                 content: detail.body,
-                content_en: translatedContent,
                 tag: 'TabNews',
                 date: new Date(post.created_at).toISOString(),
                 show_in_feed: true,
@@ -99,28 +107,34 @@ export default async function handler(req, res) {
                 image: null
             };
 
-            console.log(`[Sync] Upserting payload for ${post.slug}`);
+            // Only update translation if successful
+            if (translatedTitle) payload.title_en = translatedTitle;
+            if (translatedContent) payload.content_en = translatedContent;
 
             const saveRes = await fetch(`${SUPABASE_URL}/rest/v1/feed_posts?on_conflict=external_id`, {
                 method: 'POST',
                 headers: {
                     ...supabaseHeaders,
-                    'Prefer': 'resolution=merge-duplicates,return=representation'
+                    'Prefer': 'resolution=merge-duplicates,return=minimal'
                 },
                 body: JSON.stringify(payload)
             });
 
             if (saveRes.ok) {
                 results.synced++;
+                if (translatedTitle && translatedContent) {
+                    results.translated = (results.translated || 0) + 1;
+                }
             } else {
-                const errorData = await saveRes.json();
-                console.error('Supabase Save error:', errorData);
                 results.errors++;
-                results.lastError = errorData.message || JSON.stringify(errorData);
             }
         }
 
-        return res.status(200).json({ success: true, results });
+        return res.status(200).json({
+            success: true,
+            message: `Synced ${results.synced} posts, ${results.translated || 0} with new translations.`,
+            results
+        });
     } catch (error) {
         return res.status(500).json({ success: false, error: error.message });
     }

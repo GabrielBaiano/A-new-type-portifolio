@@ -6470,19 +6470,6 @@ body.detail-mode {
     /* Push to the right inside the disclaimer */
 }
 
-.btn-source-tabnews:hover {
-    opacity: 0.7;
-}
-
-/* Bilingual Filter specific */
-.sidebar-tag.bilingual {
-    color: #00a3ff;
-    border-color: rgba(0, 163, 255, 0.3);
-}
-
-.sidebar-tag.bilingual:hover {
-    background: rgba(0, 163, 255, 0.1);
-}
 
 .btn-source-tabnews:hover {
     opacity: 0.7;
