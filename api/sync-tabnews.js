@@ -1,6 +1,6 @@
 /**
  * TabNews & Gemini Synchronization API
- * Fetches content from TabNews, translates to English using Gemini 1.5 Flash,
+ * Fetches content from TabNews, translates to English using Gemini 2.5 Flash,
  * and saves to Supabase feed_posts.
  */
 
@@ -80,20 +80,41 @@ async function translateWithGemini(text, isTitle = false) {
 
 export default async function handler(req, res) {
     const secret = req.method === 'POST' ? req.body.secret : req.query.secret;
+    const targetSlug = req.method === 'GET' ? req.query.slug : req.body.slug;
+    const forceTranslate = req.method === 'GET' ? (req.query.force === 'true') : (req.body.force === true);
 
     if (!API_SECRET || !secret || secret !== API_SECRET) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
 
     try {
-        // 1. Fetch contents from TabNews
-        const tabNewsRes = await fetch(`https://www.tabnews.com.br/api/v1/contents/${TABNEWS_USERNAME}`);
-        if (!tabNewsRes.ok) throw new Error('Failed to fetch from TabNews');
-        const posts = await tabNewsRes.json();
+        let postsToProcess = [];
+
+        // 1. Fetch content
+        if (targetSlug) {
+            // Fetch single post details directly to verify existence
+            const detailRes = await fetch(`https://www.tabnews.com.br/api/v1/contents/${TABNEWS_USERNAME}/${targetSlug}`);
+            if (!detailRes.ok) {
+                return res.status(404).json({ error: 'Post not found on TabNews' });
+            }
+            const detail = await detailRes.json();
+            // Construct a "post object" similar to the list format
+            postsToProcess = [{
+                slug: detail.slug,
+                title: detail.title,
+                status: detail.status,
+                created_at: detail.created_at
+            }];
+        } else {
+            // Fetch all posts
+            const tabNewsRes = await fetch(`https://www.tabnews.com.br/api/v1/contents/${TABNEWS_USERNAME}`);
+            if (!tabNewsRes.ok) throw new Error('Failed to fetch from TabNews');
+            postsToProcess = await tabNewsRes.json();
+        }
 
         const results = { synced: 0, skipped: 0, errors: 0, translationsRequested: 0, translationsSuccessful: 0, safetyFailures: 0 };
 
-        for (const post of posts) {
+        for (const post of postsToProcess) {
             if (post.status !== 'published' || !post.title) {
                 results.skipped++;
                 continue;
@@ -116,6 +137,7 @@ export default async function handler(req, res) {
 
             // 2. Decide if we need to translate
             const isMissingTranslation = !existingRecord || !existingRecord.title_en || !existingRecord.content_en;
+            const shouldTranslate = isMissingTranslation || forceTranslate || !!targetSlug;
 
             let translatedTitle = existingRecord?.title_en || null;
             let translatedContent = existingRecord?.content_en || null;
@@ -130,8 +152,8 @@ export default async function handler(req, res) {
 
             let translationSuccessful = false;
 
-            if (isMissingTranslation) {
-                console.log(`[Sync] 🤖 Translating: ${post.title}`);
+            if (shouldTranslate) {
+                console.log(`[Sync] 🤖 Translating: ${post.title} (Force: ${forceTranslate || !!targetSlug})`);
                 results.translationsRequested++;
 
                 const tTitle = await translateWithGemini(post.title, true);
@@ -182,7 +204,7 @@ export default async function handler(req, res) {
 
         return res.status(200).json({
             success: true,
-            message: `Processed ${posts.length} posts. Synced: ${results.synced}. New translations: ${results.translationsSuccessful}. Safety Rejections: ${results.safetyFailures}.`,
+            message: `Processed ${postsToProcess.length} posts. Synced: ${results.synced}. New translations: ${results.translationsSuccessful}. Safety Rejections: ${results.safetyFailures}.`,
             results
         });
     } catch (error) {

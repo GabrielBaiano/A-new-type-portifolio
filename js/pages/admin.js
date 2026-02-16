@@ -72,6 +72,9 @@ const AdminPage = {
                             <button class="admin-nav-item ${this.activeTab === 'leetcode' ? 'active' : ''}" data-tab="leetcode">
                                 <i class="fa-solid fa-code"></i> LeetCode
                             </button>
+                            <button class="admin-nav-item ${this.activeTab === 'tabnews' ? 'active' : ''}" data-tab="tabnews">
+                                <i class="fa-solid fa-newspaper"></i> TabNews
+                            </button>
                         </nav>
                         <button class="admin-logout-btn" id="admin-logout">
                             <i class="fa-solid fa-right-from-bracket"></i> Logout
@@ -124,6 +127,8 @@ const AdminPage = {
                 return this.renderGuidesModule();
             case 'leetcode':
                 return this.renderLeetCodeModule();
+            case 'tabnews':
+                return this.renderTabNewsManager();
             default:
                 return this.renderOverview();
         }
@@ -711,6 +716,176 @@ const AdminPage = {
         `;
     },
 
+    renderTabNewsManager() {
+        const tabNewsPosts = this.allPosts.filter(p => p.tag === 'TabNews');
+
+        return `
+            <div class="admin-tab-header">
+                <div class="header-main">
+                    <h1>TabNews Manager</h1>
+                    <div class="header-actions">
+                         <button class="btn-action secondary" id="btn-sync-all-tabnews">
+                            <i class="fa-solid fa-sync"></i> Sync All
+                        </button>
+                    </div>
+                </div>
+                <p>Manage visibility and translations for TabNews content.</p>
+            </div>
+
+            <div class="admin-inventory-full">
+                <div class="inventory-list-header" style="grid-template-columns: 2fr 1fr 1fr 1fr 1fr;">
+                    <span>Title</span>
+                    <span>Date</span>
+                    <span>Translation</span>
+                    <span>Visibility</span>
+                    <span>Actions</span>
+                </div>
+                <div class="inventory-list" id="tabnews-inventory">
+                    ${tabNewsPosts.length > 0 ? tabNewsPosts.map(p => {
+            const isTranslated = p.title_en && p.content_en;
+            return `
+                        <div class="inventory-item-row" style="grid-template-columns: 2fr 1fr 1fr 1fr 1fr; cursor: default;">
+                            <span class="item-title" title="${p.title}">
+                                ${p.title}
+                                <a href="${p.source_url}" target="_blank" style="margin-left:5px; color: var(--accent-blue);"><i class="fa-solid fa-external-link-alt"></i></a>
+                            </span>
+                            <span class="item-date">${new Date(p.date).toLocaleDateString()}</span>
+                            <span class="item-status">
+                                ${isTranslated
+                    ? '<span class="badge-success" style="color: #4CAF50; font-size: 0.8rem;"><i class="fa-solid fa-check"></i> EN Ready</span>'
+                    : '<span class="badge-warning" style="color: #FF9800; font-size: 0.8rem;"><i class="fa-solid fa-triangle-exclamation"></i> PT Only</span>'}
+                            </span>
+                            <span class="item-visibility">
+                                <label class="switch-toggle" style="position: relative; display: inline-block; width: 40px; height: 20px;">
+                                    <input type="checkbox" class="toggle-visibility-btn" data-id="${p.id}" ${p.show_in_feed !== false ? 'checked' : ''} style="opacity: 0; width: 0; height: 0;">
+                                    <span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px;"></span>
+                                </label>
+                            </span>
+                            <span class="item-actions">
+                                <button class="btn-action-mini btn-translate-single" data-slug="${p.external_id}" title="Force Translate" style="background: var(--accent-blue); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
+                                    <i class="fa-solid fa-language"></i> Translate
+                                </button>
+                            </span>
+                        </div>
+                        `;
+        }).join('') : '<p class="empty-state" style="padding: 20px; text-align: center; color: grey;">No TabNews posts found. Try syncing first.</p>'}
+                </div>
+            </div>
+            <style>
+                .switch-toggle input:checked + .slider { background-color: var(--accent-blue); }
+                .switch-toggle input:checked + .slider:before { transform: translateX(20px); }
+                .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+            </style>
+        `;
+    },
+
+    setupTabNewsLogic() {
+        // Sync All
+        const syncBtn = document.getElementById('btn-sync-all-tabnews');
+        if (syncBtn) {
+            syncBtn.addEventListener('click', async () => {
+                const secret = sessionStorage.getItem('admin_secret');
+                syncBtn.disabled = true;
+                syncBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Syncing...';
+                try {
+                    const res = await fetch(`/api/sync-tabnews?secret=${secret}`);
+                    const data = await res.json();
+                    if (res.ok && data.success) {
+                        const { synced, translationsSuccessful, safetyFailures } = data.results;
+                        alert(`Sync Complete!\nFound: ${synced}\nTranslated: ${translationsSuccessful}\nSafety Blocks: ${safetyFailures}`);
+                        this.loadInitialData();
+                    } else {
+                        alert('Sync failed: ' + (data.error || 'Unknown error'));
+                    }
+                } catch (e) {
+                    alert('Error during sync.');
+                } finally {
+                    syncBtn.disabled = false;
+                    syncBtn.innerHTML = '<i class="fa-solid fa-sync"></i> Sync All';
+                }
+            });
+        }
+
+        // Visibility Toggles
+        const toggles = document.querySelectorAll('.toggle-visibility-btn');
+        toggles.forEach(toggle => {
+            toggle.addEventListener('change', async (e) => {
+                const id = e.target.dataset.id;
+                const showInFeed = e.target.checked;
+                const secret = sessionStorage.getItem('admin_secret');
+
+                const post = this.allPosts.find(p => p.id === id);
+                if (!post) return;
+
+                // We need to send a valid update payload. 
+                // Since api/feed POST is an UPSERT, we need minimal required fields + changed field.
+                // However, the current implementation might require more fields.
+                // Let's rely on standard fields.
+                const payload = {
+                    id: post.id,
+                    title: post.title,
+                    content: post.content, // We might need to fetch full content if it is not in list? 
+                    // Wait, this.allPosts usually has content.
+                    tag: post.tag,
+                    date: post.date,
+                    image: post.image,
+                    show_in_feed: showInFeed,
+                    secret
+                };
+
+                try {
+                    const res = await fetch('/api/feed', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!res.ok) {
+                        e.target.checked = !showInFeed;
+                        alert('Failed to update visibility.');
+                    } else {
+                        post.show_in_feed = showInFeed;
+                    }
+                } catch (err) {
+                    e.target.checked = !showInFeed;
+                    alert('Connection error.');
+                }
+            });
+        });
+
+        // Translate Single
+        const translateBtns = document.querySelectorAll('.btn-translate-single');
+        translateBtns.forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const slug = btn.dataset.slug;
+                const secret = sessionStorage.getItem('admin_secret');
+
+                if (!confirm(`Force re-translation for this post?`)) return;
+
+                btn.disabled = true;
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+                try {
+                    const res = await fetch(`/api/sync-tabnews?secret=${secret}&slug=${slug}&force=true`);
+                    const data = await res.json();
+
+                    if (res.ok && data.success) {
+                        alert(`Translation Success!\nNew translations: ${data.results.translationsSuccessful}`);
+                        this.loadInitialData();
+                    } else {
+                        alert('Translation failed: ' + (data.error || 'Unknown error'));
+                    }
+                } catch (err) {
+                    alert('Error requesting translation.');
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }
+            });
+        });
+    },
+
     onMount() {
         // If already authenticated in current session object, just init modules
         if (this.isAuthenticated) {
@@ -884,6 +1059,7 @@ const AdminPage = {
         if (this.activeTab === 'posts') this.setupFeedLogic();
         if (this.activeTab === 'guides') this.setupGuidesLogic();
         if (this.activeTab === 'balloons') this.setupBalloonsLogic();
+        if (this.activeTab === 'tabnews') this.setupTabNewsLogic();
     },
 
     setupFeedLogic() {
