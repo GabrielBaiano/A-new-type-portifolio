@@ -1058,7 +1058,12 @@ const AdminPage = {
                     const res = await fetch(`/api/sync-tabnews?secret=${secret}`);
                     const data = await res.json();
                     if (res.ok && data.success) {
-                        alert(`TabNews Sync complete!\nSynced: ${data.results.synced}\nSkipped: ${data.results.skipped}\nErrors: ${data.results.errors}`);
+                        const { synced, skipped, errors, lastError } = data.results;
+                        let msg = `TabNews Sync complete!\nSynced: ${synced}\nSkipped: ${skipped}\nErrors: ${errors}`;
+                        if (errors > 0 && lastError) {
+                            msg += `\n\nLast Error: ${lastError}`;
+                        }
+                        alert(msg);
                         this.loadInitialData();
                     } else {
                         alert('Sync failed: ' + (data.error || 'Unknown error'));

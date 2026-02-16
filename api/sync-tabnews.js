@@ -77,30 +77,37 @@ export default async function handler(req, res) {
             const translatedTitle = await translateWithGemini(post.title, true);
             const translatedContent = await translateWithGemini(detail.body, false);
 
-            // 5. Save to Supabase
+            // 5. Generate ID (slug-based like in feed.js)
+            const id = post.slug.substring(0, 100) + '-' + Date.now().toString().slice(-4);
+
+            // 6. Save to Supabase
             const payload = {
+                id,
                 title: post.title,
                 title_en: translatedTitle,
                 content: detail.body,
                 content_en: translatedContent,
-                tag: 'Artigo', // Default tag for TabNews
+                tag: 'Artigo',
                 date: new Date(post.created_at).toISOString(),
                 show_in_feed: true,
                 source_url: `https://www.tabnews.com.br/${TABNEWS_USERNAME}/${post.slug}`,
                 external_id: post.slug,
-                image: 'assets/images/tabnews-logo.png' // Fallback icon
+                image: 'assets/images/tabnews-logo.png'
             };
 
             const saveRes = await fetch(`${SUPABASE_URL}/rest/v1/feed_posts`, {
                 method: 'POST',
-                headers: { ...supabaseHeaders, 'Prefer': 'return=minimal' },
+                headers: { ...supabaseHeaders, 'Prefer': 'return=representation' },
                 body: JSON.stringify(payload)
             });
 
             if (saveRes.ok) {
                 results.synced++;
             } else {
+                const errorData = await saveRes.json();
+                console.error('Supabase Save error:', errorData);
                 results.errors++;
+                results.lastError = errorData.message || JSON.stringify(errorData);
             }
         }
 
