@@ -74,9 +74,11 @@ export default async function handler(req, res) {
             const deterministicId = `tabnews-${post.slug}`.substring(0, 100);
 
             // 5. Translate using Gemini
-            console.log(`Translating: ${post.title}`);
+            console.log(`[Sync] Translating: ${post.title}`);
             const translatedTitle = await translateWithGemini(post.title, true);
             const translatedContent = await translateWithGemini(detail.body, false);
+
+            console.log(`[Sync] Title EN: ${translatedTitle ? translatedTitle.substring(0, 30) + '...' : 'FAILED'}`);
 
             // 6. Save to Supabase (UPSERT mode)
             const payload = {
@@ -92,6 +94,8 @@ export default async function handler(req, res) {
                 external_id: post.slug,
                 image: null
             };
+
+            console.log(`[Sync] Upserting payload for ${post.slug}`);
 
             const saveRes = await fetch(`${SUPABASE_URL}/rest/v1/feed_posts?on_conflict=external_id`, {
                 method: 'POST',

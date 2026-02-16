@@ -441,12 +441,17 @@ const DataService = {
             date: post.date,
             tag: post.tag || 'Thoughts',
             title: post.title,
-            description: post.content ? post.content.substring(0, 150).replace(/[#*]/g, '') + '...' : '',
+            title_en: post.title_en,
             content: post.content,
+            content_en: post.content_en,
+            description: post.content_en
+                ? post.content_en.substring(0, 150).replace(/[#*]/g, '') + '...'
+                : (post.content ? post.content.substring(0, 150).replace(/[#*]/g, '') + '...' : ''),
             image: post.image || null,
             show_in_feed: post.show_in_feed,
             is_popular: post.is_popular,
             show_toc: post.show_toc,
+            source_url: post.source_url,
             link: `#/detail/feed/${post.id}`,
             _source: 'supabase-posts'
         })) : [];
