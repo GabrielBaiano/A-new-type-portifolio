@@ -57,9 +57,13 @@ export default async function handler(req, res) {
         const results = { synced: 0, skipped: 0, errors: 0 };
 
         for (const post of posts) {
-            if (post.status !== 'published') continue;
+            // 2. Skip deleted, drafts or comments (comments don't have titles in the list)
+            if (post.status !== 'published' || !post.title) {
+                results.skipped++;
+                continue;
+            }
 
-            // 2. Check if already exists in Supabase
+            // 3. Check if already exists in Supabase
             const checkRes = await fetch(`${SUPABASE_URL}/rest/v1/feed_posts?external_id=eq.${post.slug}&select=id`, { headers: supabaseHeaders });
             const existing = await checkRes.json();
 
