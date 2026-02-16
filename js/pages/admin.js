@@ -331,7 +331,14 @@ const AdminPage = {
             <div class="admin-tab-header">
                 <div class="header-main">
                     <h1>Feed Posts</h1>
-                    <button class="btn-action" id="btn-new-post">+ New Post</button>
+                    <div class="header-actions">
+                        <button class="btn-action secondary" id="btn-sync-tabnews">
+                            <i class="fa-solid fa-sync"></i> Sync TabNews
+                        </button>
+                        <button class="btn-action primary" id="btn-new-post">
+                            <i class="fa-solid fa-plus"></i> New Post
+                        </button>
+                    </div>
                 </div>
             </div>
             
@@ -1037,6 +1044,32 @@ const AdminPage = {
 
             this.startAutoSave();
             this.loadDraftFromLocalStorage();
+        }
+
+        // TabNews Sync Button
+        const syncTabNewsBtn = document.getElementById('btn-sync-tabnews');
+        if (syncTabNewsBtn) {
+            syncTabNewsBtn.addEventListener('click', async () => {
+                const secret = sessionStorage.getItem('admin_secret');
+                syncTabNewsBtn.disabled = true;
+                syncTabNewsBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Syncing...';
+
+                try {
+                    const res = await fetch(`/api/sync-tabnews?secret=${secret}`);
+                    const data = await res.json();
+                    if (res.ok && data.success) {
+                        alert(`TabNews Sync complete!\nSynced: ${data.results.synced}\nSkipped: ${data.results.skipped}\nErrors: ${data.results.errors}`);
+                        this.loadInitialData();
+                    } else {
+                        alert('Sync failed: ' + (data.error || 'Unknown error'));
+                    }
+                } catch (e) {
+                    alert('Error during sync.');
+                } finally {
+                    syncTabNewsBtn.disabled = false;
+                    syncTabNewsBtn.innerHTML = '<i class="fa-solid fa-sync"></i> Sync TabNews';
+                }
+            });
         }
     },
 

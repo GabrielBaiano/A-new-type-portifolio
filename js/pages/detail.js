@@ -3,6 +3,7 @@ const DetailPage = {
     currentType: null,
     currentId: null,
     currentData: null,
+    currentLang: 'pt', // 'pt' or 'en'
 
     /**
      * Render the detail page
@@ -39,7 +40,7 @@ const DetailPage = {
         console.log(`[Detail] Mounted: ${this.currentType}/${this.currentId}`);
         document.body.classList.add('detail-mode');
         document.body.classList.add('wide-layout');
-        
+
         const statusEl = document.getElementById('loading-status');
         const updateStatus = (msg) => { if (statusEl) statusEl.textContent = msg; };
 
@@ -53,7 +54,7 @@ const DetailPage = {
                 'category': '#/academic'
             };
             const fallback = fallbackMap[this.currentType] || '#/feed';
-            
+
             // If they land directly (no history), clicking back goes to fallback
             if (window.history.length <= 1) {
                 backBtn.href = fallback;
@@ -68,9 +69,9 @@ const DetailPage = {
         try {
             let data;
             updateStatus("Fetching data...");
-            
+
             // Artificial delay check? No.
-            
+
             switch (this.currentType) {
                 case 'project':
                     data = await DataService.getProjectById(this.currentId);
@@ -93,10 +94,10 @@ const DetailPage = {
 
             clearTimeout(timeout);
             updateStatus("Rendering content...");
-            
+
             this.currentData = data;
             this.renderContent(data);
-            
+
         } catch (error) {
             clearTimeout(timeout);
             console.error('[Detail] Error:', error);
@@ -126,12 +127,23 @@ const DetailPage = {
                     <h1 class="detail-title">${data.title}</h1>
                     ${data.subtitle ? `<p class="detail-subtitle">${data.subtitle}</p>` : ''}
                     ${data.date ? `<div class="detail-date">${(() => {
-                        try {
-                            const d = new Date(data.date);
-                            return isNaN(d) ? data.date : d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
-                        } catch (e) { return data.date; }
-                    })()}</div>` : ''}
+                    try {
+                        const d = new Date(data.date);
+                        return isNaN(d) ? data.date : d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+                    } catch (e) { return data.date; }
+                })()}</div>` : ''}
                     ${data.count !== undefined ? `<div class="detail-date">${data.count} Articles</div>` : ''}
+                    
+                    ${(data.title_en || data.content_en) ? `
+                        <div class="lang-selector">
+                            <button class="lang-btn ${this.currentLang === 'pt' ? 'active' : ''}" data-lang="pt">PT-BR</button>
+                            <button class="lang-btn ${this.currentLang === 'en' ? 'active' : ''}" data-lang="en">EN-US</button>
+                        </div>
+                    ` : ''}
+                </div>
+
+                <div id="detail-dynamic-content">
+                    ${this.renderBody(data)}
                 </div>
 
                 ${data.image ? `
@@ -162,12 +174,75 @@ const DetailPage = {
                 this.generateTOC();
             }
 
-            // Add syntax highlighting to code blocks if needed
+            // Language switcher logic
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const lang = btn.dataset.lang;
+                    if (lang === this.currentLang) return;
+                    this.currentLang = lang;
+
+                    // Update UI
+                    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    // Update contents
+                    const dynamicArea = document.getElementById('detail-dynamic-content');
+                    if (dynamicArea) {
+                        dynamicArea.innerHTML = this.renderBody(this.currentData);
+                        this.enhanceCodeBlocks();
+                        if (data.show_toc || data.tag === 'Guides') this.generateTOC();
+                    }
+                });
+            });
+
+            // Syntax Highlighting
             this.enhanceCodeBlocks();
         } catch (e) {
             console.error('[Detail] Render Error:', e);
             this.renderError("Failed to render content: " + e.message);
         }
+    },
+
+    renderBody(data) {
+        const title = this.currentLang === 'en' && data.title_en ? data.title_en : data.title;
+        const bodyContent = this.currentLang === 'en' && data.content_en ? data.content_en : data.content;
+        const htmlContent = marked.parse(bodyContent || '');
+
+        // Update Title if needed
+        const titleEl = document.querySelector('.detail-title');
+        if (titleEl) titleEl.innerText = title;
+
+        return `
+            ${data.image ? `
+                <div class="detail-image-container" style="margin-bottom: 2rem; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); background: rgba(0,0,0,0.2);">
+                    <img src="${data.image}" alt="${title}" style="width: 100%; height: auto; display: block; object-fit: contain; max-height: 70vh;">
+                </div>
+            ` : ''}
+            
+            <div class="markdown-content">
+                ${data.items ? `
+                    <div class="pub-grid">
+                        ${data.items.map(pub => `
+                            <div class="pub-card" onclick="location.hash='#/detail/academic/${pub.id}'">
+                                <h3>${pub.title}</h3>
+                                <p>${pub.excerpt || 'Explore the full content of this publication.'}</p>
+                                <span class="read-more-btn">Read more</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : htmlContent}
+            </div>
+
+            ${data.source_url ? `
+                <div class="original-source">
+                    <a href="${data.source_url}" target="_blank" class="source-link">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Original at TabNews
+                    </a>
+                </div>
+            ` : ''}
+
+            ${data.show_toc || data.tag === 'Guides' ? this.renderTOC() : ''}
+        `;
     },
 
     /**
@@ -198,13 +273,13 @@ const DetailPage = {
         const codeBlocks = document.querySelectorAll('.markdown-content pre code');
         codeBlocks.forEach((block, index) => {
             const pre = block.parentElement;
-            
+
             // Add copy button
             const copyButton = document.createElement('button');
             copyButton.className = 'code-copy-button';
             copyButton.innerHTML = '<i class="fa-solid fa-copy"></i>';
             copyButton.onclick = () => this.copyCode(block, copyButton);
-            
+
             pre.style.position = 'relative';
             pre.appendChild(copyButton);
         });
@@ -286,7 +361,7 @@ const DetailPage = {
             const originalHTML = button.innerHTML;
             button.innerHTML = '<i class="fa-solid fa-check"></i>';
             button.classList.add('copied');
-            
+
             setTimeout(() => {
                 button.innerHTML = originalHTML;
                 button.classList.remove('copied');

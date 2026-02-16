@@ -73,6 +73,7 @@ const FeedPage = {
                     } catch (e) { return item.date; }
                 })()}</span>
                     <span class="feed-tag ${tagClass}" data-tag="${item.tag}">${item.tag}</span>
+                    ${(item.title_en || item.content_en) ? `<span class="lang-badge">PT | EN</span>` : ''}
                 </div>
                 
                 <div class="feed-item-content">
