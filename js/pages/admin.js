@@ -6,6 +6,7 @@ const AdminPage = {
     isAuthenticated: false,
     isVerifying: false,
     activeTab: 'overview',
+    activePostFilter: 'all', // New state for filtering
     allBooks: [],
     allPhotos: [],
     allPosts: [],
@@ -337,6 +338,14 @@ const AdminPage = {
                 <div class="header-main">
                     <h1>Feed Posts</h1>
                     <div class="header-actions">
+                        <select id="feed-filter-select" style="padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); margin-right: 10px;">
+                            <option value="all" ${this.activePostFilter === 'all' ? 'selected' : ''}>All Posts</option>
+                            <option value="Thoughts" ${this.activePostFilter === 'Thoughts' ? 'selected' : ''}>Thoughts</option>
+                            <option value="TabNews" ${this.activePostFilter === 'TabNews' ? 'selected' : ''}>TabNews</option>
+                            <option value="Guides" ${this.activePostFilter === 'Guides' ? 'selected' : ''}>Guides</option>
+                            <option value="LeetCode" ${this.activePostFilter === 'LeetCode' ? 'selected' : ''}>LeetCode</option>
+                            <option value="Updates" ${this.activePostFilter === 'Updates' ? 'selected' : ''}>Updates</option>
+                        </select>
                         <button class="btn-action secondary" id="btn-sync-tabnews">
                             <i class="fa-solid fa-sync"></i> Sync TabNews
                         </button>
@@ -355,7 +364,13 @@ const AdminPage = {
                     <span>Status</span>
                 </div>
                 <div class="inventory-list" id="posts-inventory-full">
-                    ${this.allPosts.length > 0 ? this.allPosts.map(p => `
+                    ${(() => {
+                let filtered = this.allPosts;
+                if (this.activePostFilter !== 'all') {
+                    filtered = filtered.filter(p => p.tag === this.activePostFilter);
+                }
+
+                return filtered.length > 0 ? filtered.map(p => `
                         <div class="inventory-item-row" data-id="${p.id}">
                             <span class="item-title">
                                 ${p.title}
@@ -365,7 +380,8 @@ const AdminPage = {
                             <span class="item-date">${new Date(p.date).toLocaleDateString()}</span>
                             <span class="item-visibility">${p.show_in_feed !== false ? 'Public' : 'Hidden'}</span>
                         </div>
-                    `).join('') : '<p style="padding: 20px; color: grey; text-align: center;">No posts yet. Start by creating your first article!</p>'}
+                    `).join('') : '<p style="padding: 20px; color: grey; text-align: center;">No posts found for this filter.</p>';
+            })()}
                 </div>
             </div>
         `;
@@ -935,13 +951,14 @@ const AdminPage = {
 
     async loadInitialData() {
         const secret = sessionStorage.getItem('admin_secret');
+        const ts = Date.now(); // Cache buster
         const [books, photos, balloons, posts, leetcode, repos] = await Promise.all([
-            fetch(`/api/books?secret=${secret}`).then(r => r.json()).catch(() => ({ data: [] })),
-            fetch(`/api/photos?secret=${secret}`).then(r => r.json()).catch(() => ({ data: [] })),
-            fetch(`/api/balloons?context=all&secret=${secret}`).then(r => r.json()).catch(() => ({ data: [] })),
-            fetch(`/api/feed?secret=${secret}`).then(r => r.json()).catch(() => ({ data: [] })),
-            fetch(`/api/leetcode?secret=${secret}`).then(r => r.json()).catch(() => ({ data: [] })),
-            fetch(`/api/balloons?update=list&secret=${secret}`).then(r => r.json()).catch(() => ({ data: [] }))
+            fetch(`/api/books?secret=${secret}&_t=${ts}`).then(r => r.json()).catch(() => ({ data: [] })),
+            fetch(`/api/photos?secret=${secret}&_t=${ts}`).then(r => r.json()).catch(() => ({ data: [] })),
+            fetch(`/api/balloons?context=all&secret=${secret}&_t=${ts}`).then(r => r.json()).catch(() => ({ data: [] })),
+            fetch(`/api/feed?secret=${secret}&_t=${ts}`).then(r => r.json()).catch(() => ({ data: [] })),
+            fetch(`/api/leetcode?secret=${secret}&_t=${ts}`).then(r => r.json()).catch(() => ({ data: [] })),
+            fetch(`/api/balloons?update=list&secret=${secret}&_t=${ts}`).then(r => r.json()).catch(() => ({ data: [] }))
         ]);
 
         this.allBooks = books.data || [];
@@ -1073,6 +1090,14 @@ const AdminPage = {
                     this.editingItem = null;
                     this.isEditingPost = true;
                     this.isPreviewMode = false;
+                    pageManager.loadPage('admin');
+                });
+            }
+
+            const filterSelect = document.getElementById('feed-filter-select');
+            if (filterSelect) {
+                filterSelect.addEventListener('change', (e) => {
+                    this.activePostFilter = e.target.value;
                     pageManager.loadPage('admin');
                 });
             }
