@@ -185,7 +185,7 @@ class BalloonSystem {
 
         const dataSet = await this.getAvailableData();
         const unused = dataSet.filter(item => {
-            if (item.id === 'ad-yellowhood-standard' || item.id === 'newsletter-orange') return false;
+            if (item.id === 'welcome-tutorial-yellow' || item.id === 'newsletter-orange') return false;
             for (let balloonContext of this.activeBalloons.values()) {
                 if (balloonContext.data.id === item.id) return false;
             }
@@ -449,7 +449,7 @@ class BalloonSystem {
         try {
             const response = await fetch(`/api/balloons?context=all`);
             const result = await response.json();
-            const ad = this.getAd();
+            const welcome = this.getWelcomeBalloon();
             const newsletter = this.getNewsletter();
 
             if (result.success && result.data) {
@@ -470,12 +470,12 @@ class BalloonSystem {
                     return true;
                 });
 
-                return [ad, ...dynamicBalloons];
+                return [welcome, ...dynamicBalloons];
             }
         } catch (error) {
             console.error('🎈 Balloon System Error:', error);
         }
-        return [this.getAd(), ...this.getFallbackData()];
+        return [this.getWelcomeBalloon(), ...this.getFallbackData()];
     }
 
     getNewsletter() {
@@ -491,14 +491,14 @@ class BalloonSystem {
         };
     }
 
-    getAd() {
+    getWelcomeBalloon() {
         return {
-            id: "ad-yellowhood-standard",
-            name: "YELLOWHOOD AGENCY",
-            message: "Transform your idea into an elite digital product. Strategy, Design, and Full-stack.",
-            badge: "Agency",
-            color: "blue", // Force blue for ad
-            link: "https://www.yellowhood.com.br",
+            id: "welcome-tutorial-yellow",
+            name: "WELCOME!",
+            title: "Exploring the Portfolio",
+            message: "• **Projects**: See what I've built.\n• **TabNews**: Read my latest tech thoughts.\n• **Photos**: Check out my photography!",
+            badge: "Start Here",
+            color: "yellow",
             contexts: ['home', 'projects', 'academic', 'feed', 'photos']
         };
     }
